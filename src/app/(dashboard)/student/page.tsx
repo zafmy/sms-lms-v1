@@ -1,7 +1,10 @@
 import Announcements from "@/components/Announcements";
+import AssignmentsDue from "@/components/AssignmentsDue";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
-import BigCalendar from "@/components/BigCalendar";
 import EventCalendar from "@/components/EventCalendar";
+import RecentGrades from "@/components/RecentGrades";
+import StudentAttendanceCard from "@/components/StudentAttendanceCard";
+import UpcomingExams from "@/components/UpcomingExams";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
@@ -19,7 +22,9 @@ const StudentPage = async () => {
       {/* LEFT */}
       <div className="w-full xl:w-2/3">
         <div className="h-full bg-white p-4 rounded-md">
-          <h1 className="text-xl font-semibold">Schedule (4A)</h1>
+          <h1 className="text-xl font-semibold">
+            Schedule ({classItem[0]?.name || "No Class"})
+          </h1>
           {classItem[0] ? (
             <BigCalendarContainer type="classId" id={classItem[0].id} />
           ) : (
@@ -29,6 +34,10 @@ const StudentPage = async () => {
       </div>
       {/* RIGHT */}
       <div className="w-full xl:w-1/3 flex flex-col gap-8">
+        <StudentAttendanceCard id={userId!} />
+        <RecentGrades studentId={userId!} />
+        {classItem[0] && <UpcomingExams classId={classItem[0].id} />}
+        {classItem[0] && <AssignmentsDue classId={classItem[0].id} />}
         <EventCalendar />
         <Announcements />
       </div>

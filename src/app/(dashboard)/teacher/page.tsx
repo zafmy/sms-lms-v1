@@ -1,5 +1,8 @@
 import Announcements from "@/components/Announcements";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
+import ClassAttendanceOverview from "@/components/ClassAttendanceOverview";
+import PendingGrading from "@/components/PendingGrading";
+import TodaySchedule from "@/components/TodaySchedule";
 import { auth } from "@clerk/nextjs/server";
 
 const TeacherPage = () => {
@@ -15,6 +18,9 @@ const TeacherPage = () => {
       </div>
       {/* RIGHT */}
       <div className="w-full xl:w-1/3 flex flex-col gap-8">
+        <TodaySchedule teacherId={userId!} />
+        <PendingGrading teacherId={userId!} />
+        <ClassAttendanceOverview teacherId={userId!} />
         <Announcements />
       </div>
     </div>

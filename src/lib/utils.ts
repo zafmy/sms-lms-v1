@@ -43,3 +43,14 @@ export const adjustScheduleToCurrentWeek = (
     };
   });
 };
+
+export const getTodayDayEnum = (): string | null => {
+  const dayMap: Record<number, string> = {
+    1: "MONDAY",
+    2: "TUESDAY",
+    3: "WEDNESDAY",
+    4: "THURSDAY",
+    5: "FRIDAY",
+  };
+  return dayMap[new Date().getDay()] || null;
+};
