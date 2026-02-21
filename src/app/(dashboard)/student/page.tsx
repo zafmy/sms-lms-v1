@@ -3,6 +3,9 @@ import AssignmentsDue from "@/components/AssignmentsDue";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import EnrolledCourses from "@/components/EnrolledCourses";
 import EventCalendar from "@/components/EventCalendar";
+import LearningActivityHeatmapContainer from "@/components/LearningActivityHeatmapContainer";
+import LmsProgressOverview from "@/components/LmsProgressOverview";
+import QuizPerformanceTrendContainer from "@/components/QuizPerformanceTrendContainer";
 import RecentGrades from "@/components/RecentGrades";
 import StudentAttendanceCard from "@/components/StudentAttendanceCard";
 import UpcomingExams from "@/components/UpcomingExams";
@@ -36,6 +39,12 @@ const StudentPage = async () => {
       {/* RIGHT */}
       <div className="w-full xl:w-1/3 flex flex-col gap-8">
         <EnrolledCourses studentId={userId!} />
+        <LmsProgressOverview studentId={userId!} />
+        <div className="bg-white p-4 rounded-md h-[300px]">
+          <h2 className="text-lg font-semibold mb-2">Quiz Performance Trend</h2>
+          <QuizPerformanceTrendContainer studentId={userId!} />
+        </div>
+        <LearningActivityHeatmapContainer studentId={userId!} />
         <StudentAttendanceCard id={userId!} />
         <RecentGrades studentId={userId!} />
         {classItem[0] && <UpcomingExams classId={classItem[0].id} />}

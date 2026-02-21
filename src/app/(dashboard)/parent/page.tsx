@@ -1,6 +1,8 @@
 import Announcements from "@/components/Announcements";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import ChildGradeOverview from "@/components/ChildGradeOverview";
+import ChildLearningActivity from "@/components/ChildLearningActivity";
+import ChildLmsProgressCard from "@/components/ChildLmsProgressCard";
 import ChildQuickStats from "@/components/ChildQuickStats";
 import RecentActivity from "@/components/RecentActivity";
 import prisma from "@/lib/prisma";
@@ -33,6 +35,18 @@ const ParentPage = async () => {
               />
               <div className="mt-4">
                 <ChildGradeOverview
+                  studentId={student.id}
+                  studentName={student.name + " " + student.surname}
+                />
+              </div>
+              <div className="mt-4">
+                <ChildLmsProgressCard
+                  studentId={student.id}
+                  studentName={student.name + " " + student.surname}
+                />
+              </div>
+              <div className="mt-4">
+                <ChildLearningActivity
                   studentId={student.id}
                   studentName={student.name + " " + student.surname}
                 />

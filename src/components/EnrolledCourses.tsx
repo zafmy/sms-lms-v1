@@ -14,9 +14,20 @@ const EnrolledCourses = async ({ studentId }: { studentId: string }) => {
           teacher: { select: { name: true, surname: true } },
           subject: { select: { name: true } },
           modules: {
+            orderBy: { order: "asc" },
             include: {
               lessons: {
-                select: { id: true },
+                select: {
+                  id: true,
+                  quizzes: {
+                    include: {
+                      attempts: {
+                        where: { studentId, submittedAt: { not: null } },
+                        select: { percentage: true },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -64,26 +75,78 @@ const EnrolledCourses = async ({ studentId }: { studentId: string }) => {
             );
 
             return (
-              <Link
+              <div
                 key={enrollment.id}
-                href={`/list/courses/${enrollment.course.id}`}
                 className="border border-gray-200 rounded-md p-4 hover:shadow-md transition-shadow"
               >
-                <h3 className="font-semibold text-md mb-1">
-                  {enrollment.course.title}
-                </h3>
-                <div className="flex gap-3 text-xs text-gray-500 mb-3">
-                  <span>
-                    {enrollment.course.teacher.name}{" "}
-                    {enrollment.course.teacher.surname}
-                  </span>
-                  <span>{enrollment.course.subject.name}</span>
-                </div>
-                <CourseProgressBar
-                  completed={completedLessons}
-                  total={totalLessons}
-                />
-              </Link>
+                <Link
+                  href={`/list/courses/${enrollment.course.id}`}
+                  className="block"
+                >
+                  <h3 className="font-semibold text-md mb-1">
+                    {enrollment.course.title}
+                  </h3>
+                  <div className="flex gap-3 text-xs text-gray-500 mb-3">
+                    <span>
+                      {enrollment.course.teacher.name}{" "}
+                      {enrollment.course.teacher.surname}
+                    </span>
+                    <span>{enrollment.course.subject.name}</span>
+                  </div>
+                  <CourseProgressBar
+                    completed={completedLessons}
+                    total={totalLessons}
+                  />
+                </Link>
+
+                {/* Collapsible module breakdown */}
+                {enrollment.course.modules.length > 0 && (
+                  <details className="mt-3">
+                    <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700 select-none">
+                      Module breakdown ({enrollment.course.modules.length}{" "}
+                      module{enrollment.course.modules.length !== 1 ? "s" : ""})
+                    </summary>
+                    <div className="mt-2 space-y-2 pl-2 border-l-2 border-gray-100">
+                      {enrollment.course.modules.map((mod) => {
+                        const modTotal = mod.lessons.length;
+                        const modCompleted = mod.lessons.filter((l) =>
+                          completedLessonIds.has(l.id)
+                        ).length;
+
+                        // Compute avg quiz % for this module
+                        const moduleAttempts = mod.lessons.flatMap((l) =>
+                          l.quizzes.flatMap((q) => q.attempts)
+                        );
+                        const hasQuizData = moduleAttempts.length > 0;
+                        const avgQuizPct = hasQuizData
+                          ? Math.round(
+                              moduleAttempts.reduce(
+                                (acc, a) => acc + (a.percentage ?? 0),
+                                0
+                              ) / moduleAttempts.length
+                            )
+                          : null;
+
+                        return (
+                          <div key={mod.id} className="text-xs">
+                            <p className="font-medium text-gray-700">
+                              {mod.title}
+                            </p>
+                            <p className="text-gray-500">
+                              {modCompleted}/{modTotal} lessons completed
+                              {avgQuizPct !== null && (
+                                <span className="ml-2 text-purple-600">
+                                  Quiz avg: {avgQuizPct}%
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </details>
+                )}
+              </div>
             );
           })}
         </div>

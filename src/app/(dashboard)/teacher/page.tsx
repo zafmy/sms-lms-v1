@@ -1,8 +1,12 @@
 import Announcements from "@/components/Announcements";
+import AtRiskStudentsAlert from "@/components/AtRiskStudentsAlert";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import ClassAttendanceOverview from "@/components/ClassAttendanceOverview";
+import ClassQuizAnalyticsContainer from "@/components/ClassQuizAnalyticsContainer";
+import CourseEngagementOverviewContainer from "@/components/CourseEngagementOverviewContainer";
 import MyStudentsOverview from "@/components/MyStudentsOverview";
 import PendingGrading from "@/components/PendingGrading";
+import PreClassEngagementReport from "@/components/PreClassEngagementReport";
 import TodaySchedule from "@/components/TodaySchedule";
 import { auth } from "@clerk/nextjs/server";
 
@@ -20,6 +24,10 @@ const TeacherPage = async () => {
       {/* RIGHT */}
       <div className="w-full xl:w-1/3 flex flex-col gap-8">
         <TodaySchedule teacherId={userId!} />
+        <PreClassEngagementReport teacherId={userId!} />
+        <AtRiskStudentsAlert teacherId={userId!} />
+        <CourseEngagementOverviewContainer teacherId={userId!} />
+        <ClassQuizAnalyticsContainer teacherId={userId!} />
         <PendingGrading teacherId={userId!} />
         <ClassAttendanceOverview teacherId={userId!} />
         <MyStudentsOverview teacherId={userId!} />

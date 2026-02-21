@@ -3,6 +3,7 @@ import AttendanceChartContainer from "@/components/AttendanceChartContainer";
 import CountChartContainer from "@/components/CountChartContainer";
 import EventCalendarContainer from "@/components/EventCalendarContainer";
 import ClassOccupancyChartContainer from "@/components/ClassOccupancyChartContainer";
+import LmsAdoptionMetrics from "@/components/LmsAdoptionMetrics";
 import UserCard from "@/components/UserCard";
 
 const AdminPage = async ({
@@ -21,6 +22,10 @@ const AdminPage = async ({
           <UserCard type="teacher" />
           <UserCard type="student" />
           <UserCard type="parent" />
+        </div>
+        {/* LMS ADOPTION METRICS */}
+        <div className="w-full">
+          <LmsAdoptionMetrics />
         </div>
         {/* MIDDLE CHARTS */}
         <div className="flex gap-4 flex-col lg:flex-row">
