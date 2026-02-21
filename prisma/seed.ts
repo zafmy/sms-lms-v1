@@ -201,6 +201,98 @@ async function main() {
     });
   }
 
+  // BADGES (gamification)
+  const badges = [
+    {
+      name: "First Steps",
+      category: "course",
+      description: "Complete your first lesson",
+      threshold: 1,
+      xpReward: 10,
+      criteria: JSON.stringify({ type: "lesson_count", count: 1 }),
+    },
+    {
+      name: "Quiz Taker",
+      category: "quiz",
+      description: "Complete your first quiz",
+      threshold: 1,
+      xpReward: 10,
+      criteria: JSON.stringify({ type: "quiz_count", count: 1 }),
+    },
+    {
+      name: "Perfect Score",
+      category: "quiz",
+      description: "Score 100% on any quiz",
+      threshold: 100,
+      xpReward: 25,
+      criteria: JSON.stringify({ type: "quiz_perfect", percentage: 100 }),
+    },
+    {
+      name: "Consistent",
+      category: "streak",
+      description: "Achieve a 3-day streak",
+      threshold: 3,
+      xpReward: 15,
+      criteria: JSON.stringify({ type: "streak", days: 3 }),
+    },
+    {
+      name: "Dedicated",
+      category: "streak",
+      description: "Achieve a 7-day streak",
+      threshold: 7,
+      xpReward: 30,
+      criteria: JSON.stringify({ type: "streak", days: 7 }),
+    },
+    {
+      name: "Marathon",
+      category: "streak",
+      description: "Achieve a 14-day streak",
+      threshold: 14,
+      xpReward: 75,
+      criteria: JSON.stringify({ type: "streak", days: 14 }),
+    },
+    {
+      name: "Scholar",
+      category: "course",
+      description: "Complete your first course",
+      threshold: 1,
+      xpReward: 50,
+      criteria: JSON.stringify({ type: "course_complete", count: 1 }),
+    },
+    {
+      name: "Bookworm",
+      category: "course",
+      description: "Complete 3 courses",
+      threshold: 3,
+      xpReward: 100,
+      criteria: JSON.stringify({ type: "course_complete", count: 3 }),
+    },
+    {
+      name: "Century",
+      category: "xp",
+      description: "Earn 100 total XP",
+      threshold: 100,
+      xpReward: 20,
+      criteria: JSON.stringify({ type: "total_xp", amount: 100 }),
+    },
+    {
+      name: "XP Master",
+      category: "xp",
+      description: "Earn 1000 total XP",
+      threshold: 1000,
+      xpReward: 50,
+      criteria: JSON.stringify({ type: "total_xp", amount: 1000 }),
+    },
+  ];
+
+  for (const badge of badges) {
+    await prisma.badge.upsert({
+      where: { name: badge.name },
+      update: {},
+      create: badge,
+    });
+  }
+
   console.log("Seeding completed successfully.");
 }
 

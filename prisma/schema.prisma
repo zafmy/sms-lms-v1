@@ -36,6 +36,9 @@ model Student {
   enrollments     Enrollment[]
   lessonProgress  LessonProgress[]
   quizAttempts    QuizAttempt[]
+  gamification    StudentGamification?
+  badges          StudentBadge[]
+  xpTransactions  XpTransaction[]
 }
 
 model Teacher {
@@ -203,6 +206,7 @@ enum NotificationType {
   ASSIGNMENT
   GENERAL
   ENROLLMENT
+  GAMIFICATION
 }
 
 enum UserSex {
@@ -407,4 +411,57 @@ model QuestionResponse {
   question         Question     @relation(fields: [questionId], references: [id])
   attemptId        Int
   attempt          QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+}
+
+enum XpSource {
+  LESSON
+  QUIZ
+  STREAK
+  BADGE
+  MANUAL
+}
+
+model StudentGamification {
+  id               Int       @id @default(autoincrement())
+  studentId        String    @unique
+  totalXp          Int       @default(0)
+  currentLevel     Int       @default(1)
+  currentStreak    Int       @default(0)
+  longestStreak    Int       @default(0)
+  lastActivityDate DateTime?
+  student          Student   @relation(fields: [studentId], references: [id])
+}
+
+model Badge {
+  id          Int            @id @default(autoincrement())
+  name        String         @unique
+  description String
+  iconUrl     String?
+  criteria    String
+  xpReward    Int            @default(0)
+  category    String
+  threshold   Int?
+  createdAt   DateTime       @default(now())
+  students    StudentBadge[]
+}
+
+model StudentBadge {
+  id        Int      @id @default(autoincrement())
+  studentId String
+  badgeId   Int
+  earnedAt  DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id])
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+
+  @@unique([studentId, badgeId])
+}
+
+model XpTransaction {
+  id        Int      @id @default(autoincrement())
+  studentId String
+  amount    Int
+  source    XpSource
+  sourceId  String?
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id])
 }

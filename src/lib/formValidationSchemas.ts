@@ -282,3 +282,16 @@ export const questionBankSchema = z.object({
   subjectId: z.coerce.number().min(1, { message: "Subject is required!" }),
 });
 export type QuestionBankSchema = z.infer<typeof questionBankSchema>;
+
+export const badgeSchema = z.object({
+  id: z.coerce.number().optional(),
+  name: z.string().min(1, { message: "Badge name is required!" }),
+  description: z.string().min(1, { message: "Description is required!" }),
+  iconUrl: z.string().optional().nullable(),
+  category: z.enum(["streak", "quiz", "course", "xp", "special"], {
+    message: "Category is required!",
+  }),
+  threshold: z.coerce.number().int().min(0).optional().nullable(),
+  xpReward: z.coerce.number().int().min(0, { message: "XP reward must be non-negative!" }),
+});
+export type BadgeSchema = z.infer<typeof badgeSchema>;
