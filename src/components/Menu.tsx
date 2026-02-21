@@ -62,6 +62,12 @@ const menuItems = [
       },
       {
         icon: "/result.png",
+        label: "Badges",
+        href: "/list/badges",
+        visible: ["admin"],
+      },
+      {
+        icon: "/result.png",
         label: "Achievements",
         href: "/list/achievements",
         visible: ["student"],

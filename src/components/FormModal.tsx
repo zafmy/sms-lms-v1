@@ -21,6 +21,7 @@ import {
   deleteQuestion,
   deleteQuestionBank,
 } from "@/lib/actions";
+import { deleteBadge } from "@/lib/gamificationActions";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -48,6 +49,7 @@ const deleteActionMap = {
   quiz: deleteQuiz,
   question: deleteQuestion,
   questionBank: deleteQuestionBank,
+  badge: deleteBadge,
 };
 
 // USE LAZY LOADING
@@ -110,6 +112,9 @@ const QuestionForm = dynamic(() => import("./forms/QuestionForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 const QuestionBankForm = dynamic(() => import("./forms/QuestionBankForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const BadgeForm = dynamic(() => import("./forms/BadgeForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 
@@ -267,6 +272,14 @@ const forms: {
   ),
   questionBank: (setOpen, type, data, relatedData) => (
     <QuestionBankForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  badge: (setOpen, type, data, relatedData) => (
+    <BadgeForm
       type={type}
       data={data}
       setOpen={setOpen}

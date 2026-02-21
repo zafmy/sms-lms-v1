@@ -1,5 +1,6 @@
 import Announcements from "@/components/Announcements";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
+import ChildGamificationStats from "@/components/ChildGamificationStats";
 import ChildGradeOverview from "@/components/ChildGradeOverview";
 import ChildLearningActivity from "@/components/ChildLearningActivity";
 import ChildLmsProgressCard from "@/components/ChildLmsProgressCard";
@@ -41,6 +42,12 @@ const ParentPage = async () => {
               </div>
               <div className="mt-4">
                 <ChildLmsProgressCard
+                  studentId={student.id}
+                  studentName={student.name + " " + student.surname}
+                />
+              </div>
+              <div className="mt-4">
+                <ChildGamificationStats
                   studentId={student.id}
                   studentName={student.name + " " + student.surname}
                 />

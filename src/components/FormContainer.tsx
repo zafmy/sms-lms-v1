@@ -22,7 +22,8 @@ export type FormContainerProps = {
     | "lmsLesson"
     | "quiz"
     | "question"
-    | "questionBank";
+    | "questionBank"
+    | "badge";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number | string;
@@ -215,6 +216,8 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
           select: { id: true, name: true },
         });
         relatedData = { subjects: questionBankSubjects };
+        break;
+      case "badge":
         break;
 
       default:

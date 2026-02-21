@@ -2,6 +2,7 @@ import Announcements from "@/components/Announcements";
 import AtRiskStudentsAlert from "@/components/AtRiskStudentsAlert";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import ClassAttendanceOverview from "@/components/ClassAttendanceOverview";
+import ClassLeaderboardContainer from "@/components/ClassLeaderboardContainer";
 import ClassQuizAnalyticsContainer from "@/components/ClassQuizAnalyticsContainer";
 import CourseEngagementOverviewContainer from "@/components/CourseEngagementOverviewContainer";
 import MyStudentsOverview from "@/components/MyStudentsOverview";
@@ -28,6 +29,7 @@ const TeacherPage = async () => {
         <AtRiskStudentsAlert teacherId={userId!} />
         <CourseEngagementOverviewContainer teacherId={userId!} />
         <ClassQuizAnalyticsContainer teacherId={userId!} />
+        <ClassLeaderboardContainer teacherId={userId!} />
         <PendingGrading teacherId={userId!} />
         <ClassAttendanceOverview teacherId={userId!} />
         <MyStudentsOverview teacherId={userId!} />
