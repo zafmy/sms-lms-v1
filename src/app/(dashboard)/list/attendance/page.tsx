@@ -1,4 +1,5 @@
 import FormContainer from "@/components/FormContainer";
+import ExportButton from "@/components/ExportButton";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -163,6 +164,7 @@ const AttendanceListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
+            {(role === "admin" || role === "teacher") && <ExportButton table="attendance" />}
             {(role === "admin" || role === "teacher") && (
               <FormContainer table="attendance" type="create" />
             )}

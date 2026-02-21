@@ -1,4 +1,6 @@
 import FormContainer from "@/components/FormContainer";
+import ListFilter from "@/components/ListFilter";
+import ExportButton from "@/components/ExportButton";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -114,6 +116,10 @@ const AssignmentListPage = async ({
     }
   }
 
+  // FILTER OPTIONS DATA
+  const classes = await prisma.class.findMany({ select: { id: true, name: true } });
+  const classOptions = classes.map((c) => ({ value: String(c.id), label: c.name }));
+
   // ROLE CONDITIONS
 
   switch (role) {
@@ -171,12 +177,14 @@ const AssignmentListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
+            <ListFilter paramKey="classId" label="Class" options={classOptions} />
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
+            {(role === "admin" || role === "teacher") && <ExportButton table="assignments" />}
             {(role === "admin" || role === "teacher") && (
               <FormContainer table="assignment" type="create" />
             )}

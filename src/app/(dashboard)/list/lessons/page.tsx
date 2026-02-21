@@ -1,4 +1,6 @@
 import FormContainer from "@/components/FormContainer";
+import ListFilter from "@/components/ListFilter";
+import ExportButton from "@/components/ExportButton";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -88,6 +90,9 @@ const renderRow = (item: LessonList) => (
           case "teacherId":
             query.teacherId = value;
             break;
+          case "day":
+            query.day = value as any;
+            break;
           case "search":
             query.OR = [
               { subject: { name: { contains: value, mode: "insensitive" } } },
@@ -100,6 +105,22 @@ const renderRow = (item: LessonList) => (
       }
     }
   }
+
+  // FILTER OPTIONS DATA
+  const [classes, teachers] = await Promise.all([
+    prisma.class.findMany({ select: { id: true, name: true } }),
+    prisma.teacher.findMany({ select: { id: true, name: true, surname: true } }),
+  ]);
+
+  const classOptions = classes.map((c) => ({ value: String(c.id), label: c.name }));
+  const teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.name} ${t.surname}` }));
+  const dayOptions = [
+    { value: "MONDAY", label: "Monday" },
+    { value: "TUESDAY", label: "Tuesday" },
+    { value: "WEDNESDAY", label: "Wednesday" },
+    { value: "THURSDAY", label: "Thursday" },
+    { value: "FRIDAY", label: "Friday" },
+  ];
 
   const [data, count] = await prisma.$transaction([
     prisma.lesson.findMany({
@@ -123,12 +144,16 @@ const renderRow = (item: LessonList) => (
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
+            <ListFilter paramKey="classId" label="Class" options={classOptions} />
+            <ListFilter paramKey="teacherId" label="Teacher" options={teacherOptions} />
+            <ListFilter paramKey="day" label="Day" options={dayOptions} />
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
+            {(role === "admin" || role === "teacher") && <ExportButton table="lessons" />}
             {role === "admin" && <FormContainer table="lesson" type="create" />}
           </div>
         </div>

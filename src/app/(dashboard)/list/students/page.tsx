@@ -1,4 +1,6 @@
 import FormContainer from "@/components/FormContainer";
+import ListFilter from "@/components/ListFilter";
+import ExportButton from "@/components/ExportButton";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -117,6 +119,12 @@ const StudentListPage = async ({
               },
             };
             break;
+          case "classId":
+            query.classId = parseInt(value);
+            break;
+          case "gradeId":
+            query.class = { ...query.class as any, gradeId: parseInt(value) };
+            break;
           case "search":
             query.name = { contains: value, mode: "insensitive" };
             break;
@@ -126,6 +134,15 @@ const StudentListPage = async ({
       }
     }
   }
+
+  // FILTER OPTIONS DATA
+  const [classes, grades] = await Promise.all([
+    prisma.class.findMany({ select: { id: true, name: true } }),
+    prisma.grade.findMany({ select: { id: true, level: true } }),
+  ]);
+
+  const classOptions = classes.map((c) => ({ value: String(c.id), label: c.name }));
+  const gradeOptions = grades.map((g) => ({ value: String(g.id), label: `Grade ${g.level}` }));
 
   const [data, count] = await prisma.$transaction([
     prisma.student.findMany({
@@ -147,16 +164,16 @@ const StudentListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
+            <ListFilter paramKey="classId" label="Class" options={classOptions} />
+            <ListFilter paramKey="gradeId" label="Grade" options={gradeOptions} />
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
+            {role === "admin" && <ExportButton table="students" />}
             {role === "admin" && (
-              // <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              //   <Image src="/plus.png" alt="" width={14} height={14} />
-              // </button>
               <FormContainer table="student" type="create" />
             )}
           </div>

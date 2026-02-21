@@ -1,4 +1,6 @@
 import FormContainer from "@/components/FormContainer";
+import ListFilter from "@/components/ListFilter";
+import ExportButton from "@/components/ExportButton";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -121,6 +123,9 @@ const TeacherListPage = async ({
               },
             };
             break;
+          case "subjectId":
+            query.subjects = { some: { id: parseInt(value) } };
+            break;
           case "search":
             query.name = { contains: value, mode: "insensitive" };
             break;
@@ -130,6 +135,10 @@ const TeacherListPage = async ({
       }
     }
   }
+
+  // FILTER OPTIONS DATA
+  const subjects = await prisma.subject.findMany({ select: { id: true, name: true } });
+  const subjectOptions = subjects.map((s) => ({ value: String(s.id), label: s.name }));
 
   const [data, count] = await prisma.$transaction([
     prisma.teacher.findMany({
@@ -152,12 +161,14 @@ const TeacherListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
+            <ListFilter paramKey="subjectId" label="Subject" options={subjectOptions} />
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
+            {role === "admin" && <ExportButton table="teachers" />}
             {role === "admin" && (
               <FormContainer table="teacher" type="create" />
             )}

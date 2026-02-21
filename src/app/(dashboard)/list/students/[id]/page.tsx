@@ -1,8 +1,9 @@
 import Announcements from "@/components/Announcements";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import FormContainer from "@/components/FormContainer";
-
+import GradeSummary from "@/components/GradeSummary";
 import StudentAttendanceCard from "@/components/StudentAttendanceCard";
+import SubjectGrades from "@/components/SubjectGrades";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { Class, Student } from "@prisma/client";
@@ -153,6 +154,9 @@ const SingleStudentPage = async ({
           <h1>Student&apos;s Schedule</h1>
           <BigCalendarContainer type="classId" id={student.class.id} />
         </div>
+        <div className="mt-4">
+          <SubjectGrades studentId={student.id} />
+        </div>
       </div>
       {/* RIGHT */}
       <div className="w-full xl:w-1/3 flex flex-col gap-4">
@@ -189,8 +193,15 @@ const SingleStudentPage = async ({
             >
               Student&apos;s Results
             </Link>
+            <Link
+              className="p-3 rounded-md bg-lamaPurpleLight"
+              href={`/list/students/${student.id}/report-card`}
+            >
+              Report Card
+            </Link>
           </div>
         </div>
+        <GradeSummary studentId={student.id} />
         <Announcements />
       </div>
     </div>

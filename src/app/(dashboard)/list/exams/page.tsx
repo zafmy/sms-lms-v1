@@ -1,4 +1,6 @@
 import FormContainer from "@/components/FormContainer";
+import ListFilter from "@/components/ListFilter";
+import ExportButton from "@/components/ExportButton";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -101,6 +103,9 @@ const renderRow = (item: ExamList) => (
           case "teacherId":
             query.lesson.teacherId = value;
             break;
+          case "subjectId":
+            query.lesson = { ...query.lesson as any, subjectId: parseInt(value) };
+            break;
           case "search":
             query.lesson.subject = {
               name: { contains: value, mode: "insensitive" },
@@ -112,6 +117,15 @@ const renderRow = (item: ExamList) => (
       }
     }
   }
+
+  // FILTER OPTIONS DATA
+  const [classes, subjects] = await Promise.all([
+    prisma.class.findMany({ select: { id: true, name: true } }),
+    prisma.subject.findMany({ select: { id: true, name: true } }),
+  ]);
+
+  const classOptions = classes.map((c) => ({ value: String(c.id), label: c.name }));
+  const subjectOptions = subjects.map((s) => ({ value: String(s.id), label: s.name }));
 
   // ROLE CONDITIONS
 
@@ -170,12 +184,15 @@ const renderRow = (item: ExamList) => (
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
+            <ListFilter paramKey="classId" label="Class" options={classOptions} />
+            <ListFilter paramKey="subjectId" label="Subject" options={subjectOptions} />
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
+            {(role === "admin" || role === "teacher") && <ExportButton table="exams" />}
             {(role === "admin" || role === "teacher") && (
               <FormContainer table="exam" type="create" />
             )}

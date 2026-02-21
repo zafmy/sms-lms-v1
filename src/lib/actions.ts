@@ -18,7 +18,7 @@ import {
 import prisma from "./prisma";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 
-type CurrentState = { success: boolean; error: boolean };
+type CurrentState = { success: boolean; error: boolean; message?: string };
 
 export const createSubject = async (
   currentState: CurrentState,
@@ -958,6 +958,66 @@ export const createLesson = async (
     return { success: false, error: true };
   }
   try {
+    // Check for teacher conflict
+    const teacherConflict = await prisma.lesson.findFirst({
+      where: {
+        teacherId: data.teacherId,
+        day: data.day,
+        OR: [
+          {
+            startTime: { lte: data.startTime },
+            endTime: { gt: data.startTime },
+          },
+          {
+            startTime: { lt: data.endTime },
+            endTime: { gte: data.endTime },
+          },
+          {
+            startTime: { gte: data.startTime },
+            endTime: { lte: data.endTime },
+          },
+        ],
+      },
+    });
+
+    if (teacherConflict) {
+      return {
+        success: false,
+        error: true,
+        message: "Teacher already has a lesson at this time",
+      };
+    }
+
+    // Check for class conflict
+    const classConflict = await prisma.lesson.findFirst({
+      where: {
+        classId: data.classId,
+        day: data.day,
+        OR: [
+          {
+            startTime: { lte: data.startTime },
+            endTime: { gt: data.startTime },
+          },
+          {
+            startTime: { lt: data.endTime },
+            endTime: { gte: data.endTime },
+          },
+          {
+            startTime: { gte: data.startTime },
+            endTime: { lte: data.endTime },
+          },
+        ],
+      },
+    });
+
+    if (classConflict) {
+      return {
+        success: false,
+        error: true,
+        message: "Class already has a lesson at this time",
+      };
+    }
+
     await prisma.lesson.create({
       data: {
         name: data.name,
@@ -987,6 +1047,68 @@ export const updateLesson = async (
     return { success: false, error: true };
   }
   try {
+    // Check for teacher conflict (exclude self)
+    const teacherConflict = await prisma.lesson.findFirst({
+      where: {
+        teacherId: data.teacherId,
+        day: data.day,
+        id: { not: data.id },
+        OR: [
+          {
+            startTime: { lte: data.startTime },
+            endTime: { gt: data.startTime },
+          },
+          {
+            startTime: { lt: data.endTime },
+            endTime: { gte: data.endTime },
+          },
+          {
+            startTime: { gte: data.startTime },
+            endTime: { lte: data.endTime },
+          },
+        ],
+      },
+    });
+
+    if (teacherConflict) {
+      return {
+        success: false,
+        error: true,
+        message: "Teacher already has a lesson at this time",
+      };
+    }
+
+    // Check for class conflict (exclude self)
+    const classConflict = await prisma.lesson.findFirst({
+      where: {
+        classId: data.classId,
+        day: data.day,
+        id: { not: data.id },
+        OR: [
+          {
+            startTime: { lte: data.startTime },
+            endTime: { gt: data.startTime },
+          },
+          {
+            startTime: { lt: data.endTime },
+            endTime: { gte: data.endTime },
+          },
+          {
+            startTime: { gte: data.startTime },
+            endTime: { lte: data.endTime },
+          },
+        ],
+      },
+    });
+
+    if (classConflict) {
+      return {
+        success: false,
+        error: true,
+        message: "Class already has a lesson at this time",
+      };
+    }
+
     await prisma.lesson.update({
       where: {
         id: data.id,

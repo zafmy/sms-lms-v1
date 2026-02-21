@@ -1,5 +1,6 @@
 import Announcements from "@/components/Announcements";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
+import ChildGradeOverview from "@/components/ChildGradeOverview";
 import ChildQuickStats from "@/components/ChildQuickStats";
 import RecentActivity from "@/components/RecentActivity";
 import prisma from "@/lib/prisma";
@@ -30,6 +31,12 @@ const ParentPage = async () => {
                 studentId={student.id}
                 studentName={student.name + " " + student.surname}
               />
+              <div className="mt-4">
+                <ChildGradeOverview
+                  studentId={student.id}
+                  studentName={student.name + " " + student.surname}
+                />
+              </div>
               <div className="mt-4 bg-white p-4 rounded-md">
                 <h1 className="text-xl font-semibold">
                   Schedule ({student.name + " " + student.surname})
