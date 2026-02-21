@@ -9,16 +9,50 @@ import { useEffect } from "react";
 
 const LoginPage = () => {
   const { isLoaded, isSignedIn, user } = useUser();
-
   const router = useRouter();
 
   useEffect(() => {
-    const role = user?.publicMetadata.role;
-
-    if (role) {
-      router.push(`/${role}`);
+    const role = user?.publicMetadata?.role as string | undefined;
+    if (role && ["admin", "teacher", "student", "parent"].includes(role)) {
+      router.replace(`/${role}`);
     }
   }, [user, router]);
+
+  if (!isLoaded) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-lamaSkyLight">
+        <div className="bg-white p-12 rounded-md shadow-2xl text-center">
+          <Image src="/logo.png" alt="" width={32} height={32} className="mx-auto mb-4" />
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isSignedIn && user) {
+    const role = user.publicMetadata?.role as string | undefined;
+    if (role && ["admin", "teacher", "student", "parent"].includes(role)) {
+      return (
+        <div className="h-screen flex items-center justify-center bg-lamaSkyLight">
+          <div className="bg-white p-12 rounded-md shadow-2xl text-center">
+            <Image src="/logo.png" alt="" width={32} height={32} className="mx-auto mb-4" />
+            <p className="text-gray-500">Redirecting to dashboard...</p>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="h-screen flex items-center justify-center bg-lamaSkyLight">
+        <div className="bg-white p-12 rounded-md shadow-2xl text-center max-w-md">
+          <Image src="/logo.png" alt="" width={32} height={32} className="mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Missing role</h2>
+          <p className="text-sm text-gray-500">
+            Your account has no role assigned. Ask an admin to add <code className="bg-gray-100 px-1 rounded">publicMetadata.role</code> (admin, teacher, student, or parent) in the Clerk Dashboard.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex items-center justify-center bg-lamaSkyLight">

@@ -226,7 +226,7 @@ const renderRow = (item: ResultList) => (
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table columns={columns} renderRow={renderRow} data={data.filter(Boolean)} />
       {/* PAGINATION */}
       <Pagination page={p} count={count} />
     </div>

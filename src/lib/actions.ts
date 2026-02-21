@@ -9,7 +9,7 @@ import {
   TeacherSchema,
 } from "./formValidationSchemas";
 import prisma from "./prisma";
-import { clerkClient } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 type CurrentState = { success: boolean; error: boolean };
 
@@ -17,6 +17,11 @@ export const createSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
 ) => {
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     await prisma.subject.create({
       data: {
@@ -27,10 +32,9 @@ export const createSubject = async (
       },
     });
 
-    // revalidatePath("/list/subjects");
+    revalidatePath("/list/subjects");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -39,6 +43,11 @@ export const updateSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
 ) => {
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     await prisma.subject.update({
       where: {
@@ -52,10 +61,9 @@ export const updateSubject = async (
       },
     });
 
-    // revalidatePath("/list/subjects");
+    revalidatePath("/list/subjects");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -65,6 +73,11 @@ export const deleteSubject = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     await prisma.subject.delete({
       where: {
@@ -72,10 +85,9 @@ export const deleteSubject = async (
       },
     });
 
-    // revalidatePath("/list/subjects");
+    revalidatePath("/list/subjects");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -84,15 +96,19 @@ export const createClass = async (
   currentState: CurrentState,
   data: ClassSchema
 ) => {
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     await prisma.class.create({
       data,
     });
 
-    // revalidatePath("/list/class");
+    revalidatePath("/list/class");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -101,6 +117,11 @@ export const updateClass = async (
   currentState: CurrentState,
   data: ClassSchema
 ) => {
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     await prisma.class.update({
       where: {
@@ -109,10 +130,9 @@ export const updateClass = async (
       data,
     });
 
-    // revalidatePath("/list/class");
+    revalidatePath("/list/class");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -122,6 +142,11 @@ export const deleteClass = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     await prisma.class.delete({
       where: {
@@ -129,10 +154,9 @@ export const deleteClass = async (
       },
     });
 
-    // revalidatePath("/list/class");
+    revalidatePath("/list/class");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -141,6 +165,11 @@ export const createTeacher = async (
   currentState: CurrentState,
   data: TeacherSchema
 ) => {
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     const user = await clerkClient.users.createUser({
       username: data.username,
@@ -171,10 +200,9 @@ export const createTeacher = async (
       },
     });
 
-    // revalidatePath("/list/teachers");
+    revalidatePath("/list/teachers");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -183,6 +211,11 @@ export const updateTeacher = async (
   currentState: CurrentState,
   data: TeacherSchema
 ) => {
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   if (!data.id) {
     return { success: false, error: true };
   }
@@ -217,10 +250,9 @@ export const updateTeacher = async (
         },
       },
     });
-    // revalidatePath("/list/teachers");
+    revalidatePath("/list/teachers");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -230,19 +262,26 @@ export const deleteTeacher = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     await clerkClient.users.deleteUser(id);
+    try {
+      await prisma.teacher.delete({
+        where: {
+          id: id,
+        },
+      });
+    } catch (prismaErr) {
+      return { success: false, error: true };
+    }
 
-    await prisma.teacher.delete({
-      where: {
-        id: id,
-      },
-    });
-
-    // revalidatePath("/list/teachers");
+    revalidatePath("/list/teachers");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -251,7 +290,11 @@ export const createStudent = async (
   currentState: CurrentState,
   data: StudentSchema
 ) => {
-  console.log(data);
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     const classItem = await prisma.class.findUnique({
       where: { id: data.classId },
@@ -289,10 +332,9 @@ export const createStudent = async (
       },
     });
 
-    // revalidatePath("/list/students");
+    revalidatePath("/list/students");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -301,6 +343,11 @@ export const updateStudent = async (
   currentState: CurrentState,
   data: StudentSchema
 ) => {
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   if (!data.id) {
     return { success: false, error: true };
   }
@@ -333,10 +380,9 @@ export const updateStudent = async (
         parentId: data.parentId,
       },
     });
-    // revalidatePath("/list/students");
+    revalidatePath("/list/students");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -346,19 +392,26 @@ export const deleteStudent = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
   try {
     await clerkClient.users.deleteUser(id);
+    try {
+      await prisma.student.delete({
+        where: {
+          id: id,
+        },
+      });
+    } catch (prismaErr) {
+      return { success: false, error: true };
+    }
 
-    await prisma.student.delete({
-      where: {
-        id: id,
-      },
-    });
-
-    // revalidatePath("/list/students");
+    revalidatePath("/list/students");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -367,22 +420,25 @@ export const createExam = async (
   currentState: CurrentState,
   data: ExamSchema
 ) => {
-  // const { userId, sessionClaims } = auth();
-  // const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
 
   try {
-    // if (role === "teacher") {
-    //   const teacherLesson = await prisma.lesson.findFirst({
-    //     where: {
-    //       teacherId: userId!,
-    //       id: data.lessonId,
-    //     },
-    //   });
+    if (role === "teacher") {
+      const teacherLesson = await prisma.lesson.findFirst({
+        where: {
+          teacherId: userId,
+          id: data.lessonId,
+        },
+      });
 
-    //   if (!teacherLesson) {
-    //     return { success: false, error: true };
-    //   }
-    // }
+      if (!teacherLesson) {
+        return { success: false, error: true };
+      }
+    }
 
     await prisma.exam.create({
       data: {
@@ -393,10 +449,9 @@ export const createExam = async (
       },
     });
 
-    // revalidatePath("/list/subjects");
+    revalidatePath("/list/exams");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -405,22 +460,25 @@ export const updateExam = async (
   currentState: CurrentState,
   data: ExamSchema
 ) => {
-  // const { userId, sessionClaims } = auth();
-  // const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
 
   try {
-    // if (role === "teacher") {
-    //   const teacherLesson = await prisma.lesson.findFirst({
-    //     where: {
-    //       teacherId: userId!,
-    //       id: data.lessonId,
-    //     },
-    //   });
+    if (role === "teacher") {
+      const teacherLesson = await prisma.lesson.findFirst({
+        where: {
+          teacherId: userId,
+          id: data.lessonId,
+        },
+      });
 
-    //   if (!teacherLesson) {
-    //     return { success: false, error: true };
-    //   }
-    // }
+      if (!teacherLesson) {
+        return { success: false, error: true };
+      }
+    }
 
     await prisma.exam.update({
       where: {
@@ -434,10 +492,9 @@ export const updateExam = async (
       },
     });
 
-    // revalidatePath("/list/subjects");
+    revalidatePath("/list/exams");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
     return { success: false, error: true };
   }
 };
@@ -448,21 +505,156 @@ export const deleteExam = async (
 ) => {
   const id = data.get("id") as string;
 
-  // const { userId, sessionClaims } = auth();
-  // const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
 
   try {
     await prisma.exam.delete({
       where: {
         id: parseInt(id),
-        // ...(role === "teacher" ? { lesson: { teacherId: userId! } } : {}),
+        ...(role === "teacher" ? { lesson: { teacherId: userId } } : {}),
       },
     });
 
-    // revalidatePath("/list/subjects");
+    revalidatePath("/list/exams");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
+    return { success: false, error: true };
+  }
+};
+
+export const deleteParent = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.parent.delete({ where: { id } });
+    revalidatePath("/list/parents");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteLesson = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.lesson.delete({ where: { id: parseInt(id) } });
+    revalidatePath("/list/lessons");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteAssignment = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.assignment.delete({ where: { id: parseInt(id) } });
+    revalidatePath("/list/assignments");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteResult = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.result.delete({ where: { id: parseInt(id) } });
+    revalidatePath("/list/results");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteAttendance = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.attendance.delete({ where: { id: parseInt(id) } });
+    revalidatePath("/list/attendance");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteEvent = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.event.delete({ where: { id: parseInt(id) } });
+    revalidatePath("/list/events");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteAnnouncement = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.announcement.delete({ where: { id: parseInt(id) } });
+    revalidatePath("/list/announcements");
+    return { success: true, error: false };
+  } catch (err) {
     return { success: false, error: true };
   }
 };
