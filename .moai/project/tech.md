@@ -58,8 +58,8 @@
 - Generator: `prisma-client-js` outputting to `node_modules/@prisma/client`
 - Datasource: PostgreSQL via `DATABASE_URL`
 - Seed script: `ts-node --compiler-options {"module":"CommonJS"} prisma/seed.ts`
-**Models (24)**: Admin, Student, Teacher, Parent, Class, Subject, Lesson, Exam, Assignment, Result, Attendance, Event, Announcement — plus 11 LMS models added in SPEC-LMS-001: Course, Module, LmsLesson, LessonProgress, Enrollment, Quiz, Question, QuestionBank, AnswerOption, QuizAttempt, QuestionResponse.
-**Enums (8)**: `Day` (MONDAY–SUNDAY), `UserSex` (MALE, FEMALE) — plus 6 LMS enums: `CourseStatus` (DRAFT, ACTIVE, ARCHIVED), `ContentType` (TEXT, VIDEO, LINK, MIXED), `ProgressStatus` (NOT_STARTED, IN_PROGRESS, COMPLETED), `EnrollmentStatus` (ACTIVE, DROPPED, COMPLETED), `QuestionType` (MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER, ESSAY), `ScoringPolicy` (BEST, LATEST, AVERAGE).
+**Models (28)**: Admin, Student, Teacher, Parent, Class, Subject, Lesson, Exam, Assignment, Result, Attendance, Event, Announcement — plus 11 LMS models added in SPEC-LMS-001: Course, Module, LmsLesson, LessonProgress, Enrollment, Quiz, Question, QuestionBank, AnswerOption, QuizAttempt, QuestionResponse — plus 4 gamification models added in SPEC-LMS-006: StudentGamification, Badge, StudentBadge, XpTransaction.
+**Enums (9)**: `Day` (MONDAY–SUNDAY), `UserSex` (MALE, FEMALE) — plus 6 LMS enums: `CourseStatus` (DRAFT, ACTIVE, ARCHIVED), `ContentType` (TEXT, VIDEO, LINK, MIXED), `ProgressStatus` (NOT_STARTED, IN_PROGRESS, COMPLETED), `EnrollmentStatus` (ACTIVE, DROPPED, COMPLETED), `QuestionType` (MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER, ESSAY), `ScoringPolicy` (BEST, LATEST, AVERAGE) — plus 1 gamification enum: `XpSource` (LESSON, QUIZ, STREAK, BADGE, MANUAL). The `NotificationType` enum was extended with a `GAMIFICATION` value.
 **Singleton pattern**: `src/lib/prisma.ts` uses `global.prisma` to prevent connection pool exhaustion during Next.js development hot reloads.
 
 ## Authentication
@@ -223,6 +223,18 @@
 ### Quiz Scoring Policies
 **Decision**: The `Quiz` model stores a `ScoringPolicy` enum field (`BEST`, `LATEST`, `AVERAGE`) that determines how the canonical score is computed from a student's multiple attempts.
 **Rationale**: Different assessment philosophies require different scoring behaviors. `BEST` rewards effort and retries. `LATEST` reflects the most recent demonstrated understanding. `AVERAGE` measures consistency across attempts. Storing the policy on the quiz model allows teachers to choose the appropriate policy per quiz without requiring application-level configuration changes. The scoring policy is evaluated by `quizUtils.ts` when producing the final score for an enrollment record.
+
+### Atomic Gamification Updates via Prisma $transaction
+**Decision**: The `processGamificationEvent` Server Action wraps all gamification database writes — upserting `StudentGamification`, creating `XpTransaction` records, updating streak fields, creating `StudentBadge` records, and creating `Notification` records — inside a single `prisma.$transaction` call.
+**Rationale**: Gamification state involves multiple interrelated records. A partial write (e.g., XP credited but badge not recorded) would create inconsistent state that is difficult to detect and repair. Wrapping all writes in a transaction ensures that either the full gamification update succeeds or none of it does, preserving data integrity across the five affected models.
+
+### Fire-and-Forget Integration Pattern for Gamification
+**Decision**: Gamification processing is triggered from existing Server Actions (`markLessonComplete`, quiz submission) using a fire-and-forget pattern: the `processGamificationEvent` call is wrapped in a try/catch block and errors are logged rather than surfaced to the user.
+**Rationale**: Gamification is a non-critical enrichment layer. If gamification processing fails (e.g., due to a database timeout), the primary LMS operation (lesson completion, quiz submission) should still succeed and return a success response to the student. Propagating gamification errors to the user would create false failures for core LMS actions. This fault-tolerance pattern is appropriate given that gamification state can be reconstructed from the authoritative `LessonProgress` and `QuizAttempt` records if needed.
+
+### Container/Client Component Pattern for Gamification Widgets
+**Decision**: All gamification dashboard widgets follow the same Container/Client pattern used throughout the application: a `*Container.tsx` Server Component fetches data from Prisma and passes it as props to a matching `*.tsx` Client Component for rendering.
+**Rationale**: Consistent with the existing architectural pattern used by LMS analytics widgets. Server Components handle all Prisma queries and access control, while Client Components handle rendering logic and any interactive elements (such as XP history pagination). This separation maintains a clear boundary between data fetching and presentation, keeps Server Components lean, and ensures that Prisma is never imported into Client Components.
 
 ## Development Environment Requirements
 

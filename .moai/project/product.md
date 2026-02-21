@@ -149,15 +149,38 @@ Analytics dashboards surfacing LMS engagement data across all four user roles. I
 - Empty state handling with meaningful messages for all widgets
 - Read-only analytics with zero write operations
 
+### 15. Gamification System
+
+A comprehensive gamification layer built on top of the LMS to incentivize student engagement during the 12-day gap between school sessions. Implemented in SPEC-LMS-006.
+
+**Target users:**
+- **Students**: View XP balance, current level, streak data, earned badges, and full achievement history on a dedicated achievements page.
+- **Teachers**: Monitor class leaderboard showing students ranked by XP within their class.
+- **Parents**: View per-child gamification stats (level, XP, streak) alongside existing LMS progress data.
+- **Admins**: Monitor gamification adoption metrics (active streaks, average XP, total badges awarded) and manage the badge catalog.
+
+**Key capabilities:**
+
+- XP system: Awards XP for lesson completion (10 XP), quiz submission (15 XP), quiz pass (25 XP bonus), perfect score (50 XP bonus), daily streak (5 XP), 7-day streak bonus (30 XP), and course completion (100 XP)
+- Level system: 10 levels with quadratic XP thresholds (Level 1 = 0, Level 2 = 50, Level 3 = 150, up to Level 10 = 2250). Level-up triggers in-app notification.
+- Badge system: 10 default badges seeded at startup, spanning streak, quiz, course, and XP categories. Badges are earned automatically when criteria are met. Admin can create additional badges via a CRUD form. Badge awards trigger in-app notifications of type GAMIFICATION.
+- Achievements page at `/list/achievements`: Full badge gallery (earned badges in color, locked badges grayed out), XP transaction history (paginated), 30-day streak calendar, and level progress bar.
+- Student dashboard widgets: Compact `GamificationCard` showing level, XP, and streak in the right sidebar, plus `RecentBadges` showing the 3 most recently earned badges with a link to the achievements page.
+- Class leaderboard: Teacher dashboard widget (`ClassLeaderboard`) showing students ranked by total XP within the class.
+- Parent gamification stats: `ChildGamificationStats` component showing per-child level, XP, and streak data.
+- Admin metrics: `GamificationAdoptionMetrics` component on the admin dashboard showing active streaks, average XP, and total badges awarded school-wide.
+- Atomic XP and badge updates via `prisma.$transaction` for data consistency.
+- Fire-and-forget integration: gamification processing is called from existing Server Actions after successful writes, with errors caught and logged to prevent disruption of primary LMS operations.
+
+**Routes added:**
+- `/list/achievements` — Student achievements page with badge gallery, XP history, streak calendar, and level progress
+
 ## Planned Features (Post-Phase 1)
 
 The following features remain planned for future sprints:
 
 ### Discussion Forums
 Peer and teacher-moderated forums attached to subjects and classes. Students can continue academic discussions during the 12-day gap between sessions.
-
-### Gamification
-Experience points (XP), achievement badges, and learning streaks to incentivize student engagement between sessions. A leaderboard would be visible to students and teachers.
 
 ### Spaced Repetition for Knowledge Retention
 A spaced repetition system presenting students with review material at algorithmically determined intervals designed to counteract the 12-day retention drop between sessions.

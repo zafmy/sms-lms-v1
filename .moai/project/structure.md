@@ -38,6 +38,8 @@
 │   │   │   │   │                   └── page.tsx  # Quiz attempt results
 │   │   │   │   ├── enrollments/                  # LMS: enrollment management
 │   │   │   │   │   └── page.tsx
+│   │   │   │   ├── achievements/                 # Gamification: student achievements page
+│   │   │   │   │   └── page.tsx                  # Badge gallery, XP history, streak calendar, level progress
 │   │   │   │   └── loading.tsx       # Shared loading skeleton for list pages
 │   │   │   └── layout.tsx            # Dashboard layout: sidebar + navbar wrapper
 │   │   ├── [[...sign-in]]/           # Catch-all: Clerk authentication pages
@@ -47,7 +49,7 @@
 │   │   ├── globals.css               # Tailwind v4 CSS-first configuration
 │   │   └── layout.tsx                # Root layout: ClerkProvider, ToastContainer
 │   ├── components/                   # 59 React components
-│   │   ├── forms/                    # 19 entity form components
+│   │   ├── forms/                    # 20 entity form components
 │   │   │   ├── AnnouncementForm.tsx
 │   │   │   ├── AssignmentForm.tsx
 │   │   │   ├── AttendanceForm.tsx
@@ -66,7 +68,8 @@
 │   │   │   ├── EnrollmentForm.tsx    # LMS: enrollment create form
 │   │   │   ├── QuizForm.tsx          # LMS: quiz create/update form
 │   │   │   ├── QuestionForm.tsx      # LMS: question create/update form
-│   │   │   └── QuestionBankForm.tsx  # LMS: question bank create form
+│   │   │   ├── QuestionBankForm.tsx  # LMS: question bank create form
+│   │   │   └── BadgeForm.tsx         # Gamification: admin badge create/update form
 │   │   ├── Announcements.tsx         # Announcements feed widget
 │   │   ├── AssignmentsDue.tsx        # Student upcoming assignments widget
 │   │   ├── AttendanceChart.tsx       # Bar chart for attendance data
@@ -132,7 +135,19 @@
 │   │   ├── ClassQuizAnalytics.tsx      # LMS: per-quiz difficulty and most-missed questions
 │   │   ├── ChildLmsProgressCard.tsx    # LMS: parent per-child LMS progress card
 │   │   ├── ChildLearningActivity.tsx   # LMS: parent per-child activity feed
-│   │   └── LmsAdoptionMetrics.tsx      # LMS: admin school-wide adoption metrics
+│   │   ├── LmsAdoptionMetrics.tsx      # LMS: admin school-wide adoption metrics
+│   │   ├── GamificationCard.tsx        # Gamification: student XP/level/streak widget (Client)
+│   │   ├── GamificationCardContainer.tsx  # Gamification: fetches StudentGamification data (Server)
+│   │   ├── RecentBadges.tsx            # Gamification: 3 most recently earned badges widget (Client)
+│   │   ├── RecentBadgesContainer.tsx   # Gamification: fetches recent StudentBadge records (Server)
+│   │   ├── BadgeGallery.tsx            # Gamification: full badge grid (earned in color, locked grayed)
+│   │   ├── XpTransactionHistory.tsx    # Gamification: paginated XP transaction history table
+│   │   ├── StreakCalendar.tsx           # Gamification: 30-day activity calendar visualization
+│   │   ├── LevelProgressBar.tsx        # Gamification: XP progress bar toward next level
+│   │   ├── ClassLeaderboard.tsx        # Gamification: teacher class leaderboard ranked by XP (Client)
+│   │   ├── ClassLeaderboardContainer.tsx  # Gamification: fetches class gamification records (Server)
+│   │   ├── ChildGamificationStats.tsx  # Gamification: parent per-child level/XP/streak stats
+│   │   └── GamificationAdoptionMetrics.tsx  # Gamification: admin adoption metrics widget
 │   └── lib/                          # Utilities and business logic
 │       ├── actions.ts                # 62+ Server Actions for all CRUD operations; includes selfEnrollStudent and unenrollSelf added for SPEC-LMS-002
 │       ├── csvUtils.ts               # CSV generation utilities
@@ -143,11 +158,13 @@
 │       ├── prisma.ts                 # Singleton Prisma client instance
 │       ├── quizUtils.ts              # LMS: auto-grading engine (pure functions)
 │       ├── lmsAnalyticsUtils.ts    # LMS: pure analytics functions (9 functions, no Prisma)
+│       ├── gamificationUtils.ts    # Gamification: pure utility functions (XP, level, streak, badge logic)
+│       ├── gamificationActions.ts  # Gamification: processGamificationEvent engine and badge CRUD Server Actions
 │       ├── settings.ts               # Route access config, pagination constants
 │       └── utils.ts                  # Schedule and date utility functions
 ├── prisma/
-│   ├── schema.prisma                 # 13 Prisma models, 2 enums (Day, UserSex)
-│   ├── seed.ts                       # Database seed script
+│   ├── schema.prisma                 # 28 Prisma models, 8 enums (Day, UserSex, XpSource, + 5 LMS enums), NotificationType enum with GAMIFICATION
+│   ├── seed.ts                       # Database seed script (includes 10 default gamification badges)
 │   └── migrations/                   # Prisma migration history
 ├── public/                           # Static assets (43+ files)
 │   └── [images, icons, avatars]
@@ -197,7 +214,11 @@ Components are organized at a single flat level, with the `forms/` subdirectory 
 
 ### `src/lib/` - Business Logic
 
-**`actions.ts`** is the primary business logic file containing over 62 Server Actions. Each entity has `create[Entity]`, `update[Entity]`, and `delete[Entity]` actions. Actions validate input with Zod, perform authorization checks using Clerk's `auth()`, interact with Prisma, call `revalidatePath` to invalidate Next.js cache, and return typed state objects consumed by form components. The 22 LMS Server Actions added in SPEC-LMS-001 cover course, module, lesson, enrollment, quiz, and question management. Quiz submission uses Prisma `$transaction` for atomic writes. SPEC-LMS-002 added `selfEnrollStudent` and `unenrollSelf` for student self-service enrollment management.
+**`actions.ts`** is the primary business logic file containing over 62 Server Actions. Each entity has `create[Entity]`, `update[Entity]`, and `delete[Entity]` actions. Actions validate input with Zod, perform authorization checks using Clerk's `auth()`, interact with Prisma, call `revalidatePath` to invalidate Next.js cache, and return typed state objects consumed by form components. The 22 LMS Server Actions added in SPEC-LMS-001 cover course, module, lesson, enrollment, quiz, and question management. Quiz submission uses Prisma `$transaction` for atomic writes. SPEC-LMS-002 added `selfEnrollStudent` and `unenrollSelf` for student self-service enrollment management. SPEC-LMS-006 added hooks in `markLessonComplete` and quiz submission to call `processGamificationEvent` from `gamificationActions.ts` after successful writes.
+
+**`gamificationUtils.ts`** contains the gamification engine as pure functions with no Prisma imports or side effects. Exports include XP award calculation helpers, `computeLevel` for determining the current level from total XP using the `LEVEL_THRESHOLDS` array, `computeStreakUpdate` for evaluating streak continuation or reset based on UTC calendar dates, and `evaluateBadgeEligibility` for checking whether a student's current state meets badge award criteria. The file also exports XP amount constants and the `LEVEL_THRESHOLDS` array. Follows the same pattern as `lmsAnalyticsUtils.ts` and `gradeUtils.ts`.
+
+**`gamificationActions.ts`** contains the `processGamificationEvent` Server Action that orchestrates all gamification side effects in a single `prisma.$transaction` call: upserting the `StudentGamification` record, creating `XpTransaction` records, updating streak counters, checking for level-ups, evaluating badge eligibility, creating `StudentBadge` records for newly earned badges, and creating in-app notifications for badge awards and level-ups. Also exports `createBadge`, `updateBadge`, and `deleteBadge` actions for admin badge management.
 
 **`quizUtils.ts`** contains the LMS auto-grading engine as pure functions with no side effects. The primary export accepts a `QuizAttempt` with associated `QuestionResponse` records and returns a scored result. Multiple-choice and true/false questions are graded automatically by comparing selected `AnswerOption` correctness flags. Short answer and essay questions are flagged for manual review. The engine supports three scoring policies (`BEST`, `LATEST`, `AVERAGE`) applied at the `Quiz` level when computing the canonical score for a student's enrollment.
 
@@ -213,7 +234,7 @@ Components are organized at a single flat level, with the `forms/` subdirectory 
 
 ### `prisma/` - Database Schema
 
-**`schema.prisma`** defines 24 models: the original 13 (`Admin`, `Student`, `Teacher`, `Parent`, `Class`, `Subject`, `Lesson`, `Exam`, `Assignment`, `Result`, `Attendance`, `Event`, `Announcement`) plus 11 LMS models added in SPEC-LMS-001 (`Course`, `Module`, `LmsLesson`, `LessonProgress`, `Enrollment`, `Quiz`, `Question`, `QuestionBank`, `AnswerOption`, `QuizAttempt`, `QuestionResponse`). Four enums are defined: the original two (`Day`, `UserSex`) plus six LMS enums (`CourseStatus`, `ContentType`, `ProgressStatus`, `EnrollmentStatus`, `QuestionType`, `ScoringPolicy`). Clerk user IDs are stored as string fields on `Admin`, `Student`, `Teacher`, and `Parent` models for authorization lookups.
+**`schema.prisma`** defines 28 models: the original 13 (`Admin`, `Student`, `Teacher`, `Parent`, `Class`, `Subject`, `Lesson`, `Exam`, `Assignment`, `Result`, `Attendance`, `Event`, `Announcement`) plus 11 LMS models added in SPEC-LMS-001 (`Course`, `Module`, `LmsLesson`, `LessonProgress`, `Enrollment`, `Quiz`, `Question`, `QuestionBank`, `AnswerOption`, `QuizAttempt`, `QuestionResponse`) plus 4 gamification models added in SPEC-LMS-006 (`StudentGamification`, `Badge`, `StudentBadge`, `XpTransaction`). Nine enums are defined: the original two (`Day`, `UserSex`) plus six LMS enums (`CourseStatus`, `ContentType`, `ProgressStatus`, `EnrollmentStatus`, `QuestionType`, `ScoringPolicy`) plus one gamification enum (`XpSource`). The `NotificationType` enum was extended with a `GAMIFICATION` value. Clerk user IDs are stored as string fields on `Admin`, `Student`, `Teacher`, and `Parent` models for authorization lookups.
 
 ## Key File Locations
 
@@ -224,6 +245,8 @@ Components are organized at a single flat level, with the `forms/` subdirectory 
 | `/src/lib/prisma.ts` | Singleton Prisma client (import this, never instantiate directly) |
 | `/src/lib/quizUtils.ts` | LMS auto-grading engine: pure functions for scoring quiz attempts |
 | `/src/lib/lmsAnalyticsUtils.ts` | LMS analytics: 9 pure functions for progress, engagement, quiz, and heatmap computations |
+| `/src/lib/gamificationUtils.ts` | Gamification: pure utility functions for XP awards, level computation, streak evaluation, and badge eligibility |
+| `/src/lib/gamificationActions.ts` | Gamification: `processGamificationEvent` server action engine and badge CRUD actions (`createBadge`, `updateBadge`, `deleteBadge`) |
 | `/src/lib/settings.ts` | Route access control map and pagination configuration |
 | `/src/lib/gradeUtils.ts` | Grade calculation and report card aggregation functions |
 | `/src/lib/notificationActions.ts` | In-app notification creation and management |
