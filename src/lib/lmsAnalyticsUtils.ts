@@ -43,6 +43,27 @@ export interface AtRiskResult {
   reasons: string[];
 }
 
+export interface ScoreDistributionBucket {
+  range: string;
+  count: number;
+}
+
+export interface DailyEngagement {
+  date: string;
+  lessonCompletions: number;
+  quizSubmissions: number;
+  total: number;
+}
+
+export interface AtRiskStudent {
+  studentId: string;
+  studentName: string;
+  lastActivityDate: Date | null;
+  daysInactive: number;
+}
+
+export const AT_RISK_THRESHOLD_DAYS = 7;
+
 // Compute overall course completion from enrollment modules and progress records
 export function computeCourseCompletion(
   enrollmentWithModules: {
@@ -344,4 +365,184 @@ export function computeAtRiskStatus(
     isAtRisk: reasons.length > 0,
     reasons,
   };
+}
+
+// Bucket quiz attempt scores into 5 percentage ranges
+export function calculateQuizScoreDistribution(
+  attempts: { percentage: number | null }[]
+): ScoreDistributionBucket[] {
+  const buckets: ScoreDistributionBucket[] = [
+    { range: "0-20%", count: 0 },
+    { range: "21-40%", count: 0 },
+    { range: "41-60%", count: 0 },
+    { range: "61-80%", count: 0 },
+    { range: "81-100%", count: 0 },
+  ];
+
+  for (const attempt of attempts) {
+    if (attempt.percentage === null) {
+      continue;
+    }
+
+    const pct = attempt.percentage;
+    if (pct <= 20) {
+      buckets[0].count += 1;
+    } else if (pct <= 40) {
+      buckets[1].count += 1;
+    } else if (pct <= 60) {
+      buckets[2].count += 1;
+    } else if (pct <= 80) {
+      buckets[3].count += 1;
+    } else {
+      buckets[4].count += 1;
+    }
+  }
+
+  return buckets;
+}
+
+// Calculate daily engagement totals for a date range
+export function calculateEngagementByDay(
+  lessonProgressRecords: { completedAt: Date | null }[],
+  quizAttempts: { submittedAt: Date | null }[],
+  startDate: Date,
+  endDate: Date
+): DailyEngagement[] {
+  const dayMap = new Map<string, { lessons: number; quizzes: number }>();
+
+  // Initialize every day in the range
+  const current = new Date(startDate);
+  current.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(0, 0, 0, 0);
+
+  while (current <= end) {
+    const key = current.toISOString().slice(0, 10);
+    dayMap.set(key, { lessons: 0, quizzes: 0 });
+    current.setDate(current.getDate() + 1);
+  }
+
+  // Count lesson completions
+  for (const record of lessonProgressRecords) {
+    if (record.completedAt) {
+      const key = new Date(record.completedAt).toISOString().slice(0, 10);
+      const entry = dayMap.get(key);
+      if (entry) {
+        entry.lessons += 1;
+      }
+    }
+  }
+
+  // Count quiz submissions
+  for (const attempt of quizAttempts) {
+    if (attempt.submittedAt) {
+      const key = new Date(attempt.submittedAt).toISOString().slice(0, 10);
+      const entry = dayMap.get(key);
+      if (entry) {
+        entry.quizzes += 1;
+      }
+    }
+  }
+
+  return Array.from(dayMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, counts]) => ({
+      date,
+      lessonCompletions: counts.lessons,
+      quizSubmissions: counts.quizzes,
+      total: counts.lessons + counts.quizzes,
+    }));
+}
+
+// Identify students who have been inactive for N or more days
+export function identifyAtRiskStudents(
+  enrollments: { studentId: string; studentName: string }[],
+  lessonProgressRecords: {
+    studentId: string;
+    completedAt: Date | null;
+    startedAt: Date | null;
+  }[],
+  quizAttempts: {
+    studentId: string;
+    submittedAt: Date | null;
+    startedAt: Date;
+  }[],
+  thresholdDays: number = AT_RISK_THRESHOLD_DAYS,
+  referenceDate: Date = new Date()
+): AtRiskStudent[] {
+  const lastActivityMap = new Map<string, Date | null>();
+
+  // Initialize all enrolled students with null
+  for (const enrollment of enrollments) {
+    lastActivityMap.set(enrollment.studentId, null);
+  }
+
+  // Find most recent activity from lesson progress
+  for (const record of lessonProgressRecords) {
+    if (!lastActivityMap.has(record.studentId)) {
+      continue;
+    }
+
+    const dates: Date[] = [];
+    if (record.completedAt) {
+      dates.push(new Date(record.completedAt));
+    }
+
+    for (const d of dates) {
+      const current = lastActivityMap.get(record.studentId) ?? null;
+      if (current === null || d > current) {
+        lastActivityMap.set(record.studentId, d);
+      }
+    }
+  }
+
+  // Find most recent activity from quiz attempts
+  for (const attempt of quizAttempts) {
+    if (!lastActivityMap.has(attempt.studentId)) {
+      continue;
+    }
+
+    const dates: Date[] = [];
+    if (attempt.submittedAt) {
+      dates.push(new Date(attempt.submittedAt));
+    }
+
+    for (const d of dates) {
+      const current = lastActivityMap.get(attempt.studentId) ?? null;
+      if (current === null || d > current) {
+        lastActivityMap.set(attempt.studentId, d);
+      }
+    }
+  }
+
+  // Build results
+  const results: AtRiskStudent[] = [];
+  const refTime = referenceDate.getTime();
+
+  for (const enrollment of enrollments) {
+    const lastActivity = lastActivityMap.get(enrollment.studentId) ?? null;
+
+    let daysInactive: number;
+    if (lastActivity === null) {
+      daysInactive = 999;
+    } else {
+      daysInactive = Math.floor(
+        (refTime - lastActivity.getTime()) / (1000 * 60 * 60 * 24)
+      );
+    }
+
+    if (daysInactive >= thresholdDays) {
+      results.push({
+        studentId: enrollment.studentId,
+        studentName: enrollment.studentName,
+        lastActivityDate: lastActivity,
+        daysInactive,
+      });
+    }
+  }
+
+  // Sort by daysInactive descending
+  results.sort((a, b) => b.daysInactive - a.daysInactive);
+
+  return results;
 }
