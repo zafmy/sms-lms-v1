@@ -2023,6 +2023,10 @@ export const markLessonComplete = async (lessonId: number) => {
       },
     });
 
+    // Fire-and-forget gamification event; failure must not affect lesson completion
+    const { processGamificationEvent } = await import("./gamificationActions");
+    processGamificationEvent(userId, "LESSON_COMPLETE", { lessonId }).catch(() => {});
+
     revalidatePath("/list/courses");
     return { success: true, error: false };
   } catch (err) {
@@ -2481,6 +2485,15 @@ export const submitQuizAttempt = async (
         },
       });
     });
+
+    // Fire-and-forget gamification event; failure must not affect quiz submission
+    const { processGamificationEvent } = await import("./gamificationActions");
+    processGamificationEvent(userId, "QUIZ_SUBMIT", {
+      quizId: attempt.quiz.id,
+      percentage: gradingResult.percentage,
+      passed: gradingResult.passed,
+      passScore: attempt.quiz.passScore,
+    }).catch(() => {});
 
     revalidatePath("/list/courses");
     return { success: true, error: false };
