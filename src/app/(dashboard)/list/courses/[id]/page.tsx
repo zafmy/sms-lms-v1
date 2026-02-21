@@ -2,6 +2,7 @@ import CourseProgressBar from "@/components/CourseProgressBar";
 import ModuleList from "@/components/ModuleList";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 const CourseDetailPage = async ({
@@ -77,17 +78,28 @@ const CourseDetailPage = async ({
             <h1 className="text-2xl font-semibold">{course.title}</h1>
             <p className="text-sm text-gray-500 font-mono">{course.code}</p>
           </div>
-          <span
-            className={`px-3 py-1 rounded-full text-sm ${
-              course.status === "ACTIVE"
-                ? "bg-green-100 text-green-700"
-                : course.status === "DRAFT"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-          >
-            {course.status}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className={`px-3 py-1 rounded-full text-sm ${
+                course.status === "ACTIVE"
+                  ? "bg-green-100 text-green-700"
+                  : course.status === "DRAFT"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {course.status}
+            </span>
+            {(role === "admin" ||
+              (role === "teacher" && course.teacherId === userId)) && (
+              <Link
+                href={`/list/courses/${course.id}/analytics`}
+                className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 hover:bg-blue-200"
+              >
+                Analytics
+              </Link>
+            )}
+          </div>
         </div>
         {course.description && (
           <p className="text-gray-600">{course.description}</p>
