@@ -896,6 +896,33 @@ export const createResult = async (
       },
     });
 
+    // Notify student about new grade
+    try {
+      let assessmentTitle = "an assessment";
+      if (data.examId) {
+        const exam = await prisma.exam.findUnique({
+          where: { id: data.examId },
+          select: { title: true },
+        });
+        if (exam) assessmentTitle = exam.title;
+      } else if (data.assignmentId) {
+        const assignment = await prisma.assignment.findUnique({
+          where: { id: data.assignmentId },
+          select: { title: true },
+        });
+        if (assignment) assessmentTitle = assignment.title;
+      }
+      await prisma.notification.create({
+        data: {
+          userId: data.studentId,
+          type: "GRADE",
+          message: `New grade: ${data.score} on ${assessmentTitle}`,
+        },
+      });
+    } catch {
+      // Notification failure should not block the result creation
+    }
+
     revalidatePath("/list/results");
     return { success: true, error: false };
   } catch (err) {

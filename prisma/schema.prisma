@@ -179,6 +179,24 @@ model Announcement {
   class   Class? @relation(fields: [classId], references: [id])
 }
 
+model Notification {
+  id        Int              @id @default(autoincrement())
+  type      NotificationType
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  userId String
+}
+
+enum NotificationType {
+  GRADE
+  ATTENDANCE
+  ANNOUNCEMENT
+  ASSIGNMENT
+  GENERAL
+}
+
 enum UserSex {
   MALE
   FEMALE
