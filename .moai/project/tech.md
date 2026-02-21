@@ -216,6 +216,10 @@
 **Decision**: LMS lessons use a `ContentType` enum (`TEXT`, `VIDEO`, `LINK`, `MIXED`) stored on the `LmsLesson` model to describe the primary media type of a lesson's content.
 **Rationale**: Typed content enables the frontend to render the appropriate viewer component for each lesson without runtime content sniffing. The `MIXED` type signals that a lesson contains heterogeneous content requiring a combined renderer. This pattern allows content-type-specific UI optimizations (e.g., embedding a video player only when `ContentType` is `VIDEO`) without branching on unstructured content fields.
 
+### JavaScript Analytics Aggregation Pattern
+**Decision**: All LMS analytics are computed through pure JavaScript aggregation functions in `src/lib/lmsAnalyticsUtils.ts`, with no new Prisma models, materialized views, or database-level aggregation queries.
+**Rationale**: The system serves under 500 users with bounded data volumes. JavaScript aggregation over existing `LessonProgress`, `QuizAttempt`, and `Enrollment` records provides sufficient performance while keeping the architecture simple. Analytics functions are pure (no Prisma imports, no side effects), making them independently testable and reusable across all four role dashboards. This avoids schema migration complexity and maintains backward compatibility. If data volumes grow beyond current bounds, database-level aggregation or caching can be added as a future optimization.
+
 ### Quiz Scoring Policies
 **Decision**: The `Quiz` model stores a `ScoringPolicy` enum field (`BEST`, `LATEST`, `AVERAGE`) that determines how the canonical score is computed from a student's multiple attempts.
 **Rationale**: Different assessment philosophies require different scoring behaviors. `BEST` rewards effort and retries. `LATEST` reflects the most recent demonstrated understanding. `AVERAGE` measures consistency across attempts. Storing the policy on the quiz model allows teachers to choose the appropriate policy per quiz without requiring application-level configuration changes. The scoring policy is evaluated by `quizUtils.ts` when producing the final score for an enrollment record.

@@ -46,7 +46,7 @@
 │   │   ├── favicon.ico
 │   │   ├── globals.css               # Tailwind v4 CSS-first configuration
 │   │   └── layout.tsx                # Root layout: ClerkProvider, ToastContainer
-│   ├── components/                   # 45 React components
+│   ├── components/                   # 59 React components
 │   │   ├── forms/                    # 19 entity form components
 │   │   │   ├── AnnouncementForm.tsx
 │   │   │   ├── AssignmentForm.tsx
@@ -118,7 +118,21 @@
 │   │   ├── QuizResults.tsx           # LMS: attempt result breakdown component
 │   │   ├── QuizTakingClient.tsx      # LMS: client wrapper managing quiz attempt state
 │   │   ├── QuizTimer.tsx             # LMS: countdown timer with auto-submit on expiry
-│   │   └── UserCard.tsx              # Dashboard stat card with icon
+│   │   ├── UserCard.tsx              # Dashboard stat card with icon
+│   │   ├── LmsProgressOverview.tsx     # LMS: student progress overview (4-metric grid)
+│   │   ├── QuizPerformanceTrendContainer.tsx  # LMS: server-side quiz data fetcher
+│   │   ├── QuizPerformanceTrend.tsx    # LMS: quiz score line chart (Recharts)
+│   │   ├── LearningActivityHeatmapContainer.tsx  # LMS: server-side heatmap data fetcher
+│   │   ├── LearningActivityHeatmap.tsx # LMS: calendar-style activity heatmap
+│   │   ├── CourseEngagementOverviewContainer.tsx  # LMS: teacher course engagement data fetcher
+│   │   ├── CourseEngagementOverview.tsx # LMS: per-course engagement metrics display
+│   │   ├── PreClassEngagementReport.tsx # LMS: teacher pre-class student activity report
+│   │   ├── AtRiskStudentsAlert.tsx     # LMS: teacher at-risk students warning widget
+│   │   ├── ClassQuizAnalyticsContainer.tsx  # LMS: teacher quiz difficulty data fetcher
+│   │   ├── ClassQuizAnalytics.tsx      # LMS: per-quiz difficulty and most-missed questions
+│   │   ├── ChildLmsProgressCard.tsx    # LMS: parent per-child LMS progress card
+│   │   ├── ChildLearningActivity.tsx   # LMS: parent per-child activity feed
+│   │   └── LmsAdoptionMetrics.tsx      # LMS: admin school-wide adoption metrics
 │   └── lib/                          # Utilities and business logic
 │       ├── actions.ts                # 62+ Server Actions for all CRUD operations; includes selfEnrollStudent and unenrollSelf added for SPEC-LMS-002
 │       ├── csvUtils.ts               # CSV generation utilities
@@ -128,6 +142,7 @@
 │       ├── notificationActions.ts    # Notification creation and update actions
 │       ├── prisma.ts                 # Singleton Prisma client instance
 │       ├── quizUtils.ts              # LMS: auto-grading engine (pure functions)
+│       ├── lmsAnalyticsUtils.ts    # LMS: pure analytics functions (9 functions, no Prisma)
 │       ├── settings.ts               # Route access config, pagination constants
 │       └── utils.ts                  # Schedule and date utility functions
 ├── prisma/
@@ -208,6 +223,7 @@ Components are organized at a single flat level, with the `forms/` subdirectory 
 | `/src/lib/formValidationSchemas.ts` | Zod validation schemas for all entity forms |
 | `/src/lib/prisma.ts` | Singleton Prisma client (import this, never instantiate directly) |
 | `/src/lib/quizUtils.ts` | LMS auto-grading engine: pure functions for scoring quiz attempts |
+| `/src/lib/lmsAnalyticsUtils.ts` | LMS analytics: 9 pure functions for progress, engagement, quiz, and heatmap computations |
 | `/src/lib/settings.ts` | Route access control map and pagination configuration |
 | `/src/lib/gradeUtils.ts` | Grade calculation and report card aggregation functions |
 | `/src/lib/notificationActions.ts` | In-app notification creation and management |

@@ -4,7 +4,7 @@
 |-----------|-----------------------------------------------------------------------|
 | ID        | SPEC-LMS-004                                                         |
 | Version   | 1.0.0                                                                |
-| Status    | Draft                                                                |
+| Status    | Completed                                                            |
 | Lifecycle | spec-anchored                                                        |
 | Created   | 2026-02-21                                                           |
 | Author    | MoAI (manager-spec)                                                  |
@@ -545,6 +545,28 @@ Add `LmsAdoptionMetrics` (S-12) below the `UserCard` row and above the chart row
 | Integration   | S-14          | Teacher dashboard page (modify)                                 | `teacher/page.tsx`                                   |
 | Integration   | S-15          | Parent dashboard page (modify)                                  | `parent/page.tsx`                                    |
 | Integration   | S-16          | Admin dashboard page (modify)                                   | `admin/page.tsx`                                     |
+
+---
+
+## Implementation Notes
+
+| Field | Value |
+|-------|-------|
+| Implementation Date | 2026-02-21 |
+| Commit | 1526933 |
+| Requirements Status | All 16 requirements (REQ-LMS-050 through REQ-LMS-065) implemented as specified |
+| Files Created | 15 new component/utility files |
+| Files Modified | 5 dashboard pages modified |
+| Lines Added | +2,006 lines of code |
+| Schema Changes | Zero Prisma schema changes (as designed) |
+
+### Implementation Deviations from SPEC
+
+**Widget ordering (S-14)**: The Teacher dashboard placed `PreClassEngagementReport` first (before `CourseEngagementOverview`), prioritizing the most critical bi-weekly widget that shows which students studied between sessions.
+
+**EnrolledCourses collapsible breakdown (S-03)**: The per-module breakdown used HTML5 `<details>/<summary>` elements for the collapsible module breakdown instead of client-side state. This approach preserves Server Component status for the `EnrolledCourses` component, avoiding the need for a Client Component conversion solely for UI toggle behavior.
+
+**Code conciseness refactoring**: `AtRiskStudentsAlert` and `PreClassEngagementReport` were refactored after initial implementation to improve code conciseness, condensing from approximately 230 lines to approximately 135 lines each while preserving full functionality.
 
 ---
 

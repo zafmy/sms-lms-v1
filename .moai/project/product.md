@@ -131,6 +131,24 @@ A self-service enrollment system allowing students to browse available courses, 
 - In-app notifications for both students and teachers on enrollment changes
 - `EnrollButton` component with contextual states: Enroll (green), Drop Course (red), Full (gray disabled), Completed (blue badge)
 
+### 14. LMS Progress Tracking and Analytics
+
+Analytics dashboards surfacing LMS engagement data across all four user roles. Implemented in SPEC-LMS-004. Zero new Prisma models — all analytics are computed through JavaScript aggregation of existing data.
+
+**Target users:**
+- **Students**: View LMS progress overview (courses enrolled, avg completion %, lessons completed, time spent), quiz performance trend chart, learning activity heatmap, and enhanced per-course module breakdown with quiz averages
+- **Teachers**: Pre-class engagement report showing which students studied between sessions, at-risk student alerts with specific risk reasons, course engagement overview with 7-day activity metrics, and per-quiz difficulty analytics with most-missed questions
+- **Parents**: Per-child LMS progress card (course count, completion %, latest quiz score, days active this week) and learning activity feed showing 10 most recent LMS events with relative timestamps
+- **Admins**: School-wide LMS adoption metrics (total courses, active enrollments, engagement rate, teacher adoption rate)
+
+**Key capabilities:**
+- Pure utility function library (`lmsAnalyticsUtils.ts`) with 9 functions following the `gradeUtils.ts` pattern
+- Container/Presenter component pattern for Recharts visualizations (Server Component fetches data, Client Component renders charts)
+- Batch query optimization to avoid N+1 patterns in teacher analytics
+- Consistent color coding convention (green >= 90%, yellow >= 75%, red < 75%) across all widgets
+- Empty state handling with meaningful messages for all widgets
+- Read-only analytics with zero write operations
+
 ## Planned Features (Post-Phase 1)
 
 The following features remain planned for future sprints:
@@ -140,9 +158,6 @@ Peer and teacher-moderated forums attached to subjects and classes. Students can
 
 ### Gamification
 Experience points (XP), achievement badges, and learning streaks to incentivize student engagement between sessions. A leaderboard would be visible to students and teachers.
-
-### Progress Tracking and Analytics
-Per-student learning velocity dashboards showing time spent on content, quiz performance trends, and engagement metrics between sessions. Teachers receive aggregate class-level insights.
 
 ### Spaced Repetition for Knowledge Retention
 A spaced repetition system presenting students with review material at algorithmically determined intervals designed to counteract the 12-day retention drop between sessions.
