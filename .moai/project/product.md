@@ -175,6 +175,28 @@ A comprehensive gamification layer built on top of the LMS to incentivize studen
 **Routes added:**
 - `/list/achievements` — Student achievements page with badge gallery, XP history, streak calendar, and level progress
 
+### 16. Course Analytics Dashboard
+
+A per-course analytics page enabling teachers and administrators to monitor student engagement, completion rates, quiz performance, and at-risk students within individual courses. Implemented in SPEC-LMS-005.
+
+**Target users:**
+- **Teachers**: View analytics for courses they own, including per-module completion rates, quiz score distribution, 90-day engagement heatmap, daily activity timeline, and at-risk student identification.
+- **Admins**: View analytics for any course in the system.
+
+**Key capabilities:**
+- Per-course analytics page at `/list/courses/[id]/analytics` with authorization (teacher must own course or admin)
+- Per-module completion rate bar chart (Recharts) showing completion percentages
+- Quiz score distribution chart across 5 ranges (0-20%, 21-40%, 41-60%, 61-80%, 81-100%)
+- 90-day engagement heatmap with color-coded daily activity (lesson completions + quiz submissions)
+- Daily engagement trend line chart over 90 days
+- At-risk student detection with configurable threshold (default: 7 days of inactivity)
+- At-risk students table with student name, last activity date, and days inactive
+- "Analytics" link on course detail page visible to teachers and admins
+- Extended `lmsAnalyticsUtils.ts` with 3 new pure functions (12 total): `calculateQuizScoreDistribution`, `calculateEngagementByDay`, `identifyAtRiskStudents`
+
+**Routes added:**
+- `/list/courses/[id]/analytics` — Per-course analytics dashboard (admin, teacher)
+
 ## Planned Features (Post-Phase 1)
 
 The following features remain planned for future sprints:

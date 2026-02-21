@@ -36,6 +36,8 @@
 │   │   │   │   │               ├── page.tsx      # Quiz-taking interface
 │   │   │   │   │               └── results/
 │   │   │   │   │                   └── page.tsx  # Quiz attempt results
+│   │   │   │   │       ├── analytics/
+│   │   │   │   │           └── page.tsx      # LMS: per-course analytics dashboard
 │   │   │   │   ├── enrollments/                  # LMS: enrollment management
 │   │   │   │   │   └── page.tsx
 │   │   │   │   ├── achievements/                 # Gamification: student achievements page
@@ -48,7 +50,7 @@
 │   │   ├── favicon.ico
 │   │   ├── globals.css               # Tailwind v4 CSS-first configuration
 │   │   └── layout.tsx                # Root layout: ClerkProvider, ToastContainer
-│   ├── components/                   # 59 React components
+│   ├── components/                   # 66 React components
 │   │   ├── forms/                    # 20 entity form components
 │   │   │   ├── AnnouncementForm.tsx
 │   │   │   ├── AssignmentForm.tsx
@@ -136,6 +138,12 @@
 │   │   ├── ChildLmsProgressCard.tsx    # LMS: parent per-child LMS progress card
 │   │   ├── ChildLearningActivity.tsx   # LMS: parent per-child activity feed
 │   │   ├── LmsAdoptionMetrics.tsx      # LMS: admin school-wide adoption metrics
+│   │   ├── CourseAnalyticsContainer.tsx   # LMS: server-side course analytics data fetcher
+│   │   ├── CompletionRateChart.tsx        # LMS: per-module completion Recharts BarChart
+│   │   ├── QuizScoreDistribution.tsx      # LMS: quiz score range distribution BarChart
+│   │   ├── LmsEngagementHeatmap.tsx       # LMS: 90-day course engagement calendar heatmap
+│   │   ├── CourseActivityTimeline.tsx      # LMS: daily engagement Recharts LineChart
+│   │   ├── AtRiskStudentsList.tsx          # LMS: at-risk students table (7+ days inactive)
 │   │   ├── GamificationCard.tsx        # Gamification: student XP/level/streak widget (Client)
 │   │   ├── GamificationCardContainer.tsx  # Gamification: fetches StudentGamification data (Server)
 │   │   ├── RecentBadges.tsx            # Gamification: 3 most recently earned badges widget (Client)
@@ -157,7 +165,7 @@
 │       ├── notificationActions.ts    # Notification creation and update actions
 │       ├── prisma.ts                 # Singleton Prisma client instance
 │       ├── quizUtils.ts              # LMS: auto-grading engine (pure functions)
-│       ├── lmsAnalyticsUtils.ts    # LMS: pure analytics functions (9 functions, no Prisma)
+│       ├── lmsAnalyticsUtils.ts    # LMS: pure analytics functions (12 functions, no Prisma)
 │       ├── gamificationUtils.ts    # Gamification: pure utility functions (XP, level, streak, badge logic)
 │       ├── gamificationActions.ts  # Gamification: processGamificationEvent engine and badge CRUD Server Actions
 │       ├── settings.ts               # Route access config, pagination constants
@@ -244,7 +252,7 @@ Components are organized at a single flat level, with the `forms/` subdirectory 
 | `/src/lib/formValidationSchemas.ts` | Zod validation schemas for all entity forms |
 | `/src/lib/prisma.ts` | Singleton Prisma client (import this, never instantiate directly) |
 | `/src/lib/quizUtils.ts` | LMS auto-grading engine: pure functions for scoring quiz attempts |
-| `/src/lib/lmsAnalyticsUtils.ts` | LMS analytics: 9 pure functions for progress, engagement, quiz, and heatmap computations |
+| `/src/lib/lmsAnalyticsUtils.ts` | LMS analytics: 12 pure functions for progress, engagement, quiz, heatmap, score distribution, and at-risk detection |
 | `/src/lib/gamificationUtils.ts` | Gamification: pure utility functions for XP awards, level computation, streak evaluation, and badge eligibility |
 | `/src/lib/gamificationActions.ts` | Gamification: `processGamificationEvent` server action engine and badge CRUD actions (`createBadge`, `updateBadge`, `deleteBadge`) |
 | `/src/lib/settings.ts` | Route access control map and pagination configuration |
