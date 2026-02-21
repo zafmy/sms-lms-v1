@@ -1,6 +1,7 @@
 import Announcements from "@/components/Announcements";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import ClassAttendanceOverview from "@/components/ClassAttendanceOverview";
+import MyStudentsOverview from "@/components/MyStudentsOverview";
 import PendingGrading from "@/components/PendingGrading";
 import TodaySchedule from "@/components/TodaySchedule";
 import { auth } from "@clerk/nextjs/server";
@@ -21,6 +22,7 @@ const TeacherPage = () => {
         <TodaySchedule teacherId={userId!} />
         <PendingGrading teacherId={userId!} />
         <ClassAttendanceOverview teacherId={userId!} />
+        <MyStudentsOverview teacherId={userId!} />
         <Announcements />
       </div>
     </div>

@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 
 const PendingGrading = async ({ teacherId }: { teacherId: string }) => {
   const exams = await prisma.exam.findMany({
@@ -39,16 +40,17 @@ const PendingGrading = async ({ teacherId }: { teacherId: string }) => {
     },
   });
 
-  const pendingExams = exams.filter(
+  const pendingExamsList = exams.filter(
     (exam) => exam.results.length < exam.lesson.class._count.students
-  ).length;
+  );
 
-  const pendingAssignments = assignments.filter(
+  const pendingAssignmentsList = assignments.filter(
     (assignment) =>
       assignment.results.length < assignment.lesson.class._count.students
-  ).length;
+  );
 
-  const nothingPending = pendingExams === 0 && pendingAssignments === 0;
+  const nothingPending =
+    pendingExamsList.length === 0 && pendingAssignmentsList.length === 0;
 
   return (
     <div className="bg-white rounded-md p-4">
@@ -57,14 +59,64 @@ const PendingGrading = async ({ teacherId }: { teacherId: string }) => {
         <p className="text-sm text-green-600 mt-4">All caught up!</p>
       ) : (
         <div className="flex flex-col gap-4 mt-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">{pendingExams}</span>
-            <span className="text-sm text-gray-400">Exams pending</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">{pendingAssignments}</span>
-            <span className="text-sm text-gray-400">Assignments pending</span>
-          </div>
+          {/* Pending Exams */}
+          {pendingExamsList.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-600">
+                  Exams ({pendingExamsList.length})
+                </span>
+              </div>
+              {pendingExamsList.slice(0, 3).map((exam) => (
+                <Link
+                  key={exam.id}
+                  href={`/list/results?examId=${exam.id}`}
+                  className="flex items-center justify-between p-2 rounded-md bg-lamaSkyLight hover:bg-lamaSky transition-colors"
+                >
+                  <div>
+                    <span className="text-sm font-medium">{exam.title}</span>
+                    <span className="text-xs text-gray-400 ml-2">
+                      {exam.lesson.class.name}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {exam.results.length}/
+                    {exam.lesson.class._count.students}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+          {/* Pending Assignments */}
+          {pendingAssignmentsList.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-600">
+                  Assignments ({pendingAssignmentsList.length})
+                </span>
+              </div>
+              {pendingAssignmentsList.slice(0, 3).map((assignment) => (
+                <Link
+                  key={assignment.id}
+                  href={`/list/results?assignmentId=${assignment.id}`}
+                  className="flex items-center justify-between p-2 rounded-md bg-lamaYellowLight hover:bg-lamaYellow transition-colors"
+                >
+                  <div>
+                    <span className="text-sm font-medium">
+                      {assignment.title}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-2">
+                      {assignment.lesson.class.name}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {assignment.results.length}/
+                    {assignment.lesson.class._count.students}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,7 +1,9 @@
 import Announcements from "@/components/Announcements";
+import AttendanceHeatmap from "@/components/AttendanceHeatmap";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import FormContainer from "@/components/FormContainer";
 import GradeSummary from "@/components/GradeSummary";
+import RecentActivity from "@/components/RecentActivity";
 import StudentAttendanceCard from "@/components/StudentAttendanceCard";
 import SubjectGrades from "@/components/SubjectGrades";
 import prisma from "@/lib/prisma";
@@ -202,6 +204,8 @@ const SingleStudentPage = async ({
           </div>
         </div>
         <GradeSummary studentId={student.id} />
+        <AttendanceHeatmap studentId={student.id} />
+        <RecentActivity studentIds={[student.id]} />
         <Announcements />
       </div>
     </div>

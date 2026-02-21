@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { getTodayDayEnum } from "@/lib/utils";
 import { Day } from "@prisma/client";
+import Link from "next/link";
 
 const TodaySchedule = async ({ teacherId }: { teacherId: string }) => {
   const todayDay = getTodayDayEnum();
@@ -54,6 +55,12 @@ const TodaySchedule = async ({ teacherId }: { teacherId: string }) => {
               <span className="text-sm text-gray-500">
                 {lesson.class.name}
               </span>
+              <Link
+                href={`/list/attendance?lessonId=${lesson.id}`}
+                className="text-xs text-lamaSky hover:underline ml-auto"
+              >
+                Attendance
+              </Link>
             </div>
           ))}
         </div>
