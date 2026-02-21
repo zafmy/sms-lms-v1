@@ -18,10 +18,11 @@ type LessonList = Lesson & { subject: Subject } & { class: Class } & {
 const LessonListPage = async ({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
+  const resolvedParams = await searchParams;
 
-const { sessionClaims } = auth();
+const { sessionClaims } = await auth();
 const role = (sessionClaims?.metadata as { role?: string })?.role;
 
 
@@ -72,7 +73,7 @@ const renderRow = (item: LessonList) => (
   </tr>
 );
 
-  const { page, ...queryParams } = searchParams;
+  const { page, ...queryParams } = resolvedParams;
 
   const p = page ? parseInt(page) : 1;
 

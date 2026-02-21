@@ -6,8 +6,8 @@ import PendingGrading from "@/components/PendingGrading";
 import TodaySchedule from "@/components/TodaySchedule";
 import { auth } from "@clerk/nextjs/server";
 
-const TeacherPage = () => {
-  const { userId } = auth();
+const TeacherPage = async () => {
+  const { userId } = await auth();
   return (
     <div className="flex-1 p-4 flex gap-4 flex-col xl:flex-row">
       {/* LEFT */}

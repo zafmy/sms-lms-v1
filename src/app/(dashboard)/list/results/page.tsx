@@ -25,10 +25,11 @@ type ResultList = {
 const ResultListPage = async ({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
+  const resolvedParams = await searchParams;
 
-const { userId, sessionClaims } = auth();
+const { userId, sessionClaims } = await auth();
 const role = (sessionClaims?.metadata as { role?: string })?.role;
 const currentUserId = userId;
 
@@ -100,7 +101,7 @@ const renderRow = (item: ResultList) => (
   </tr>
 );
 
-  const { page, ...queryParams } = searchParams;
+  const { page, ...queryParams } = resolvedParams;
 
   const p = page ? parseInt(page) : 1;
 

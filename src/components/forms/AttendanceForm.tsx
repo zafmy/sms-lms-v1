@@ -8,8 +8,7 @@ import {
   AttendanceSchema,
 } from "@/lib/formValidationSchemas";
 import { createAttendance, updateAttendance } from "@/lib/actions";
-import { useFormState } from "react-dom";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
@@ -32,7 +31,7 @@ const AttendanceForm = ({
     resolver: zodResolver(attendanceSchema),
   });
 
-  const [state, formAction] = useFormState(
+  const [state, formAction] = useActionState(
     type === "create" ? createAttendance : updateAttendance,
     {
       success: false,

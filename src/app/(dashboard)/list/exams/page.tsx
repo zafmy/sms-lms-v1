@@ -21,10 +21,11 @@ type ExamList = Exam & {
 const ExamListPage = async ({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
+  const resolvedParams = await searchParams;
 
-const { userId, sessionClaims } = auth();
+const { userId, sessionClaims } = await auth();
 const role = (sessionClaims?.metadata as { role?: string })?.role;
 const currentUserId = userId;
 
@@ -84,7 +85,7 @@ const renderRow = (item: ExamList) => (
   </tr>
 );
 
-  const { page, ...queryParams } = searchParams;
+  const { page, ...queryParams } = resolvedParams;
 
   const p = page ? parseInt(page) : 1;
 
@@ -92,22 +93,22 @@ const renderRow = (item: ExamList) => (
 
   const query: Prisma.ExamWhereInput = {};
 
-  query.lesson = {};
+  const lessonQuery: Prisma.LessonWhereInput = {};
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
       if (value !== undefined) {
         switch (key) {
           case "classId":
-            query.lesson.classId = parseInt(value);
+            lessonQuery.classId = parseInt(value);
             break;
           case "teacherId":
-            query.lesson.teacherId = value;
+            lessonQuery.teacherId = value;
             break;
           case "subjectId":
-            query.lesson = { ...query.lesson as any, subjectId: parseInt(value) };
+            lessonQuery.subjectId = parseInt(value);
             break;
           case "search":
-            query.lesson.subject = {
+            lessonQuery.subject = {
               name: { contains: value, mode: "insensitive" },
             };
             break;
@@ -117,7 +118,6 @@ const renderRow = (item: ExamList) => (
       }
     }
   }
-
   // FILTER OPTIONS DATA
   const [classes, subjects] = await Promise.all([
     prisma.class.findMany({ select: { id: true, name: true } }),
@@ -133,10 +133,10 @@ const renderRow = (item: ExamList) => (
     case "admin":
       break;
     case "teacher":
-      query.lesson.teacherId = currentUserId!;
+      lessonQuery.teacherId = currentUserId!;
       break;
     case "student":
-      query.lesson.class = {
+      lessonQuery.class = {
         students: {
           some: {
             id: currentUserId!,
@@ -145,7 +145,7 @@ const renderRow = (item: ExamList) => (
       };
       break;
     case "parent":
-      query.lesson.class = {
+      lessonQuery.class = {
         students: {
           some: {
             parentId: currentUserId!,
@@ -156,6 +156,9 @@ const renderRow = (item: ExamList) => (
 
     default:
       break;
+  }
+  if (Object.keys(lessonQuery).length > 0) {
+    query.lesson = lessonQuery;
   }
 
   const [data, count] = await prisma.$transaction([

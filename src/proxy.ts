@@ -7,8 +7,8 @@ const matchers = Object.keys(routeAccessMap).map((route) => ({
   allowedRoles: routeAccessMap[route],
 }));
 
-export default clerkMiddleware((auth, req) => {
-  const { sessionClaims, userId } = auth();
+export default clerkMiddleware(async (auth, req) => {
+  const { sessionClaims, userId } = await auth();
 
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 

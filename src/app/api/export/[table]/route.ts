@@ -12,17 +12,17 @@ function headersOnlyCSV(columns: ColumnDef[]): string {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { table: string } }
+  { params }: { params: Promise<{ table: string }> }
 ) {
   // Auth check - admin and teacher only
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const { table } = params;
+  const { table } = await params;
   const searchParams = request.nextUrl.searchParams;
 
   try {

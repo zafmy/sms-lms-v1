@@ -24,7 +24,7 @@ export const createSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -50,7 +50,7 @@ export const updateSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -80,7 +80,7 @@ export const deleteSubject = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -103,7 +103,7 @@ export const createClass = async (
   currentState: CurrentState,
   data: ClassSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -124,7 +124,7 @@ export const updateClass = async (
   currentState: CurrentState,
   data: ClassSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -149,7 +149,7 @@ export const deleteClass = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -172,13 +172,13 @@ export const createTeacher = async (
   currentState: CurrentState,
   data: TeacherSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
   }
   try {
-    const user = await clerkClient.users.createUser({
+    const user = await (await clerkClient()).users.createUser({
       username: data.username,
       password: data.password,
       firstName: data.name,
@@ -218,7 +218,7 @@ export const updateTeacher = async (
   currentState: CurrentState,
   data: TeacherSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -227,7 +227,7 @@ export const updateTeacher = async (
     return { success: false, error: true };
   }
   try {
-    const user = await clerkClient.users.updateUser(data.id, {
+    const user = await (await clerkClient()).users.updateUser(data.id, {
       username: data.username,
       ...(data.password !== "" && { password: data.password }),
       firstName: data.name,
@@ -269,13 +269,13 @@ export const deleteTeacher = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
   }
   try {
-    await clerkClient.users.deleteUser(id);
+    await (await clerkClient()).users.deleteUser(id);
     try {
       await prisma.teacher.delete({
         where: {
@@ -297,7 +297,7 @@ export const createStudent = async (
   currentState: CurrentState,
   data: StudentSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -312,7 +312,7 @@ export const createStudent = async (
       return { success: false, error: true };
     }
 
-    const user = await clerkClient.users.createUser({
+    const user = await (await clerkClient()).users.createUser({
       username: data.username,
       password: data.password,
       firstName: data.name,
@@ -350,7 +350,7 @@ export const updateStudent = async (
   currentState: CurrentState,
   data: StudentSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -359,7 +359,7 @@ export const updateStudent = async (
     return { success: false, error: true };
   }
   try {
-    const user = await clerkClient.users.updateUser(data.id, {
+    const user = await (await clerkClient()).users.updateUser(data.id, {
       username: data.username,
       ...(data.password !== "" && { password: data.password }),
       firstName: data.name,
@@ -399,13 +399,13 @@ export const deleteStudent = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
   }
   try {
-    await clerkClient.users.deleteUser(id);
+    await (await clerkClient()).users.deleteUser(id);
     try {
       await prisma.student.delete({
         where: {
@@ -427,7 +427,7 @@ export const createExam = async (
   currentState: CurrentState,
   data: ExamSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -467,7 +467,7 @@ export const updateExam = async (
   currentState: CurrentState,
   data: ExamSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -512,7 +512,7 @@ export const deleteExam = async (
 ) => {
   const id = data.get("id") as string;
 
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -538,7 +538,7 @@ export const deleteParent = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -557,7 +557,7 @@ export const deleteLesson = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -576,7 +576,7 @@ export const deleteAssignment = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -595,7 +595,7 @@ export const deleteResult = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -614,7 +614,7 @@ export const deleteAttendance = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -633,7 +633,7 @@ export const deleteEvent = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -652,7 +652,7 @@ export const deleteAnnouncement = async (
   data: FormData
 ) => {
   const id = data.get("id") as string;
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -670,7 +670,7 @@ export const createAssignment = async (
   currentState: CurrentState,
   data: AssignmentSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -710,7 +710,7 @@ export const updateAssignment = async (
   currentState: CurrentState,
   data: AssignmentSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -753,7 +753,7 @@ export const createEvent = async (
   currentState: CurrentState,
   data: EventSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -780,7 +780,7 @@ export const updateEvent = async (
   currentState: CurrentState,
   data: EventSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -810,7 +810,7 @@ export const createAnnouncement = async (
   currentState: CurrentState,
   data: AnnouncementSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -836,7 +836,7 @@ export const updateAnnouncement = async (
   currentState: CurrentState,
   data: AnnouncementSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -865,7 +865,7 @@ export const createResult = async (
   currentState: CurrentState,
   data: ResultSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -934,7 +934,7 @@ export const updateResult = async (
   currentState: CurrentState,
   data: ResultSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return { success: false, error: true };
@@ -979,7 +979,7 @@ export const createLesson = async (
   currentState: CurrentState,
   data: LessonSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -1068,7 +1068,7 @@ export const updateLesson = async (
   currentState: CurrentState,
   data: LessonSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -1162,13 +1162,13 @@ export const createParent = async (
   currentState: CurrentState,
   data: ParentSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
   }
   try {
-    const user = await clerkClient.users.createUser({
+    const user = await (await clerkClient()).users.createUser({
       username: data.username,
       password: data.password,
       firstName: data.name,
@@ -1199,7 +1199,7 @@ export const updateParent = async (
   currentState: CurrentState,
   data: ParentSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -1208,7 +1208,7 @@ export const updateParent = async (
     return { success: false, error: true };
   }
   try {
-    const user = await clerkClient.users.updateUser(data.id, {
+    const user = await (await clerkClient()).users.updateUser(data.id, {
       username: data.username,
       ...(data.password !== "" && { password: data.password }),
       firstName: data.name,
@@ -1240,7 +1240,7 @@ export const createAttendance = async (
   currentState: CurrentState,
   data: AttendanceSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };
@@ -1266,7 +1266,7 @@ export const updateAttendance = async (
   currentState: CurrentState,
   data: AttendanceSchema
 ) => {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "admin") {
     return { success: false, error: true };

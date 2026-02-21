@@ -11,11 +11,12 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 
 const ReportCardPage = async ({
-  params: { id },
+  params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) => {
-  const { userId, sessionClaims } = auth();
+  const { id } = await params;
+  const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
   // Access control

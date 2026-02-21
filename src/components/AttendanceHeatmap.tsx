@@ -77,7 +77,7 @@ const AttendanceHeatmap = async ({ studentId }: { studentId: string }) => {
                 {records.map((record, idx) => (
                   <div
                     key={idx}
-                    className={`w-3 h-3 rounded-sm ${
+                    className={`w-3 h-3 rounded-xs ${
                       record.present ? "bg-green-400" : "bg-red-400"
                     }`}
                     title={`${new Intl.DateTimeFormat("en-GB").format(record.date)} - ${
@@ -96,11 +96,11 @@ const AttendanceHeatmap = async ({ studentId }: { studentId: string }) => {
       {/* Legend */}
       <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100">
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm bg-green-400" />
+          <div className="w-3 h-3 rounded-xs bg-green-400" />
           <span className="text-xs text-gray-500">Present</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-sm bg-red-400" />
+          <div className="w-3 h-3 rounded-xs bg-red-400" />
           <span className="text-xs text-gray-500">Absent</span>
         </div>
       </div>
