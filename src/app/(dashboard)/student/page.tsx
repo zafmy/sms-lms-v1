@@ -3,9 +3,11 @@ import AssignmentsDue from "@/components/AssignmentsDue";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import EnrolledCourses from "@/components/EnrolledCourses";
 import EventCalendar from "@/components/EventCalendar";
+import GamificationCardContainer from "@/components/GamificationCardContainer";
 import LearningActivityHeatmapContainer from "@/components/LearningActivityHeatmapContainer";
 import LmsProgressOverview from "@/components/LmsProgressOverview";
 import QuizPerformanceTrendContainer from "@/components/QuizPerformanceTrendContainer";
+import RecentBadgesContainer from "@/components/RecentBadgesContainer";
 import RecentGrades from "@/components/RecentGrades";
 import StudentAttendanceCard from "@/components/StudentAttendanceCard";
 import UpcomingExams from "@/components/UpcomingExams";
@@ -38,6 +40,8 @@ const StudentPage = async () => {
       </div>
       {/* RIGHT */}
       <div className="w-full xl:w-1/3 flex flex-col gap-8">
+        <GamificationCardContainer studentId={userId!} />
+        <RecentBadgesContainer studentId={userId!} />
         <EnrolledCourses studentId={userId!} />
         <LmsProgressOverview studentId={userId!} />
         <div className="bg-white p-4 rounded-md h-[300px]">
