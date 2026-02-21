@@ -175,3 +175,103 @@ export const attendanceSchema = z.object({
 });
 
 export type AttendanceSchema = z.infer<typeof attendanceSchema>;
+
+export const courseSchema = z.object({
+  id: z.coerce.number().optional(),
+  title: z
+    .string()
+    .min(1, { message: "Title is required!" })
+    .max(200, { message: "Title must be at most 200 characters!" }),
+  description: z
+    .string()
+    .max(1000, { message: "Description must be at most 1000 characters!" })
+    .optional()
+    .or(z.literal("")),
+  code: z
+    .string()
+    .min(2, { message: "Code must be at least 2 characters!" })
+    .max(20, { message: "Code must be at most 20 characters!" })
+    .regex(/^[A-Z0-9-]+$/, { message: "Code must contain only uppercase letters, numbers, and hyphens!" }),
+  status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"], { message: "Status is required!" }),
+  teacherId: z.string().min(1, { message: "Teacher is required!" }),
+  subjectId: z.coerce.number({ message: "Subject is required!" }),
+});
+
+export type CourseSchema = z.infer<typeof courseSchema>;
+
+export const moduleSchema = z.object({
+  id: z.coerce.number().optional(),
+  title: z
+    .string()
+    .min(1, { message: "Title is required!" })
+    .max(200, { message: "Title must be at most 200 characters!" }),
+  description: z
+    .string()
+    .max(500, { message: "Description must be at most 500 characters!" })
+    .optional()
+    .or(z.literal("")),
+  order: z.coerce.number().min(1, { message: "Order must be at least 1!" }),
+  isLocked: z.coerce.boolean().default(false),
+  courseId: z.coerce.number({ message: "Course is required!" }),
+});
+
+export type ModuleSchema = z.infer<typeof moduleSchema>;
+
+export const enrollmentSchema = z.object({
+  studentId: z.string().min(1, { message: "Student is required!" }),
+  courseId: z.coerce.number({ message: "Course is required!" }),
+});
+
+export type EnrollmentSchema = z.infer<typeof enrollmentSchema>;
+
+export const lmsLessonSchema = z.object({
+  id: z.coerce.number().optional(),
+  title: z.string().min(1, { message: "Title is required!" }).max(200),
+  content: z.string().min(1, { message: "Content is required!" }),
+  contentType: z.enum(["TEXT", "VIDEO", "LINK", "MIXED"]),
+  externalUrl: z.string().url().optional().or(z.literal("")),
+  order: z.coerce.number().int().min(1, { message: "Order must be at least 1!" }),
+  estimatedMinutes: z.coerce.number().int().min(1).optional(),
+  moduleId: z.coerce.number().min(1, { message: "Module is required!" }),
+});
+
+export type LmsLessonSchema = z.infer<typeof lmsLessonSchema>;
+
+export const quizSchema = z.object({
+  id: z.coerce.number().optional(),
+  title: z.string().min(1, { message: "Title is required!" }).max(200),
+  description: z.string().max(500).optional().or(z.literal("")),
+  timeLimit: z.coerce.number().int().min(1).optional().or(z.literal("")),
+  maxAttempts: z.coerce.number().int().min(1).default(1),
+  passScore: z.coerce.number().int().min(0).max(100).default(70),
+  scoringPolicy: z.enum(["BEST", "LATEST", "AVERAGE"]),
+  randomizeQuestions: z.coerce.boolean().default(false),
+  randomizeOptions: z.coerce.boolean().default(false),
+  lessonId: z.coerce.number().min(1, { message: "Lesson is required!" }),
+});
+export type QuizSchema = z.infer<typeof quizSchema>;
+
+export const questionSchema = z.object({
+  id: z.coerce.number().optional(),
+  text: z.string().min(1, { message: "Question text is required!" }).max(1000),
+  type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "FILL_IN_BLANK"]),
+  explanation: z.string().max(500).optional().or(z.literal("")),
+  points: z.coerce.number().int().min(1).default(1),
+  order: z.coerce.number().int().min(1),
+  quizId: z.coerce.number().optional(),
+  questionBankId: z.coerce.number().optional(),
+  options: z.array(z.object({
+    text: z.string().min(1, { message: "Option text is required!" }),
+    isCorrect: z.boolean(),
+    order: z.coerce.number().int().min(1),
+  })).min(2, { message: "At least 2 options required!" }),
+});
+export type QuestionSchema = z.infer<typeof questionSchema>;
+
+export const questionBankSchema = z.object({
+  id: z.coerce.number().optional(),
+  name: z.string().min(1, { message: "Name is required!" }).max(200),
+  description: z.string().max(500).optional().or(z.literal("")),
+  subjectId: z.coerce.number().min(1, { message: "Subject is required!" }),
+});
+export type QuestionBankSchema = z.infer<typeof questionBankSchema>;

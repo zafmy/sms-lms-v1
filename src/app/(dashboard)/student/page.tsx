@@ -1,6 +1,7 @@
 import Announcements from "@/components/Announcements";
 import AssignmentsDue from "@/components/AssignmentsDue";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
+import EnrolledCourses from "@/components/EnrolledCourses";
 import EventCalendar from "@/components/EventCalendar";
 import RecentGrades from "@/components/RecentGrades";
 import StudentAttendanceCard from "@/components/StudentAttendanceCard";
@@ -34,6 +35,7 @@ const StudentPage = async () => {
       </div>
       {/* RIGHT */}
       <div className="w-full xl:w-1/3 flex flex-col gap-8">
+        <EnrolledCourses studentId={userId!} />
         <StudentAttendanceCard id={userId!} />
         <RecentGrades studentId={userId!} />
         {classItem[0] && <UpcomingExams classId={classItem[0].id} />}

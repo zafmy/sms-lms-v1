@@ -1,0 +1,306 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import InputField from "../InputField";
+import { questionSchema, QuestionSchema } from "@/lib/formValidationSchemas";
+import { createQuestion, updateQuestion } from "@/lib/actions";
+import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+
+const QuestionForm = ({
+  type,
+  data,
+  setOpen,
+  relatedData,
+}: {
+  type: "create" | "update";
+  data?: any;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  relatedData?: any;
+}) => {
+  const defaultOptions = data?.options
+    ? data.options.map((opt: any) => ({
+        text: opt.text,
+        isCorrect: opt.isCorrect,
+        order: opt.order,
+      }))
+    : [
+        { text: "", isCorrect: false, order: 1 },
+        { text: "", isCorrect: false, order: 2 },
+      ];
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<QuestionSchema>({
+    resolver: zodResolver(questionSchema),
+    defaultValues: {
+      options: defaultOptions,
+      type: data?.type || "MULTIPLE_CHOICE",
+      points: data?.points || 1,
+      order: data?.order || 1,
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "options",
+  });
+
+  const questionType = watch("type");
+
+  // When type changes, reset options accordingly
+  useEffect(() => {
+    if (questionType === "TRUE_FALSE") {
+      setValue("options", [
+        { text: "True", isCorrect: true, order: 1 },
+        { text: "False", isCorrect: false, order: 2 },
+      ]);
+    } else if (questionType === "FILL_IN_BLANK") {
+      setValue("options", [
+        { text: "", isCorrect: true, order: 1 },
+        { text: "(blank)", isCorrect: false, order: 2 },
+      ]);
+    }
+  }, [questionType, setValue]);
+
+  const [state, formAction] = useActionState(
+    type === "create" ? createQuestion : updateQuestion,
+    {
+      success: false,
+      error: false,
+    }
+  );
+
+  const onSubmit = handleSubmit((formData) => {
+    formAction(formData);
+  });
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.success) {
+      toast(
+        `Question has been ${type === "create" ? "created" : "updated"}!`
+      );
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state, router, type, setOpen]);
+
+  const { quizzes } = relatedData;
+
+  const handleCorrectChange = (index: number) => {
+    if (questionType === "MULTIPLE_CHOICE" || questionType === "TRUE_FALSE") {
+      // Only one correct answer allowed
+      fields.forEach((_, i) => {
+        setValue(`options.${i}.isCorrect`, i === index);
+      });
+    }
+  };
+
+  return (
+    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
+      <h1 className="text-xl font-semibold">
+        {type === "create" ? "Create a new question" : "Update the question"}
+      </h1>
+
+      <div className="flex justify-between flex-wrap gap-4">
+        {data && (
+          <InputField
+            label="Id"
+            name="id"
+            defaultValue={data?.id}
+            register={register}
+            error={errors?.id}
+            hidden
+          />
+        )}
+        <div className="flex flex-col gap-2 w-full">
+          <label className="text-xs text-gray-500">Question Text</label>
+          <textarea
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("text")}
+            defaultValue={data?.text}
+            rows={3}
+          />
+          {errors.text?.message && (
+            <p className="text-xs text-red-400">
+              {errors.text.message.toString()}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Type</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("type")}
+            defaultValue={data?.type || "MULTIPLE_CHOICE"}
+          >
+            <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+            <option value="TRUE_FALSE">True / False</option>
+            <option value="FILL_IN_BLANK">Fill in the Blank</option>
+          </select>
+          {errors.type?.message && (
+            <p className="text-xs text-red-400">
+              {errors.type.message.toString()}
+            </p>
+          )}
+        </div>
+        <InputField
+          label="Points"
+          name="points"
+          type="number"
+          defaultValue={data?.points || "1"}
+          register={register}
+          error={errors?.points}
+        />
+        <InputField
+          label="Order"
+          name="order"
+          type="number"
+          defaultValue={data?.order || "1"}
+          register={register}
+          error={errors?.order}
+        />
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Quiz</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("quizId")}
+            defaultValue={data?.quizId}
+          >
+            {quizzes.map((quiz: { id: number; title: string }) => (
+              <option value={quiz.id} key={quiz.id}>
+                {quiz.title}
+              </option>
+            ))}
+          </select>
+          {errors.quizId?.message && (
+            <p className="text-xs text-red-400">
+              {errors.quizId.message.toString()}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 w-full">
+          <label className="text-xs text-gray-500">
+            Explanation (optional)
+          </label>
+          <textarea
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("explanation")}
+            defaultValue={data?.explanation}
+            rows={2}
+          />
+          {errors.explanation?.message && (
+            <p className="text-xs text-red-400">
+              {errors.explanation.message.toString()}
+            </p>
+          )}
+        </div>
+
+        {/* ANSWER OPTIONS */}
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs text-gray-500 font-semibold">
+              Answer Options
+            </label>
+            {questionType === "MULTIPLE_CHOICE" && fields.length < 6 && (
+              <button
+                type="button"
+                onClick={() =>
+                  append({
+                    text: "",
+                    isCorrect: false,
+                    order: fields.length + 1,
+                  })
+                }
+                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded"
+              >
+                + Add Option
+              </button>
+            )}
+          </div>
+          {errors.options?.message && (
+            <p className="text-xs text-red-400 mb-2">
+              {errors.options.message.toString()}
+            </p>
+          )}
+
+          {questionType === "FILL_IN_BLANK" ? (
+            <div className="flex flex-col gap-2">
+              <label className="text-xs text-gray-500">
+                Correct Answer Text
+              </label>
+              <input
+                type="text"
+                className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                {...register("options.0.text")}
+              />
+              <input type="hidden" {...register("options.0.isCorrect")} value="true" />
+              <input type="hidden" {...register("options.0.order")} value="1" />
+              <input type="hidden" {...register("options.1.text")} value="(blank)" />
+              <input type="hidden" {...register("options.1.isCorrect")} value="" />
+              <input type="hidden" {...register("options.1.order")} value="2" />
+              {errors.options?.[0]?.text?.message && (
+                <p className="text-xs text-red-400">
+                  {errors.options[0].text.message.toString()}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {fields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="flex items-center gap-2 border border-gray-200 rounded-md p-2"
+                >
+                  <input
+                    type="radio"
+                    name="correctOption"
+                    checked={watch(`options.${index}.isCorrect`)}
+                    onChange={() => handleCorrectChange(index)}
+                    className="w-4 h-4"
+                    title="Mark as correct"
+                  />
+                  <input type="hidden" {...register(`options.${index}.isCorrect`)} />
+                  <input type="hidden" {...register(`options.${index}.order`)} value={index + 1} />
+                  <input
+                    type="text"
+                    className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm flex-1"
+                    {...register(`options.${index}.text`)}
+                    placeholder={`Option ${index + 1}`}
+                    disabled={questionType === "TRUE_FALSE"}
+                  />
+                  {questionType === "MULTIPLE_CHOICE" && fields.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="text-red-500 text-sm px-2"
+                    >
+                      X
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      {state.error && (
+        <span className="text-red-500">Something went wrong!</span>
+      )}
+      <button className="bg-blue-400 text-white p-2 rounded-md">
+        {type === "create" ? "Create" : "Update"}
+      </button>
+    </form>
+  );
+};
+
+export default QuestionForm;

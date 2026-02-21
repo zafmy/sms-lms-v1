@@ -15,7 +15,14 @@ export type FormContainerProps = {
     | "result"
     | "attendance"
     | "event"
-    | "announcement";
+    | "announcement"
+    | "course"
+    | "module"
+    | "enrollment"
+    | "lmsLesson"
+    | "quiz"
+    | "question"
+    | "questionBank";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number | string;
@@ -133,6 +140,81 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
           select: { id: true, name: true },
         });
         relatedData = { students: attendanceStudents, lessons: attendanceLessons };
+        break;
+      case "course":
+        const courseTeachers = await prisma.teacher.findMany({
+          select: { id: true, name: true, surname: true },
+        });
+        const courseSubjects = await prisma.subject.findMany({
+          select: { id: true, name: true },
+        });
+        relatedData = { teachers: courseTeachers, subjects: courseSubjects };
+        break;
+      case "module":
+        const moduleCourses = await prisma.course.findMany({
+          where: {
+            ...(role === "teacher" ? { teacherId: currentUserId! } : {}),
+          },
+          select: { id: true, title: true },
+        });
+        relatedData = { courses: moduleCourses };
+        break;
+      case "enrollment":
+        const enrollmentStudents = await prisma.student.findMany({
+          select: { id: true, name: true, surname: true },
+        });
+        const enrollmentCourses = await prisma.course.findMany({
+          where: {
+            status: { in: ["ACTIVE", "DRAFT"] },
+          },
+          select: { id: true, title: true, code: true },
+        });
+        relatedData = { students: enrollmentStudents, courses: enrollmentCourses };
+        break;
+      case "lmsLesson":
+        const lmsLessonModules = await prisma.module.findMany({
+          where: {
+            course: {
+              ...(role === "teacher" ? { teacherId: currentUserId! } : {}),
+            },
+          },
+          include: { course: { select: { title: true } } },
+        });
+        relatedData = { modules: lmsLessonModules };
+        break;
+      case "quiz":
+        const quizLessons = await prisma.lmsLesson.findMany({
+          where: {
+            module: {
+              course: {
+                ...(role === "teacher" ? { teacherId: currentUserId! } : {}),
+              },
+            },
+          },
+          include: { module: { include: { course: { select: { title: true } } } } },
+        });
+        relatedData = { lessons: quizLessons };
+        break;
+      case "question":
+        const questionQuizzes = await prisma.quiz.findMany({
+          where: {
+            lesson: {
+              module: {
+                course: {
+                  ...(role === "teacher" ? { teacherId: currentUserId! } : {}),
+                },
+              },
+            },
+          },
+          select: { id: true, title: true },
+        });
+        relatedData = { quizzes: questionQuizzes };
+        break;
+      case "questionBank":
+        const questionBankSubjects = await prisma.subject.findMany({
+          select: { id: true, name: true },
+        });
+        relatedData = { subjects: questionBankSubjects };
         break;
 
       default:

@@ -13,6 +13,13 @@ import {
   deleteAttendance,
   deleteEvent,
   deleteAnnouncement,
+  deleteCourse,
+  deleteModule,
+  dropEnrollment,
+  deleteLmsLesson,
+  deleteQuiz,
+  deleteQuestion,
+  deleteQuestionBank,
 } from "@/lib/actions";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -34,6 +41,13 @@ const deleteActionMap = {
   attendance: deleteAttendance,
   event: deleteEvent,
   announcement: deleteAnnouncement,
+  course: deleteCourse,
+  module: deleteModule,
+  enrollment: dropEnrollment,
+  lmsLesson: deleteLmsLesson,
+  quiz: deleteQuiz,
+  question: deleteQuestion,
+  questionBank: deleteQuestionBank,
 };
 
 // USE LAZY LOADING
@@ -75,6 +89,27 @@ const ParentForm = dynamic(() => import("./forms/ParentForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 const AttendanceForm = dynamic(() => import("./forms/AttendanceForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const CourseForm = dynamic(() => import("./forms/CourseForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const ModuleForm = dynamic(() => import("./forms/ModuleForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const EnrollmentForm = dynamic(() => import("./forms/EnrollmentForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const LmsLessonForm = dynamic(() => import("./forms/LmsLessonForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const QuizForm = dynamic(() => import("./forms/QuizForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const QuestionForm = dynamic(() => import("./forms/QuestionForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
+const QuestionBankForm = dynamic(() => import("./forms/QuestionBankForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 
@@ -176,6 +211,62 @@ const forms: {
   ),
   attendance: (setOpen, type, data, relatedData) => (
     <AttendanceForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  course: (setOpen, type, data, relatedData) => (
+    <CourseForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  module: (setOpen, type, data, relatedData) => (
+    <ModuleForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  enrollment: (setOpen, type, data, relatedData) => (
+    <EnrollmentForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  lmsLesson: (setOpen, type, data, relatedData) => (
+    <LmsLessonForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  quiz: (setOpen, type, data, relatedData) => (
+    <QuizForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  question: (setOpen, type, data, relatedData) => (
+    <QuestionForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  questionBank: (setOpen, type, data, relatedData) => (
+    <QuestionBankForm
       type={type}
       data={data}
       setOpen={setOpen}

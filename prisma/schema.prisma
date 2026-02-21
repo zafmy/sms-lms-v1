@@ -13,44 +13,49 @@ model Admin {
 }
 
 model Student {
-  id          String       @id
-  username    String       @unique
-  name        String
-  surname     String
-  email       String?      @unique
-  phone       String?      @unique
-  address     String
-  img         String?
-  bloodType   String
-  sex         UserSex
-  createdAt   DateTime     @default(now())
-  parentId    String
-  parent      Parent       @relation(fields: [parentId], references: [id])
-  classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
-  gradeId     Int
-  grade       Grade        @relation(fields: [gradeId], references: [id])
-  attendances Attendance[]
-  results     Result[]
-  birthday    DateTime
+  id              String           @id
+  username        String           @unique
+  name            String
+  surname         String
+  email           String?          @unique
+  phone           String?          @unique
+  address         String
+  img             String?
+  bloodType       String
+  sex             UserSex
+  createdAt       DateTime         @default(now())
+  parentId        String
+  parent          Parent           @relation(fields: [parentId], references: [id])
+  classId         Int
+  class           Class            @relation(fields: [classId], references: [id])
+  gradeId         Int
+  grade           Grade            @relation(fields: [gradeId], references: [id])
+  attendances     Attendance[]
+  results         Result[]
+  birthday        DateTime
+  enrollments     Enrollment[]
+  lessonProgress  LessonProgress[]
+  quizAttempts    QuizAttempt[]
 }
 
 model Teacher {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
-  email     String?   @unique
-  phone     String?   @unique
-  address   String
-  img       String?
-  bloodType String
-  sex       UserSex
-  createdAt DateTime  @default(now())
-  subjects  Subject[]
-  lessons   Lesson[]
-  classes   Class[]
-  birthday  DateTime
+  id            String         @id
+  username      String         @unique
+  name          String
+  surname       String
+  email         String?        @unique
+  phone         String?        @unique
+  address       String
+  img           String?
+  bloodType     String
+  sex           UserSex
+  createdAt     DateTime       @default(now())
+  subjects      Subject[]
+  lessons       Lesson[]
+  classes       Class[]
+  birthday      DateTime
+  courses       Course[]
+  questionBanks QuestionBank[]
 }
 
 model Parent {
@@ -89,10 +94,12 @@ model Class {
 }
 
 model Subject {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  teachers Teacher[]
-  lessons  Lesson[]
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  teachers      Teacher[]
+  lessons       Lesson[]
+  courses       Course[]
+  questionBanks QuestionBank[]
 }
 
 model Lesson {
@@ -195,6 +202,7 @@ enum NotificationType {
   ANNOUNCEMENT
   ASSIGNMENT
   GENERAL
+  ENROLLMENT
 }
 
 enum UserSex {
@@ -208,4 +216,194 @@ enum Day {
   WEDNESDAY
   THURSDAY
   FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum CourseStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ContentType {
+  TEXT
+  VIDEO
+  LINK
+  MIXED
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  FILL_IN_BLANK
+}
+
+enum ScoringPolicy {
+  BEST
+  LATEST
+  AVERAGE
+}
+
+model Course {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  code        String       @unique
+  status      CourseStatus @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  teacherId   String
+  teacher     Teacher      @relation(fields: [teacherId], references: [id])
+  subjectId   Int
+  subject     Subject      @relation(fields: [subjectId], references: [id])
+  modules     Module[]
+  enrollments Enrollment[]
+}
+
+model Module {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  order       Int
+  isLocked    Boolean  @default(false)
+  courseId     Int
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons     LmsLesson[]
+}
+
+model LmsLesson {
+  id               Int             @id @default(autoincrement())
+  title            String
+  content          String
+  contentType      ContentType     @default(TEXT)
+  externalUrl      String?
+  order            Int
+  estimatedMinutes Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  moduleId         Int
+  module           Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  quizzes          Quiz[]
+  progress         LessonProgress[]
+}
+
+model LessonProgress {
+  id               Int            @id @default(autoincrement())
+  status           ProgressStatus @default(NOT_STARTED)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  timeSpentSeconds Int            @default(0)
+  studentId        String
+  student          Student        @relation(fields: [studentId], references: [id])
+  lessonId         Int
+  lesson           LmsLesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
+}
+
+model Enrollment {
+  id         Int              @id @default(autoincrement())
+  enrolledAt DateTime         @default(now())
+  status     EnrollmentStatus @default(ACTIVE)
+  studentId  String
+  student    Student          @relation(fields: [studentId], references: [id])
+  courseId   Int
+  course     Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+}
+
+model Quiz {
+  id                 Int           @id @default(autoincrement())
+  title              String
+  description        String?
+  timeLimit          Int?
+  maxAttempts        Int           @default(1)
+  passScore          Int           @default(70)
+  scoringPolicy      ScoringPolicy @default(BEST)
+  randomizeQuestions Boolean       @default(false)
+  randomizeOptions   Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+  lessonId           Int
+  lesson             LmsLesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions          Question[]
+  attempts           QuizAttempt[]
+}
+
+model Question {
+  id             Int               @id @default(autoincrement())
+  text           String
+  type           QuestionType
+  explanation    String?
+  points         Int               @default(1)
+  order          Int
+  quizId         Int?
+  quiz           Quiz?             @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionBankId Int?
+  questionBank   QuestionBank?     @relation(fields: [questionBankId], references: [id])
+  options        AnswerOption[]
+  responses      QuestionResponse[]
+}
+
+model QuestionBank {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  subjectId   Int
+  subject     Subject    @relation(fields: [subjectId], references: [id])
+  teacherId   String
+  teacher     Teacher    @relation(fields: [teacherId], references: [id])
+  createdAt   DateTime   @default(now())
+  questions   Question[]
+}
+
+model AnswerOption {
+  id         Int      @id @default(autoincrement())
+  text       String
+  isCorrect  Boolean
+  order      Int
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id            Int                @id @default(autoincrement())
+  attemptNumber Int
+  startedAt     DateTime           @default(now())
+  submittedAt   DateTime?
+  score         Int?
+  maxScore      Int?
+  percentage    Float?
+  passed        Boolean?
+  studentId     String
+  student       Student            @relation(fields: [studentId], references: [id])
+  quizId        Int
+  quiz          Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  responses     QuestionResponse[]
+}
+
+model QuestionResponse {
+  id               Int          @id @default(autoincrement())
+  selectedOptionId Int?
+  textResponse     String?
+  isCorrect        Boolean?
+  pointsEarned     Int          @default(0)
+  timeTakenSeconds Int?
+  questionId       Int
+  question         Question     @relation(fields: [questionId], references: [id])
+  attemptId        Int
+  attempt          QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 }

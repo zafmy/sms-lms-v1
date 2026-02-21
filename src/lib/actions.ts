@@ -6,10 +6,17 @@ import {
   AssignmentSchema,
   AttendanceSchema,
   ClassSchema,
+  CourseSchema,
+  EnrollmentSchema,
   EventSchema,
   ExamSchema,
   LessonSchema,
+  LmsLessonSchema,
+  ModuleSchema,
   ParentSchema,
+  QuestionBankSchema,
+  QuestionSchema,
+  QuizSchema,
   ResultSchema,
   StudentSchema,
   SubjectSchema,
@@ -1285,6 +1292,978 @@ export const updateAttendance = async (
     });
 
     revalidatePath("/list/attendance");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// COURSE ACTIONS
+
+export const createCourse = async (
+  currentState: CurrentState,
+  data: CourseSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.course.create({
+      data: {
+        title: data.title,
+        description: data.description || null,
+        code: data.code,
+        status: data.status,
+        teacherId: role === "teacher" ? userId : data.teacherId,
+        subjectId: data.subjectId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const updateCourse = async (
+  currentState: CurrentState,
+  data: CourseSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    if (role === "teacher") {
+      const course = await prisma.course.findFirst({
+        where: { id: data.id, teacherId: userId },
+      });
+      if (!course) {
+        return { success: false, error: true };
+      }
+    }
+
+    await prisma.course.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        title: data.title,
+        description: data.description || null,
+        code: data.code,
+        status: data.status,
+        teacherId: role === "teacher" ? userId : data.teacherId,
+        subjectId: data.subjectId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteCourse = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.course.delete({
+      where: {
+        id: parseInt(id),
+        ...(role === "teacher" ? { teacherId: userId } : {}),
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// MODULE ACTIONS
+
+export const createModule = async (
+  currentState: CurrentState,
+  data: ModuleSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const course = await prisma.course.findFirst({
+      where: {
+        id: data.courseId,
+        ...(role === "teacher" ? { teacherId: userId } : {}),
+      },
+    });
+    if (!course) {
+      return { success: false, error: true };
+    }
+
+    await prisma.module.create({
+      data: {
+        title: data.title,
+        description: data.description || null,
+        order: data.order,
+        isLocked: data.isLocked,
+        courseId: data.courseId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const updateModule = async (
+  currentState: CurrentState,
+  data: ModuleSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const course = await prisma.course.findFirst({
+      where: {
+        id: data.courseId,
+        ...(role === "teacher" ? { teacherId: userId } : {}),
+      },
+    });
+    if (!course) {
+      return { success: false, error: true };
+    }
+
+    await prisma.module.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        title: data.title,
+        description: data.description || null,
+        order: data.order,
+        isLocked: data.isLocked,
+        courseId: data.courseId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteModule = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const moduleItem = await prisma.module.findUnique({
+      where: { id: parseInt(id) },
+      include: { course: true },
+    });
+    if (!moduleItem) {
+      return { success: false, error: true };
+    }
+    if (role === "teacher" && moduleItem.course.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.module.delete({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// ENROLLMENT ACTIONS
+
+export const enrollStudent = async (
+  currentState: CurrentState,
+  data: EnrollmentSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
+  try {
+    // Check course is not ARCHIVED
+    const course = await prisma.course.findUnique({
+      where: { id: data.courseId },
+    });
+    if (!course || course.status === "ARCHIVED") {
+      return { success: false, error: true };
+    }
+
+    // Check no duplicate enrollment
+    const existing = await prisma.enrollment.findUnique({
+      where: {
+        studentId_courseId: {
+          studentId: data.studentId,
+          courseId: data.courseId,
+        },
+      },
+    });
+    if (existing) {
+      return { success: false, error: true };
+    }
+
+    await prisma.enrollment.create({
+      data: {
+        studentId: data.studentId,
+        courseId: data.courseId,
+      },
+    });
+
+    // Create notification for the student
+    try {
+      await prisma.notification.create({
+        data: {
+          userId: data.studentId,
+          type: "ENROLLMENT",
+          message: `You have been enrolled in ${course.title}`,
+        },
+      });
+    } catch {
+      // Notification failure should not block the enrollment
+    }
+
+    revalidatePath("/list/enrollments");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const dropEnrollment = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "admin") {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.enrollment.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        status: "DROPPED",
+      },
+    });
+
+    revalidatePath("/list/enrollments");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// LMS LESSON ACTIONS
+
+export const createLmsLesson = async (
+  currentState: CurrentState,
+  data: LmsLessonSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const module = await prisma.module.findFirst({
+      where: { id: data.moduleId },
+      include: { course: true },
+    });
+    if (!module) {
+      return { success: false, error: true };
+    }
+    if (role === "teacher" && module.course.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.lmsLesson.create({
+      data: {
+        title: data.title,
+        content: data.content,
+        contentType: data.contentType,
+        externalUrl: data.externalUrl || null,
+        order: data.order,
+        estimatedMinutes: data.estimatedMinutes || null,
+        moduleId: data.moduleId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const updateLmsLesson = async (
+  currentState: CurrentState,
+  data: LmsLessonSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const module = await prisma.module.findFirst({
+      where: { id: data.moduleId },
+      include: { course: true },
+    });
+    if (!module) {
+      return { success: false, error: true };
+    }
+    if (role === "teacher" && module.course.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.lmsLesson.update({
+      where: { id: data.id },
+      data: {
+        title: data.title,
+        content: data.content,
+        contentType: data.contentType,
+        externalUrl: data.externalUrl || null,
+        order: data.order,
+        estimatedMinutes: data.estimatedMinutes || null,
+        moduleId: data.moduleId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteLmsLesson = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const lesson = await prisma.lmsLesson.findUnique({
+      where: { id: parseInt(id) },
+      include: { module: { include: { course: true } } },
+    });
+    if (!lesson) {
+      return { success: false, error: true };
+    }
+    if (role === "teacher" && lesson.module.course.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.lmsLesson.delete({
+      where: { id: parseInt(id) },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// PROGRESS TRACKING ACTIONS
+
+export const startLessonProgress = async (lessonId: number) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "student") {
+    return { success: false, error: true };
+  }
+
+  try {
+    const lesson = await prisma.lmsLesson.findFirst({
+      where: { id: lessonId },
+      include: {
+        module: {
+          include: {
+            course: {
+              include: {
+                enrollments: {
+                  where: { studentId: userId, status: "ACTIVE" },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!lesson || lesson.module.course.enrollments.length === 0) {
+      return { success: false, error: true };
+    }
+
+    await prisma.lessonProgress.upsert({
+      where: {
+        studentId_lessonId: { studentId: userId, lessonId },
+      },
+      create: {
+        studentId: userId,
+        lessonId,
+        status: "IN_PROGRESS",
+        startedAt: new Date(),
+      },
+      update: {},
+    });
+
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const markLessonComplete = async (lessonId: number) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "student") {
+    return { success: false, error: true };
+  }
+
+  try {
+    const lesson = await prisma.lmsLesson.findFirst({
+      where: { id: lessonId },
+      include: {
+        module: {
+          include: {
+            course: {
+              include: {
+                enrollments: {
+                  where: { studentId: userId, status: "ACTIVE" },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!lesson || lesson.module.course.enrollments.length === 0) {
+      return { success: false, error: true };
+    }
+
+    await prisma.lessonProgress.upsert({
+      where: {
+        studentId_lessonId: { studentId: userId, lessonId },
+      },
+      create: {
+        studentId: userId,
+        lessonId,
+        status: "COMPLETED",
+        startedAt: new Date(),
+        completedAt: new Date(),
+      },
+      update: {
+        status: "COMPLETED",
+        completedAt: new Date(),
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// QUIZ ACTIONS
+
+export const createQuiz = async (
+  currentState: CurrentState,
+  data: QuizSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const lesson = await prisma.lmsLesson.findFirst({
+      where: { id: data.lessonId },
+      include: { module: { include: { course: true } } },
+    });
+    if (!lesson) return { success: false, error: true };
+    if (role === "teacher" && lesson.module.course.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.quiz.create({
+      data: {
+        title: data.title,
+        description: data.description || null,
+        timeLimit: data.timeLimit ? Number(data.timeLimit) : null,
+        maxAttempts: data.maxAttempts,
+        passScore: data.passScore,
+        scoringPolicy: data.scoringPolicy,
+        randomizeQuestions: data.randomizeQuestions,
+        randomizeOptions: data.randomizeOptions,
+        lessonId: data.lessonId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const updateQuiz = async (
+  currentState: CurrentState,
+  data: QuizSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const lesson = await prisma.lmsLesson.findFirst({
+      where: { id: data.lessonId },
+      include: { module: { include: { course: true } } },
+    });
+    if (!lesson) return { success: false, error: true };
+    if (role === "teacher" && lesson.module.course.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.quiz.update({
+      where: { id: data.id },
+      data: {
+        title: data.title,
+        description: data.description || null,
+        timeLimit: data.timeLimit ? Number(data.timeLimit) : null,
+        maxAttempts: data.maxAttempts,
+        passScore: data.passScore,
+        scoringPolicy: data.scoringPolicy,
+        randomizeQuestions: data.randomizeQuestions,
+        randomizeOptions: data.randomizeOptions,
+        lessonId: data.lessonId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteQuiz = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const quiz = await prisma.quiz.findFirst({
+      where: { id: parseInt(id) },
+      include: { lesson: { include: { module: { include: { course: true } } } } },
+    });
+    if (!quiz) return { success: false, error: true };
+    if (role === "teacher" && quiz.lesson.module.course.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.quiz.delete({
+      where: { id: parseInt(id) },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// QUESTION ACTIONS
+
+export const createQuestion = async (
+  currentState: CurrentState,
+  data: QuestionSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    if (data.quizId) {
+      const quiz = await prisma.quiz.findFirst({
+        where: { id: data.quizId },
+        include: { lesson: { include: { module: { include: { course: true } } } } },
+      });
+      if (!quiz) return { success: false, error: true };
+      if (role === "teacher" && quiz.lesson.module.course.teacherId !== userId) {
+        return { success: false, error: true };
+      }
+    }
+
+    await prisma.question.create({
+      data: {
+        text: data.text,
+        type: data.type,
+        explanation: data.explanation || null,
+        points: data.points,
+        order: data.order,
+        quizId: data.quizId || null,
+        questionBankId: data.questionBankId || null,
+        options: {
+          create: data.options.map((opt) => ({
+            text: opt.text,
+            isCorrect: opt.isCorrect,
+            order: opt.order,
+          })),
+        },
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const updateQuestion = async (
+  currentState: CurrentState,
+  data: QuestionSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    if (data.quizId) {
+      const quiz = await prisma.quiz.findFirst({
+        where: { id: data.quizId },
+        include: { lesson: { include: { module: { include: { course: true } } } } },
+      });
+      if (!quiz) return { success: false, error: true };
+      if (role === "teacher" && quiz.lesson.module.course.teacherId !== userId) {
+        return { success: false, error: true };
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Delete existing options and recreate
+      await tx.answerOption.deleteMany({
+        where: { questionId: data.id },
+      });
+
+      await tx.question.update({
+        where: { id: data.id },
+        data: {
+          text: data.text,
+          type: data.type,
+          explanation: data.explanation || null,
+          points: data.points,
+          order: data.order,
+          quizId: data.quizId || null,
+          questionBankId: data.questionBankId || null,
+          options: {
+            create: data.options.map((opt) => ({
+              text: opt.text,
+              isCorrect: opt.isCorrect,
+              order: opt.order,
+            })),
+          },
+        },
+      });
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteQuestion = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const question = await prisma.question.findFirst({
+      where: { id: parseInt(id) },
+      include: {
+        quiz: {
+          include: { lesson: { include: { module: { include: { course: true } } } } },
+        },
+      },
+    });
+    if (!question) return { success: false, error: true };
+    if (question.quiz && role === "teacher" && question.quiz.lesson.module.course.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.question.delete({
+      where: { id: parseInt(id) },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// QUESTION BANK ACTIONS
+
+export const createQuestionBank = async (
+  currentState: CurrentState,
+  data: QuestionBankSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    await prisma.questionBank.create({
+      data: {
+        name: data.name,
+        description: data.description || null,
+        subjectId: data.subjectId,
+        teacherId: userId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const updateQuestionBank = async (
+  currentState: CurrentState,
+  data: QuestionBankSchema
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const bank = await prisma.questionBank.findFirst({
+      where: { id: data.id },
+    });
+    if (!bank) return { success: false, error: true };
+    if (role === "teacher" && bank.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.questionBank.update({
+      where: { id: data.id },
+      data: {
+        name: data.name,
+        description: data.description || null,
+        subjectId: data.subjectId,
+      },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const deleteQuestionBank = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || (role !== "admin" && role !== "teacher")) {
+    return { success: false, error: true };
+  }
+  try {
+    const bank = await prisma.questionBank.findFirst({
+      where: { id: parseInt(id) },
+    });
+    if (!bank) return { success: false, error: true };
+    if (role === "teacher" && bank.teacherId !== userId) {
+      return { success: false, error: true };
+    }
+
+    await prisma.questionBank.delete({
+      where: { id: parseInt(id) },
+    });
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// QUIZ ATTEMPT ACTIONS
+
+export const startQuizAttempt = async (quizId: number) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "student") {
+    return { success: false, error: true };
+  }
+
+  try {
+    const quiz = await prisma.quiz.findFirst({
+      where: { id: quizId },
+      include: {
+        lesson: {
+          include: {
+            module: {
+              include: {
+                course: {
+                  include: {
+                    enrollments: {
+                      where: { studentId: userId, status: "ACTIVE" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        attempts: { where: { studentId: userId } },
+      },
+    });
+
+    if (!quiz || quiz.lesson.module.course.enrollments.length === 0) {
+      return { success: false, error: true, message: "Not enrolled" };
+    }
+
+    if (quiz.attempts.length >= quiz.maxAttempts) {
+      return { success: false, error: true, message: "Maximum attempts reached" };
+    }
+
+    const attempt = await prisma.quizAttempt.create({
+      data: {
+        quizId,
+        studentId: userId,
+        attemptNumber: quiz.attempts.length + 1,
+      },
+    });
+
+    return { success: true, error: false, message: String(attempt.id) };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+export const submitQuizAttempt = async (
+  attemptId: number,
+  responses: Array<{ questionId: number; selectedOptionId?: number; textResponse?: string }>
+) => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "student") {
+    return { success: false, error: true };
+  }
+
+  try {
+    const attempt = await prisma.quizAttempt.findFirst({
+      where: { id: attemptId, studentId: userId },
+      include: { quiz: { include: { questions: { include: { options: true } } } } },
+    });
+
+    if (!attempt || attempt.submittedAt) {
+      return { success: false, error: true, message: "Invalid attempt" };
+    }
+
+    const { gradeQuizAttempt } = await import("./quizUtils");
+    const gradingResult = gradeQuizAttempt(attempt.quiz.questions, responses, attempt.quiz.passScore);
+
+    await prisma.$transaction(async (tx) => {
+      for (const resp of responses) {
+        const questionGrade = gradingResult.questionResults.find(
+          (qr) => qr.questionId === resp.questionId
+        );
+
+        await tx.questionResponse.create({
+          data: {
+            questionId: resp.questionId,
+            attemptId,
+            selectedOptionId: resp.selectedOptionId || null,
+            textResponse: resp.textResponse || null,
+            isCorrect: questionGrade?.isCorrect ?? false,
+            pointsEarned: questionGrade?.pointsEarned ?? 0,
+          },
+        });
+      }
+
+      await tx.quizAttempt.update({
+        where: { id: attemptId },
+        data: {
+          submittedAt: new Date(),
+          score: gradingResult.score,
+          maxScore: gradingResult.maxScore,
+          percentage: gradingResult.percentage,
+          passed: gradingResult.passed,
+        },
+      });
+    });
+
+    revalidatePath("/list/courses");
     return { success: true, error: false };
   } catch (err) {
     return { success: false, error: true };
