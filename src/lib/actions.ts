@@ -21,6 +21,7 @@ import {
   StudentSchema,
   SubjectSchema,
   TeacherSchema,
+  selfEnrollmentSchema,
 } from "./formValidationSchemas";
 import prisma from "./prisma";
 import { auth, clerkClient } from "@clerk/nextjs/server";
@@ -1316,6 +1317,7 @@ export const createCourse = async (
         description: data.description || null,
         code: data.code,
         status: data.status,
+        maxEnrollments: data.maxEnrollments ?? null,
         teacherId: role === "teacher" ? userId : data.teacherId,
         subjectId: data.subjectId,
       },
@@ -1356,6 +1358,7 @@ export const updateCourse = async (
         description: data.description || null,
         code: data.code,
         status: data.status,
+        maxEnrollments: data.maxEnrollments ?? null,
         teacherId: role === "teacher" ? userId : data.teacherId,
         subjectId: data.subjectId,
       },
@@ -1588,6 +1591,222 @@ export const dropEnrollment = async (
     });
 
     revalidatePath("/list/enrollments");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true };
+  }
+};
+
+// SELF-ENROLLMENT ACTIONS
+
+export const selfEnrollStudent = async (
+  currentState: CurrentState,
+  data: { courseId: number }
+): Promise<CurrentState> => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "student") {
+    return { success: false, error: true };
+  }
+  try {
+    // Look up student record by Clerk ID
+    const student = await prisma.student.findUnique({
+      where: { id: userId },
+    });
+    if (!student) {
+      return { success: false, error: true };
+    }
+
+    // Validate courseId
+    const parsed = selfEnrollmentSchema.safeParse(data);
+    if (!parsed.success) {
+      return { success: false, error: true };
+    }
+    const { courseId } = parsed.data;
+
+    // Fetch course and verify it's ACTIVE
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: { teacher: { select: { id: true, name: true } } },
+    });
+    if (!course || course.status !== "ACTIVE") {
+      return { success: false, error: true };
+    }
+
+    // Check for existing enrollment
+    const existingEnrollment = await prisma.enrollment.findUnique({
+      where: {
+        studentId_courseId: {
+          studentId: userId,
+          courseId,
+        },
+      },
+    });
+
+    if (existingEnrollment) {
+      if (existingEnrollment.status === "ACTIVE") {
+        // Already enrolled
+        return { success: false, error: true, message: "Already enrolled" };
+      }
+      if (existingEnrollment.status === "COMPLETED") {
+        // Cannot re-enroll in completed course
+        return { success: false, error: true, message: "Course already completed" };
+      }
+      // DROPPED status - re-enroll by updating back to ACTIVE
+      if (existingEnrollment.status === "DROPPED") {
+        // Capacity check for re-enrollment
+        if (course.maxEnrollments !== null) {
+          const activeCount = await prisma.enrollment.count({
+            where: { courseId, status: "ACTIVE" },
+          });
+          if (activeCount >= course.maxEnrollments) {
+            return { success: false, error: true, message: "Course is full" };
+          }
+        }
+
+        await prisma.enrollment.update({
+          where: { id: existingEnrollment.id },
+          data: { status: "ACTIVE", enrolledAt: new Date() },
+        });
+
+        // Notifications for re-enrollment
+        try {
+          await prisma.notification.create({
+            data: {
+              userId,
+              type: "ENROLLMENT",
+              message: `You have enrolled in ${course.title}`,
+            },
+          });
+          await prisma.notification.create({
+            data: {
+              userId: course.teacherId,
+              type: "ENROLLMENT",
+              message: `${student.name} ${student.surname} has enrolled in your course ${course.title}`,
+            },
+          });
+        } catch {
+          // Notification failure should not block enrollment
+        }
+
+        revalidatePath("/list/courses");
+        return { success: true, error: false };
+      }
+    }
+
+    // New enrollment - atomic capacity check + create
+    if (course.maxEnrollments !== null) {
+      await prisma.$transaction(async (tx) => {
+        const activeCount = await tx.enrollment.count({
+          where: { courseId, status: "ACTIVE" },
+        });
+        if (activeCount >= course.maxEnrollments!) {
+          throw new Error("Course is full");
+        }
+        await tx.enrollment.create({
+          data: {
+            studentId: userId,
+            courseId,
+            status: "ACTIVE",
+          },
+        });
+      });
+    } else {
+      // Unlimited capacity - create directly
+      await prisma.enrollment.create({
+        data: {
+          studentId: userId,
+          courseId,
+          status: "ACTIVE",
+        },
+      });
+    }
+
+    // Notifications
+    try {
+      await prisma.notification.create({
+        data: {
+          userId,
+          type: "ENROLLMENT",
+          message: `You have enrolled in ${course.title}`,
+        },
+      });
+      await prisma.notification.create({
+        data: {
+          userId: course.teacherId,
+          type: "ENROLLMENT",
+          message: `${student.name} ${student.surname} has enrolled in your course ${course.title}`,
+        },
+      });
+    } catch {
+      // Notification failure should not block enrollment
+    }
+
+    revalidatePath("/list/courses");
+    return { success: true, error: false };
+  } catch (err: any) {
+    if (err.message === "Course is full") {
+      return { success: false, error: true, message: "Course is full" };
+    }
+    return { success: false, error: true };
+  }
+};
+
+export const unenrollSelf = async (
+  currentState: CurrentState,
+  data: { enrollmentId: number }
+): Promise<CurrentState> => {
+  const { userId, sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!userId || role !== "student") {
+    return { success: false, error: true };
+  }
+  try {
+    // Fetch enrollment and verify ownership
+    const enrollment = await prisma.enrollment.findUnique({
+      where: { id: data.enrollmentId },
+      include: {
+        course: {
+          select: { title: true, teacherId: true },
+        },
+      },
+    });
+
+    if (!enrollment || enrollment.studentId !== userId) {
+      return { success: false, error: true };
+    }
+
+    // Cannot drop completed enrollment
+    if (enrollment.status !== "ACTIVE") {
+      return { success: false, error: true, message: "Can only drop active enrollments" };
+    }
+
+    // Update status to DROPPED
+    await prisma.enrollment.update({
+      where: { id: data.enrollmentId },
+      data: { status: "DROPPED" },
+    });
+
+    // Notify teacher
+    try {
+      const student = await prisma.student.findUnique({
+        where: { id: userId },
+        select: { name: true, surname: true },
+      });
+      if (student) {
+        await prisma.notification.create({
+          data: {
+            userId: enrollment.course.teacherId,
+            type: "ENROLLMENT",
+            message: `${student.name} ${student.surname} has dropped your course ${enrollment.course.title}`,
+          },
+        });
+      }
+    } catch {
+      // Notification failure should not block unenrollment
+    }
+
+    revalidatePath("/list/courses");
     return { success: true, error: false };
   } catch (err) {
     return { success: false, error: true };

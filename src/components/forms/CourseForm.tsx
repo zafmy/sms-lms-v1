@@ -156,6 +156,14 @@ const CourseForm = ({
             </p>
           )}
         </div>
+        <InputField
+          label="Max Enrollments"
+          name="maxEnrollments"
+          defaultValue={data?.maxEnrollments}
+          register={register}
+          error={errors?.maxEnrollments}
+          type="number"
+        />
       </div>
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>

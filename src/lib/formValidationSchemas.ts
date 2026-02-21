@@ -195,6 +195,7 @@ export const courseSchema = z.object({
   status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"], { message: "Status is required!" }),
   teacherId: z.string().min(1, { message: "Teacher is required!" }),
   subjectId: z.coerce.number({ message: "Subject is required!" }),
+  maxEnrollments: z.coerce.number().int().positive().nullable().optional(),
 });
 
 export type CourseSchema = z.infer<typeof courseSchema>;
@@ -223,6 +224,12 @@ export const enrollmentSchema = z.object({
 });
 
 export type EnrollmentSchema = z.infer<typeof enrollmentSchema>;
+
+export const selfEnrollmentSchema = z.object({
+  courseId: z.coerce.number().int().positive(),
+});
+
+export type SelfEnrollmentSchema = z.infer<typeof selfEnrollmentSchema>;
 
 export const lmsLessonSchema = z.object({
   id: z.coerce.number().optional(),

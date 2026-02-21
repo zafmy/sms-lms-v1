@@ -262,8 +262,9 @@ model Course {
   title       String
   description String?
   code        String       @unique
-  status      CourseStatus @default(DRAFT)
-  createdAt   DateTime     @default(now())
+  status         CourseStatus @default(DRAFT)
+  maxEnrollments Int?
+  createdAt      DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   teacherId   String
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
