@@ -283,6 +283,38 @@ async function main() {
       xpReward: 50,
       criteria: JSON.stringify({ type: "total_xp", amount: 1000 }),
     },
+    {
+      name: "First Review",
+      category: "review",
+      description: "Complete your first review session",
+      threshold: 1,
+      xpReward: 10,
+      criteria: JSON.stringify({ type: "review_session_count", count: 1 }),
+    },
+    {
+      name: "Review Streak 4",
+      category: "review_streak",
+      description: "Complete reviews for 4 consecutive weekends",
+      threshold: 4,
+      xpReward: 30,
+      criteria: JSON.stringify({ type: "review_streak", weekends: 4 }),
+    },
+    {
+      name: "Master 50 Cards",
+      category: "mastery",
+      description: "Move 50 cards to mastery level (Box 5)",
+      threshold: 50,
+      xpReward: 100,
+      criteria: JSON.stringify({ type: "mastery_count", count: 50 }),
+    },
+    {
+      name: "Perfect Session",
+      category: "review_perfect",
+      description: "Complete a review session with all cards correct",
+      threshold: 1,
+      xpReward: 25,
+      criteria: JSON.stringify({ type: "review_perfect_session", count: 1 }),
+    },
   ];
 
   for (const badge of badges) {

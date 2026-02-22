@@ -39,6 +39,9 @@ model Student {
   gamification    StudentGamification?
   badges          StudentBadge[]
   xpTransactions  XpTransaction[]
+  reviewCards     ReviewCard[]
+  reviewLogs      ReviewLog[]
+  reviewSessions  ReviewSession[]
 }
 
 model Teacher {
@@ -103,6 +106,7 @@ model Subject {
   lessons       Lesson[]
   courses       Course[]
   questionBanks QuestionBank[]
+  reviewCards   ReviewCard[]
 }
 
 model Lesson {
@@ -207,6 +211,7 @@ enum NotificationType {
   GENERAL
   ENROLLMENT
   GAMIFICATION
+  REVIEW
 }
 
 enum UserSex {
@@ -276,6 +281,7 @@ model Course {
   subject     Subject      @relation(fields: [subjectId], references: [id])
   modules     Module[]
   enrollments Enrollment[]
+  reviewCards ReviewCard[]
 }
 
 model Module {
@@ -299,10 +305,12 @@ model LmsLesson {
   estimatedMinutes Int?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+  flagForReview    Boolean         @default(false)
   moduleId         Int
   module           Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   quizzes          Quiz[]
   progress         LessonProgress[]
+  reviewCards      ReviewCard[]
 }
 
 model LessonProgress {
@@ -361,6 +369,7 @@ model Question {
   questionBank   QuestionBank?     @relation(fields: [questionBankId], references: [id])
   options        AnswerOption[]
   responses      QuestionResponse[]
+  reviewCards    ReviewCard[]
 }
 
 model QuestionBank {
@@ -413,12 +422,26 @@ model QuestionResponse {
   attempt          QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 }
 
+enum ReviewCardType {
+  QUIZ_QUESTION
+  VOCABULARY
+  CONCEPT
+  FLASHCARD
+}
+
+enum ReviewRating {
+  HARD
+  OK
+  EASY
+}
+
 enum XpSource {
   LESSON
   QUIZ
   STREAK
   BADGE
   MANUAL
+  REVIEW
 }
 
 model StudentGamification {
@@ -464,4 +487,68 @@ model XpTransaction {
   sourceId  String?
   createdAt DateTime @default(now())
   student   Student  @relation(fields: [studentId], references: [id])
+}
+
+model ReviewCard {
+  id                 Int            @id @default(autoincrement())
+  studentId          String
+  student            Student        @relation(fields: [studentId], references: [id])
+  courseId            Int
+  course             Course         @relation(fields: [courseId], references: [id])
+  subjectId          Int
+  subject            Subject        @relation(fields: [subjectId], references: [id])
+  cardType           ReviewCardType
+  front              String
+  back               String
+  sourceQuestionId   Int?
+  sourceQuestion     Question?      @relation(fields: [sourceQuestionId], references: [id])
+  sourceLessonId     Int?
+  sourceLesson       LmsLesson?     @relation(fields: [sourceLessonId], references: [id])
+  leitnerBox         Int            @default(1)
+  easinessFactor     Float          @default(2.5)
+  consecutiveCorrect Int            @default(0)
+  nextReviewDate     DateTime
+  lastReviewedAt     DateTime?
+  reviewCount        Int            @default(0)
+  stability          Float?
+  difficulty         Float?
+  retrievability     Float?
+  isActive           Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  reviewLogs         ReviewLog[]
+
+  @@index([studentId, isActive, nextReviewDate])
+  @@index([studentId, sourceQuestionId])
+}
+
+model ReviewLog {
+  id             Int          @id @default(autoincrement())
+  reviewCardId   Int
+  reviewCard     ReviewCard   @relation(fields: [reviewCardId], references: [id], onDelete: Cascade)
+  studentId      String
+  student        Student      @relation(fields: [studentId], references: [id])
+  rating         ReviewRating
+  previousBox    Int
+  newBox         Int
+  previousEF     Float
+  newEF          Float
+  responseTimeMs Int?
+  reviewedAt     DateTime     @default(now())
+
+  @@index([studentId, reviewedAt])
+  @@index([reviewCardId])
+}
+
+model ReviewSession {
+  id           Int       @id @default(autoincrement())
+  studentId    String
+  student      Student   @relation(fields: [studentId], references: [id])
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  totalCards   Int
+  correctCards Int       @default(0)
+  xpEarned     Int       @default(0)
+
+  @@index([studentId, startedAt])
 }
