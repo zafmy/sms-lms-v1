@@ -2027,6 +2027,13 @@ export const markLessonComplete = async (lessonId: number) => {
     const { processGamificationEvent } = await import("./gamificationActions");
     processGamificationEvent(userId, "LESSON_COMPLETE", { lessonId }).catch(() => {});
 
+    // Fire-and-forget review card generation from flagged lessons
+    if (lesson.flagForReview) {
+      import("./reviewActions").then(({ generateReviewCardFromLesson }) => {
+        generateReviewCardFromLesson(userId, lessonId).catch(() => {});
+      });
+    }
+
     revalidatePath("/list/courses");
     return { success: true, error: false };
   } catch (err) {
@@ -2494,6 +2501,11 @@ export const submitQuizAttempt = async (
       passed: gradingResult.passed,
       passScore: attempt.quiz.passScore,
     }).catch(() => {});
+
+    // Fire-and-forget review card generation from incorrect answers
+    import("./reviewActions").then(({ generateReviewCardsFromQuiz }) => {
+      generateReviewCardsFromQuiz(userId, attemptId).catch(() => {});
+    });
 
     revalidatePath("/list/courses");
     return { success: true, error: false };

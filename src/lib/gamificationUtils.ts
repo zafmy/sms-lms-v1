@@ -9,6 +9,10 @@ export const XP_QUIZ_PERFECT = 50;
 export const XP_DAILY_STREAK = 5;
 export const XP_STREAK_7_BONUS = 30;
 export const XP_COURSE_COMPLETE = 100;
+export const XP_REVIEW_CORRECT = 10;
+export const XP_REVIEW_HARD_BONUS = 5;
+export const XP_REVIEW_SESSION_COMPLETE = 50;
+export const XP_MASTERY_BONUS = 25;
 
 // Level thresholds: index = level, value = minimum XP required
 export const LEVEL_THRESHOLDS: readonly number[] = [
