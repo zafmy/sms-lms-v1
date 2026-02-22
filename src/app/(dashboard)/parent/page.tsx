@@ -4,6 +4,7 @@ import ChildGamificationStats from "@/components/ChildGamificationStats";
 import ChildGradeOverview from "@/components/ChildGradeOverview";
 import ChildLearningActivity from "@/components/ChildLearningActivity";
 import ChildLmsProgressCard from "@/components/ChildLmsProgressCard";
+import ChildReviewActivityContainer from "@/components/ChildReviewActivityContainer";
 import ChildQuickStats from "@/components/ChildQuickStats";
 import RecentActivity from "@/components/RecentActivity";
 import prisma from "@/lib/prisma";
@@ -48,6 +49,12 @@ const ParentPage = async () => {
               </div>
               <div className="mt-4">
                 <ChildGamificationStats
+                  studentId={student.id}
+                  studentName={student.name + " " + student.surname}
+                />
+              </div>
+              <div className="mt-4">
+                <ChildReviewActivityContainer
                   studentId={student.id}
                   studentName={student.name + " " + student.surname}
                 />
