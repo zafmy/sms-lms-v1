@@ -29,10 +29,18 @@ export const startReviewSession = async (studentId: string) => {
         isActive: true,
         nextReviewDate: { lte: today },
       },
+      include: {
+        subject: { select: { id: true, name: true } },
+      },
       orderBy: { nextReviewDate: "asc" },
     });
 
-    const queuedCards = buildReviewQueue(activeCards);
+    // Use buildReviewQueue for ordering/filtering, then map back to full cards
+    const queueOrder = buildReviewQueue(activeCards);
+    const cardMap = new Map(activeCards.map((c) => [c.id, c]));
+    const queuedCards = queueOrder
+      .map((q) => cardMap.get(q.id))
+      .filter((c): c is NonNullable<typeof c> => c != null);
 
     const session = await prisma.reviewSession.create({
       data: {
