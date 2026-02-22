@@ -1,6 +1,7 @@
 import Announcements from "@/components/Announcements";
 import AssignmentsDue from "@/components/AssignmentsDue";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
+import CardProgressionChartContainer from "@/components/CardProgressionChartContainer";
 import EnrolledCourses from "@/components/EnrolledCourses";
 import EventCalendar from "@/components/EventCalendar";
 import GamificationCardContainer from "@/components/GamificationCardContainer";
@@ -9,7 +10,9 @@ import LmsProgressOverview from "@/components/LmsProgressOverview";
 import QuizPerformanceTrendContainer from "@/components/QuizPerformanceTrendContainer";
 import RecentBadgesContainer from "@/components/RecentBadgesContainer";
 import RecentGrades from "@/components/RecentGrades";
+import ReviewStreakCalendarContainer from "@/components/ReviewStreakCalendarContainer";
 import StudentAttendanceCard from "@/components/StudentAttendanceCard";
+import SubjectMasteryMeterContainer from "@/components/SubjectMasteryMeterContainer";
 import UpcomingExams from "@/components/UpcomingExams";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
@@ -49,6 +52,15 @@ const StudentPage = async () => {
           <QuizPerformanceTrendContainer studentId={userId!} />
         </div>
         <LearningActivityHeatmapContainer studentId={userId!} />
+        {/* Review Progress */}
+        <div className="bg-white p-4 rounded-md">
+          <h2 className="text-lg font-semibold mb-3">Review Progress</h2>
+          <div className="space-y-4">
+            <SubjectMasteryMeterContainer studentId={userId!} />
+            <CardProgressionChartContainer studentId={userId!} />
+            <ReviewStreakCalendarContainer studentId={userId!} />
+          </div>
+        </div>
         <StudentAttendanceCard id={userId!} />
         <RecentGrades studentId={userId!} />
         {classItem[0] && <UpcomingExams classId={classItem[0].id} />}

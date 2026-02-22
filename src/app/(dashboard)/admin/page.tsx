@@ -5,6 +5,7 @@ import EventCalendarContainer from "@/components/EventCalendarContainer";
 import ClassOccupancyChartContainer from "@/components/ClassOccupancyChartContainer";
 import GamificationAdoptionMetrics from "@/components/GamificationAdoptionMetrics";
 import LmsAdoptionMetrics from "@/components/LmsAdoptionMetrics";
+import ReviewAdoptionMetricsContainer from "@/components/ReviewAdoptionMetricsContainer";
 import UserCard from "@/components/UserCard";
 
 const AdminPage = async ({
@@ -31,6 +32,10 @@ const AdminPage = async ({
         {/* GAMIFICATION ADOPTION METRICS */}
         <div className="w-full">
           <GamificationAdoptionMetrics />
+        </div>
+        {/* REVIEW SYSTEM ADOPTION METRICS */}
+        <div className="w-full">
+          <ReviewAdoptionMetricsContainer />
         </div>
         {/* MIDDLE CHARTS */}
         <div className="flex gap-4 flex-col lg:flex-row">

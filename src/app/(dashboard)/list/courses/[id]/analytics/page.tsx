@@ -1,3 +1,4 @@
+import ClassReviewAnalyticsContainer from "@/components/ClassReviewAnalyticsContainer";
 import CourseAnalyticsContainer from "@/components/CourseAnalyticsContainer";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
@@ -26,8 +27,13 @@ const CourseAnalyticsPage = async ({
   if (role === "teacher" && course.teacherId !== userId) return notFound();
 
   return (
-    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      <CourseAnalyticsContainer courseId={course.id} />
+    <div className="flex-1 m-4 mt-0 space-y-4">
+      <div className="bg-white p-4 rounded-md">
+        <CourseAnalyticsContainer courseId={course.id} />
+      </div>
+      <div className="bg-white p-4 rounded-md">
+        <ClassReviewAnalyticsContainer courseId={course.id} />
+      </div>
     </div>
   );
 };
