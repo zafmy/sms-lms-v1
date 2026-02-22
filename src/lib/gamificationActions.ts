@@ -12,6 +12,10 @@ import {
   XP_DAILY_STREAK,
   XP_STREAK_7_BONUS,
   XP_COURSE_COMPLETE,
+  XP_REVIEW_CORRECT,
+  XP_REVIEW_HARD_BONUS,
+  XP_REVIEW_SESSION_COMPLETE,
+  XP_MASTERY_BONUS,
 } from "./gamificationUtils";
 import { createNotification } from "./notificationActions";
 import { BadgeSchema, badgeSchema } from "./formValidationSchemas";
@@ -43,7 +47,7 @@ export const processGamificationEvent = async (
 
     // b. Calculate XP based on eventType
     let eventXp = 0;
-    let xpSource: "LESSON" | "QUIZ" = "LESSON";
+    let xpSource: "LESSON" | "QUIZ" | "REVIEW" = "LESSON";
     let sourceId: string | null = null;
 
     if (eventType === "LESSON_COMPLETE") {
@@ -56,6 +60,22 @@ export const processGamificationEvent = async (
       eventXp = computeQuizXp(percentage, passScore);
       xpSource = "QUIZ";
       sourceId = String(eventData.quizId ?? "");
+    } else if (eventType === "REVIEW_CORRECT") {
+      eventXp = XP_REVIEW_CORRECT;
+      xpSource = "REVIEW";
+      sourceId = String(eventData.reviewCardId ?? "");
+      // Hard bonus: extra XP when correctly answering a Box 1 card
+      if (Number(eventData.previousBox ?? 0) === 1) {
+        eventXp += XP_REVIEW_HARD_BONUS;
+      }
+    } else if (eventType === "REVIEW_SESSION_COMPLETE") {
+      eventXp = XP_REVIEW_SESSION_COMPLETE;
+      xpSource = "REVIEW";
+      sourceId = String(eventData.sessionId ?? "");
+    } else if (eventType === "MASTERY_ACHIEVED") {
+      eventXp = XP_MASTERY_BONUS;
+      xpSource = "REVIEW";
+      sourceId = String(eventData.reviewCardId ?? "");
     }
 
     // c. Create XpTransaction for the event
@@ -192,6 +212,81 @@ export const processGamificationEvent = async (
 
     if (streakResult.streakIncremented) {
       badgesToCheck.push({ category: "streak", value: streakResult.newStreak });
+    }
+
+    // Review-related badge evaluation
+    if (eventType === "REVIEW_CORRECT" || eventType === "REVIEW_SESSION_COMPLETE" || eventType === "MASTERY_ACHIEVED") {
+      // "review" category - count completed review sessions
+      const reviewSessionCount = await tx.reviewSession.count({
+        where: { studentId, completedAt: { not: null } },
+      });
+      badgesToCheck.push({ category: "review", value: reviewSessionCount });
+
+      // "review_streak" category - count consecutive weekends with review sessions
+      const recentSessions = await tx.reviewSession.findMany({
+        where: { studentId, completedAt: { not: null } },
+        select: { completedAt: true },
+        orderBy: { completedAt: "desc" },
+      });
+
+      let weekendStreak = 0;
+      if (recentSessions.length > 0) {
+        // Get unique weekend identifiers (date of the Saturday)
+        const weekendSet = new Set<string>();
+        for (const session of recentSessions) {
+          if (session.completedAt) {
+            const d = session.completedAt;
+            const dayOfWeek = d.getDay();
+            const saturday = new Date(d);
+            if (dayOfWeek === 0) {
+              saturday.setDate(saturday.getDate() - 1); // Sunday -> Saturday
+            } else if (dayOfWeek !== 6) {
+              // Weekday session - find the preceding Saturday
+              saturday.setDate(saturday.getDate() - ((dayOfWeek + 1) % 7));
+            }
+            const key = `${saturday.getFullYear()}-${String(saturday.getMonth() + 1).padStart(2, "0")}-${String(saturday.getDate()).padStart(2, "0")}`;
+            weekendSet.add(key);
+          }
+        }
+
+        // Sort weekends descending and count consecutive ones (7-day intervals)
+        const sortedWeekends = Array.from(weekendSet).sort().reverse();
+        weekendStreak = 1;
+        for (let i = 1; i < sortedWeekends.length; i++) {
+          const current = new Date(sortedWeekends[i - 1]);
+          const previous = new Date(sortedWeekends[i]);
+          const diffDays = Math.round((current.getTime() - previous.getTime()) / (1000 * 60 * 60 * 24));
+          // Consecutive weekends are 7 days apart
+          if (diffDays <= 8) {
+            weekendStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+      badgesToCheck.push({ category: "review_streak", value: weekendStreak });
+
+      // "mastery" category - count cards that reached Box 5
+      const masteredCards = await tx.reviewCard.count({
+        where: { studentId, leitnerBox: 5 },
+      });
+      badgesToCheck.push({ category: "mastery", value: masteredCards });
+
+      // "review_perfect" category - check if session was perfect (all cards correct)
+      if (eventType === "REVIEW_SESSION_COMPLETE") {
+        const sessionId = Number(eventData.sessionId ?? 0);
+        if (sessionId > 0) {
+          const session = await tx.reviewSession.findUnique({
+            where: { id: sessionId },
+          });
+          if (session && session.correctCards === session.totalCards && session.totalCards > 0) {
+            badgesToCheck.push({ category: "review_perfect", value: 1 });
+          }
+        }
+      }
+
+      // Also check XP-based badges
+      badgesToCheck.push({ category: "xp", value: runningXp });
     }
 
     const badgesForDb = allBadges.map((b) => ({
