@@ -240,6 +240,7 @@ export const lmsLessonSchema = z.object({
   order: z.coerce.number().int().min(1, { message: "Order must be at least 1!" }),
   estimatedMinutes: z.coerce.number().int().min(1).optional(),
   moduleId: z.coerce.number().min(1, { message: "Module is required!" }),
+  flagForReview: z.coerce.boolean().default(false),
 });
 
 export type LmsLessonSchema = z.infer<typeof lmsLessonSchema>;
@@ -295,3 +296,12 @@ export const badgeSchema = z.object({
   xpReward: z.coerce.number().int().min(0, { message: "XP reward must be non-negative!" }),
 });
 export type BadgeSchema = z.infer<typeof badgeSchema>;
+
+export const reviewCardSchema = z.object({
+  front: z.string().min(1, { message: "Front text is required!" }),
+  back: z.string().min(1, { message: "Back text is required!" }),
+  cardType: z.enum(["FLASHCARD", "VOCABULARY"]),
+  courseId: z.coerce.number().int().positive(),
+  targetStudents: z.string().optional(), // JSON string of student IDs
+});
+export type ReviewCardSchema = z.infer<typeof reviewCardSchema>;

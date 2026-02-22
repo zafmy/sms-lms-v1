@@ -1845,6 +1845,7 @@ export const createLmsLesson = async (
         order: data.order,
         estimatedMinutes: data.estimatedMinutes || null,
         moduleId: data.moduleId,
+        flagForReview: data.flagForReview ?? false,
       },
     });
 
@@ -1886,6 +1887,7 @@ export const updateLmsLesson = async (
         order: data.order,
         estimatedMinutes: data.estimatedMinutes || null,
         moduleId: data.moduleId,
+        flagForReview: data.flagForReview ?? false,
       },
     });
 

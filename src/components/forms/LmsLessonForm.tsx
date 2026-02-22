@@ -138,6 +138,18 @@ const LmsLessonForm = ({
             </p>
           )}
         </div>
+        <div className="flex items-center gap-2 w-full">
+          <input
+            type="checkbox"
+            id="flagForReview"
+            className="w-4 h-4"
+            {...register("flagForReview")}
+            defaultChecked={data?.flagForReview ?? false}
+          />
+          <label htmlFor="flagForReview" className="text-sm text-gray-600">
+            Flag for spaced repetition review
+          </label>
+        </div>
         <div className="flex flex-col gap-2 w-full">
           <label className="text-xs text-gray-500">Content</label>
           <textarea
