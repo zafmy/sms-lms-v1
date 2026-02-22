@@ -212,6 +212,7 @@ enum NotificationType {
   ENROLLMENT
   GAMIFICATION
   REVIEW
+  FORUM_REPLY
 }
 
 enum UserSex {
@@ -281,7 +282,8 @@ model Course {
   subject     Subject      @relation(fields: [subjectId], references: [id])
   modules     Module[]
   enrollments Enrollment[]
-  reviewCards ReviewCard[]
+  reviewCards   ReviewCard[]
+  forumThreads ForumThread[]
 }
 
 model Module {
@@ -551,4 +553,61 @@ model ReviewSession {
   xpEarned     Int       @default(0)
 
   @@index([studentId, startedAt])
+}
+
+// Forum Models (SPEC-LMS-003)
+
+model ForumThread {
+  id             Int       @id @default(autoincrement())
+  title          String
+  content        String
+  isPinned       Boolean   @default(false)
+  isLocked       Boolean   @default(false)
+  isAnonymous    Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastActivityAt DateTime  @default(now())
+
+  courseId    Int
+  course     Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  authorId   String
+  authorRole String
+
+  replies ForumReply[]
+
+  @@index([courseId, lastActivityAt])
+  @@index([courseId, isPinned])
+}
+
+model ForumReply {
+  id          Int       @id @default(autoincrement())
+  content     String
+  isAccepted  Boolean   @default(false)
+  isAnonymous Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  threadId   Int
+  thread     ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  parentId   Int?
+  parent     ForumReply?  @relation("ReplyToReply", fields: [parentId], references: [id])
+  children   ForumReply[] @relation("ReplyToReply")
+  authorId   String
+  authorRole String
+
+  votes ForumVote[]
+
+  @@index([threadId, createdAt])
+}
+
+model ForumVote {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  replyId Int
+  reply   ForumReply @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  userId  String
+
+  @@unique([replyId, userId])
+  @@index([replyId])
 }

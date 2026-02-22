@@ -90,6 +90,14 @@ const CourseDetailPage = async ({
             >
               {course.status}
             </span>
+            {role !== "parent" && (
+              <Link
+                href={`/list/courses/${course.id}/forum`}
+                className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700 hover:bg-green-200"
+              >
+                Forum
+              </Link>
+            )}
             {(role === "admin" ||
               (role === "teacher" && course.teacherId === userId)) && (
               <Link
