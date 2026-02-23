@@ -1,10 +1,14 @@
 import { UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
+import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
 
 const Navbar = async () => {
   const user = await currentUser();
+  const t = await getTranslations("navbar");
+
   return (
     <div className="flex items-center justify-between p-4">
       {/* SEARCH BAR */}
@@ -12,7 +16,7 @@ const Navbar = async () => {
         <Image src="/search.png" alt="" width={14} height={14} />
         <input
           type="text"
-          placeholder="Search..."
+          placeholder={t("searchPlaceholder")}
           className="w-[200px] p-2 bg-transparent outline-none"
         />
       </div>
@@ -28,7 +32,7 @@ const Navbar = async () => {
             {user?.publicMetadata?.role as string}
           </span>
         </div>
-        {/* <Image src="/avatar.png" alt="" width={36} height={36} className="rounded-full"/> */}
+        <LanguageSwitcher />
         <UserButton />
       </div>
     </div>

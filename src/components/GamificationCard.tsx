@@ -1,6 +1,7 @@
 "use client";
 
 import { computeLevelProgress } from "@/lib/gamificationUtils";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 interface GamificationData {
@@ -11,6 +12,7 @@ interface GamificationData {
 }
 
 const GamificationCard = ({ data }: { data: GamificationData }) => {
+  const t = useTranslations("dashboard.student");
   const progress = computeLevelProgress(data.totalXp);
 
   const progressBarColor =
@@ -30,7 +32,7 @@ const GamificationCard = ({ data }: { data: GamificationData }) => {
           </span>
         </div>
         <div>
-          <h2 className="text-md font-semibold">Level {data.currentLevel}</h2>
+          <h2 className="text-md font-semibold">{t("level")} {data.currentLevel}</h2>
           <p className="text-xs text-gray-500">{data.totalXp} XP</p>
         </div>
       </div>
@@ -38,7 +40,7 @@ const GamificationCard = ({ data }: { data: GamificationData }) => {
       {/* Progress bar */}
       <div className="mb-3">
         <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Progress</span>
+          <span>{t("progress")}</span>
           <span>{progress.percentage}%</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -49,7 +51,7 @@ const GamificationCard = ({ data }: { data: GamificationData }) => {
         </div>
         {progress.nextLevelXp > 0 && (
           <p className="text-xs text-gray-400 mt-1">
-            {progress.currentXp} / {progress.nextLevelXp} XP to next level
+            {progress.currentXp} / {progress.nextLevelXp} {t("xpToNextLevel")}
           </p>
         )}
       </div>
@@ -59,12 +61,11 @@ const GamificationCard = ({ data }: { data: GamificationData }) => {
         <div className="flex items-center gap-1">
           <span className="text-orange-500 text-lg">&#128293;</span>
           <span className="text-sm font-medium">
-            {data.currentStreak} day{data.currentStreak !== 1 ? "s" : ""}
+            {data.currentStreak} {data.currentStreak !== 1 ? t("days") : t("day")}
           </span>
         </div>
         <span className="text-xs text-gray-400">
-          Longest: {data.longestStreak} day
-          {data.longestStreak !== 1 ? "s" : ""}
+          {t("longest")}: {data.longestStreak} {data.longestStreak !== 1 ? t("days") : t("day")}
         </span>
       </div>
 
@@ -73,7 +74,7 @@ const GamificationCard = ({ data }: { data: GamificationData }) => {
         href="/list/achievements"
         className="text-xs text-blue-600 hover:underline"
       >
-        View all achievements
+        {t("viewAllAchievements")}
       </Link>
     </div>
   );

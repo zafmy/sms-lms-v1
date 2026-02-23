@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -29,23 +30,24 @@ const typeColors: Record<string, string> = {
   GENERAL: "bg-gray-500",
 };
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, t: (key: string, params?: Record<string, number>) => string): string {
   const now = new Date();
   const date = new Date(dateStr);
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return t("justNow");
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t("minutesAgo", { minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("hoursAgo", { hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t("daysAgo", { days });
 }
 
 const NotificationDropdown = ({
   notifications,
   unreadCount,
 }: NotificationDropdownProps) => {
+  const t = useTranslations("notifications");
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -95,14 +97,14 @@ const NotificationDropdown = ({
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <span className="text-sm font-semibold text-gray-700">
-              Notifications
+              {t("title")}
             </span>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
                 className="text-xs text-purple-500 hover:text-purple-700"
               >
-                Mark all as read
+                {t("markAllRead")}
               </button>
             )}
           </div>
@@ -110,7 +112,7 @@ const NotificationDropdown = ({
           {/* Notification List */}
           {notifications.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-gray-400">
-              No notifications
+              {t("noNotifications")}
             </div>
           ) : (
             <div>
@@ -141,7 +143,7 @@ const NotificationDropdown = ({
                       {notification.message}
                     </p>
                     <p className="text-[10px] text-gray-400 mt-1">
-                      {timeAgo(notification.createdAt)}
+                      {timeAgo(notification.createdAt, t)}
                     </p>
                   </div>
                   {/* Unread Indicator */}

@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 
 const ChildQuickStats = async ({
   studentId,
@@ -7,6 +8,8 @@ const ChildQuickStats = async ({
   studentId: string;
   studentName: string;
 }) => {
+  const t = await getTranslations("dashboard.parent");
+
   // 1. Attendance (year-to-date)
   const attendance = await prisma.attendance.findMany({
     where: {
@@ -70,7 +73,7 @@ const ChildQuickStats = async ({
           <span className={`text-2xl font-bold ${attendanceColor}`}>
             {totalDays > 0 ? `${attendancePercentage}%` : "-"}
           </span>
-          <span className="text-xs text-gray-400">Attendance</span>
+          <span className="text-xs text-gray-400">{t("attendanceLabel")}</span>
         </div>
         {/* Latest Grade */}
         <div className="flex-1 flex flex-col items-center">
@@ -78,13 +81,13 @@ const ChildQuickStats = async ({
             {latestScore !== null ? latestScore : "-"}
           </span>
           <span className="text-xs text-gray-400 truncate max-w-[100px] text-center">
-            {latestTitle || "Latest Grade"}
+            {latestTitle || t("latestGrade")}
           </span>
         </div>
         {/* Pending Assignments */}
         <div className="flex-1 flex flex-col items-center">
           <span className="text-2xl font-bold">{pendingAssignments}</span>
-          <span className="text-xs text-gray-400">Due Soon</span>
+          <span className="text-xs text-gray-400">{t("dueSoon")}</span>
         </div>
       </div>
     </div>

@@ -11,6 +11,7 @@ import { createAttendance, updateAttendance } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const AttendanceForm = ({
   type,
@@ -23,6 +24,8 @@ const AttendanceForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const t = useTranslations("forms");
+
   const {
     register,
     handleSubmit,
@@ -47,9 +50,7 @@ const AttendanceForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(
-        `Attendance has been ${type === "create" ? "created" : "updated"}!`
-      );
+      toast(type === "create" ? t("messages.created", { entity: "Attendance" }) : t("messages.updated", { entity: "Attendance" }));
       setOpen(false);
       router.refresh();
     }
@@ -61,13 +62,13 @@ const AttendanceForm = ({
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
         {type === "create"
-          ? "Create a new attendance"
-          : "Update the attendance"}
+          ? t("attendance.createTitle")
+          : t("attendance.updateTitle")}
       </h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
-          label="Date"
+          label={t("labels.date")}
           name="date"
           defaultValue={data?.date}
           register={register}
@@ -75,7 +76,7 @@ const AttendanceForm = ({
           type="datetime-local"
         />
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Present</label>
+          <label className="text-xs text-gray-500">{t("labels.present")}</label>
           <input
             type="checkbox"
             {...register("present")}
@@ -89,7 +90,7 @@ const AttendanceForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Student</label>
+          <label className="text-xs text-gray-500">{t("labels.student")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("studentId")}
@@ -110,7 +111,7 @@ const AttendanceForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Lesson</label>
+          <label className="text-xs text-gray-500">{t("labels.lesson")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("lessonId")}
@@ -130,7 +131,7 @@ const AttendanceForm = ({
         </div>
         {data && (
           <InputField
-            label="Id"
+            label={t("labels.id")}
             name="id"
             defaultValue={data?.id}
             register={register}
@@ -140,10 +141,10 @@ const AttendanceForm = ({
         )}
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{t("common.somethingWentWrong")}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
+        {type === "create" ? t("common.create") : t("common.update")}
       </button>
     </form>
   );

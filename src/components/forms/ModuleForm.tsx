@@ -8,6 +8,7 @@ import { createModule, updateModule } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const ModuleForm = ({
   type,
@@ -20,6 +21,8 @@ const ModuleForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const t = useTranslations("forms");
+
   const {
     register,
     handleSubmit,
@@ -44,7 +47,7 @@ const ModuleForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`Module has been ${type === "create" ? "created" : "updated"}!`);
+      toast(type === "create" ? t("messages.created", { entity: "Module" }) : t("messages.updated", { entity: "Module" }));
       setOpen(false);
       router.refresh();
     }
@@ -55,19 +58,19 @@ const ModuleForm = ({
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new module" : "Update the module"}
+        {type === "create" ? t("modules.createTitle") : t("modules.updateTitle")}
       </h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
-          label="Title"
+          label={t("labels.title")}
           name="title"
           defaultValue={data?.title}
           register={register}
           error={errors?.title}
         />
         <InputField
-          label="Order"
+          label={t("labels.order")}
           name="order"
           type="number"
           defaultValue={data?.order}
@@ -76,7 +79,7 @@ const ModuleForm = ({
         />
         {data && (
           <InputField
-            label="Id"
+            label={t("labels.id")}
             name="id"
             defaultValue={data?.id}
             register={register}
@@ -85,7 +88,7 @@ const ModuleForm = ({
           />
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Description</label>
+          <label className="text-xs text-gray-500">{t("labels.description")}</label>
           <textarea
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("description")}
@@ -99,7 +102,7 @@ const ModuleForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Locked</label>
+          <label className="text-xs text-gray-500">{t("common.locked")}</label>
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -107,7 +110,7 @@ const ModuleForm = ({
               {...register("isLocked")}
               defaultChecked={data?.isLocked}
             />
-            <span className="text-sm text-gray-500">Lock this module</span>
+            <span className="text-sm text-gray-500">{t("common.lockModule")}</span>
           </div>
           {errors.isLocked?.message && (
             <p className="text-xs text-red-400">
@@ -116,7 +119,7 @@ const ModuleForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Course</label>
+          <label className="text-xs text-gray-500">{t("labels.course")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("courseId")}
@@ -138,10 +141,10 @@ const ModuleForm = ({
         </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{t("common.somethingWentWrong")}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
+        {type === "create" ? t("common.create") : t("common.update")}
       </button>
     </form>
   );

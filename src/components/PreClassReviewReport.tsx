@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 type StudentReviewData = {
   name: string;
   reviewsCompleted: number;
@@ -12,12 +14,13 @@ const PreClassReviewReport = ({
 }: {
   students: StudentReviewData[];
 }) => {
+  const t = useTranslations("spaced_repetition.analytics");
   if (students.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <p className="text-lg mb-2">No enrolled students</p>
+        <p className="text-lg mb-2">{t("noEnrolledStudents")}</p>
         <p className="text-sm">
-          Enroll students in this course to see their review engagement data.
+          {t("enrollStudentsMessage")}
         </p>
       </div>
     );
@@ -50,15 +53,15 @@ const PreClassReviewReport = ({
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">
-        Pre-Class Review Engagement (Last 2 Weeks)
+        {t("preClassReviewEngagement")}
       </h2>
       <table className="w-full">
         <thead>
           <tr className="text-left text-sm text-gray-500 border-b">
-            <th className="pb-2 px-2">Student Name</th>
-            <th className="pb-2 px-2">Reviews Completed</th>
-            <th className="pb-2 px-2">Completion Rate</th>
-            <th className="pb-2 px-2">Average Score</th>
+            <th className="pb-2 px-2">{t("studentName")}</th>
+            <th className="pb-2 px-2">{t("reviewsCompleted")}</th>
+            <th className="pb-2 px-2">{t("completionRate")}</th>
+            <th className="pb-2 px-2">{t("averageScore")}</th>
           </tr>
         </thead>
         <tbody>
@@ -78,7 +81,7 @@ const PreClassReviewReport = ({
             </tr>
           ))}
           <tr className="bg-gray-100 font-semibold">
-            <td className="py-3 px-2 text-sm">Class Average</td>
+            <td className="py-3 px-2 text-sm">{t("classAverage")}</td>
             <td className="py-3 px-2 text-sm">
               {classAverages.reviewsCompleted}
             </td>

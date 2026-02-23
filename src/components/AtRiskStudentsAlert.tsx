@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { computeAtRiskStatus, computeAverageQuizScore } from "@/lib/lmsAnalyticsUtils";
+import { getTranslations } from "next-intl/server";
 
 interface AtRiskStudent {
   studentId: string;
@@ -11,6 +12,7 @@ interface AtRiskStudent {
 }
 
 const AtRiskStudentsAlert = async ({ teacherId }: { teacherId: string }) => {
+  const t = await getTranslations("dashboard.teacher");
   const now = new Date();
 
   const courses = await prisma.course.findMany({
@@ -28,8 +30,8 @@ const AtRiskStudentsAlert = async ({ teacherId }: { teacherId: string }) => {
   if (courses.length === 0) {
     return (
       <div className="bg-white rounded-md p-4">
-        <h1 className="text-xl font-semibold">At-Risk Students</h1>
-        <p className="text-sm text-gray-400 mt-4">No active courses.</p>
+        <h1 className="text-xl font-semibold">{t("atRiskStudents")}</h1>
+        <p className="text-sm text-gray-400 mt-4">{t("noActiveCourses")}</p>
       </div>
     );
   }
@@ -94,8 +96,8 @@ const AtRiskStudentsAlert = async ({ teacherId }: { teacherId: string }) => {
   if (atRiskStudents.length === 0) {
     return (
       <div className="bg-white rounded-md p-4">
-        <h1 className="text-xl font-semibold">At-Risk Students</h1>
-        <p className="text-sm text-gray-400 mt-4">No at-risk students detected.</p>
+        <h1 className="text-xl font-semibold">{t("atRiskStudents")}</h1>
+        <p className="text-sm text-gray-400 mt-4">{t("noAtRisk")}</p>
       </div>
     );
   }
@@ -103,9 +105,9 @@ const AtRiskStudentsAlert = async ({ teacherId }: { teacherId: string }) => {
   return (
     <div className="bg-white rounded-md p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">At-Risk Students</h1>
+        <h1 className="text-xl font-semibold">{t("atRiskStudents")}</h1>
         <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
-          {atRiskStudents.length} alert{atRiskStudents.length !== 1 ? "s" : ""}
+          {t("alerts", { count: atRiskStudents.length })}
         </span>
       </div>
       <div className="flex flex-col gap-3 mt-4 max-h-72 overflow-y-auto">
@@ -114,7 +116,7 @@ const AtRiskStudentsAlert = async ({ teacherId }: { teacherId: string }) => {
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm font-medium">{s.name} {s.surname}</span>
               <span className="text-xs text-orange-600 font-bold">
-                {s.daysSinceLastActivity !== null ? `${s.daysSinceLastActivity}d ago` : "No activity"}
+                {s.daysSinceLastActivity !== null ? t("daysAgo", { days: s.daysSinceLastActivity }) : t("noActivity")}
               </span>
             </div>
             <p className="text-xs text-gray-500 mb-1">{s.courseName}</p>

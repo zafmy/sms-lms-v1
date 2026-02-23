@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+import { getIntlLocale } from "@/lib/formatUtils";
+
 type QuizResultsProps = {
   attempt: {
     id: number;
@@ -33,18 +36,21 @@ type QuizResultsProps = {
 };
 
 const QuizResults = ({ attempt }: QuizResultsProps) => {
+  const t = useTranslations("lms.quizzes");
+  const locale = useLocale();
+
   return (
     <div className="flex flex-col gap-6">
       {/* SCORE SUMMARY */}
       <div className="bg-gray-50 rounded-lg p-6 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">
-            Attempt #{attempt.attemptNumber}
+            {t("attemptNum", { number: attempt.attemptNumber })}
           </h2>
           {attempt.submittedAt && (
             <p className="text-sm text-gray-500">
-              Submitted:{" "}
-              {new Date(attempt.submittedAt).toLocaleString()}
+              {t("submitted")}{" "}
+              {new Date(attempt.submittedAt).toLocaleString(getIntlLocale(locale))}
             </p>
           )}
         </div>
@@ -61,7 +67,7 @@ const QuizResults = ({ attempt }: QuizResultsProps) => {
                   : "bg-red-100 text-red-700"
               }`}
             >
-              {attempt.passed ? "PASSED" : "FAILED"}
+              {attempt.passed ? t("passed") : t("failed")}
             </span>
           </div>
         </div>
@@ -99,7 +105,7 @@ const QuizResults = ({ attempt }: QuizResultsProps) => {
                 {response.question.type === "FILL_IN_BLANK" ? (
                   <>
                     <p>
-                      <span className="text-gray-500">Your answer: </span>
+                      <span className="text-gray-500">{t("yourAnswer")} </span>
                       <span
                         className={
                           response.isCorrect
@@ -107,12 +113,12 @@ const QuizResults = ({ attempt }: QuizResultsProps) => {
                             : "text-red-700 font-medium"
                         }
                       >
-                        {response.textResponse || "(no answer)"}
+                        {response.textResponse || t("noAnswer")}
                       </span>
                     </p>
                     {!response.isCorrect && correctOption && (
                       <p>
-                        <span className="text-gray-500">Correct answer: </span>
+                        <span className="text-gray-500">{t("correctAnswer")} </span>
                         <span className="text-green-700 font-medium">
                           {correctOption.text}
                         </span>
@@ -122,7 +128,7 @@ const QuizResults = ({ attempt }: QuizResultsProps) => {
                 ) : (
                   <>
                     <p>
-                      <span className="text-gray-500">Your answer: </span>
+                      <span className="text-gray-500">{t("yourAnswer")} </span>
                       <span
                         className={
                           response.isCorrect
@@ -130,12 +136,12 @@ const QuizResults = ({ attempt }: QuizResultsProps) => {
                             : "text-red-700 font-medium"
                         }
                       >
-                        {selectedOption?.text || "(no answer)"}
+                        {selectedOption?.text || t("noAnswer")}
                       </span>
                     </p>
                     {!response.isCorrect && correctOption && (
                       <p>
-                        <span className="text-gray-500">Correct answer: </span>
+                        <span className="text-gray-500">{t("correctAnswer")} </span>
                         <span className="text-green-700 font-medium">
                           {correctOption.text}
                         </span>

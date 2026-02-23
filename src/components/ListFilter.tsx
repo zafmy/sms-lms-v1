@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface FilterOption {
@@ -14,6 +15,7 @@ interface ListFilterProps {
 }
 
 const ListFilter = ({ paramKey, label, options }: ListFilterProps) => {
+  const t = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -41,7 +43,7 @@ const ListFilter = ({ paramKey, label, options }: ListFilterProps) => {
       onChange={handleChange}
       className="bg-white border border-gray-300 text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-lamaSky"
     >
-      <option value="">All {label}</option>
+      <option value="">{t("allLabel", { label })}</option>
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}

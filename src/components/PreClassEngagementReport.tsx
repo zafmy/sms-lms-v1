@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 import { categorizeStudentEngagement } from "@/lib/lmsAnalyticsUtils";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 interface StudentRow {
   studentId: string;
@@ -15,6 +17,9 @@ interface StudentRow {
 const WINDOW_DAYS = 14;
 
 const PreClassEngagementReport = async ({ teacherId }: { teacherId: string }) => {
+  const t = await getTranslations("dashboard.teacher");
+  const locale = await getLocale();
+
   const now = new Date();
   const cutoff = new Date(now.getTime() - WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
@@ -33,8 +38,8 @@ const PreClassEngagementReport = async ({ teacherId }: { teacherId: string }) =>
   if (courses.length === 0) {
     return (
       <div className="bg-white rounded-md p-4">
-        <h1 className="text-xl font-semibold">Pre-Class Engagement</h1>
-        <p className="text-sm text-gray-400 mt-4">No active courses.</p>
+        <h1 className="text-xl font-semibold">{t("preClassEngagement")}</h1>
+        <p className="text-sm text-gray-400 mt-4">{t("noActiveCourses")}</p>
       </div>
     );
   }
@@ -100,12 +105,12 @@ const PreClassEngagementReport = async ({ teacherId }: { teacherId: string }) =>
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Pre-Class Engagement</h1>
+      <h1 className="text-xl font-semibold">{t("preClassEngagement")}</h1>
       <p className="text-sm text-gray-500 mt-1">
-        {engagedCount} of {rows.length} students engaged in the last {WINDOW_DAYS} days.
+        {t("studentsEngaged", { count: engagedCount, total: rows.length, days: WINDOW_DAYS })}
       </p>
       {rows.length === 0 ? (
-        <p className="text-sm text-gray-400 mt-4">No enrolled students.</p>
+        <p className="text-sm text-gray-400 mt-4">{t("noEnrolledStudents")}</p>
       ) : (
         <div className="flex flex-col gap-2 mt-4 max-h-80 overflow-y-auto">
           {rows.map((row) => (
@@ -118,11 +123,11 @@ const PreClassEngagementReport = async ({ teacherId }: { teacherId: string }) =>
                 <div className="text-right">
                   <p className="text-xs text-gray-500">{row.lessonsCompleted}L / {row.quizAttemptCount}Q</p>
                   <p className="text-xs text-gray-400">
-                    {row.lastActivity ? row.lastActivity.toLocaleDateString() : "No activity"}
+                    {row.lastActivity ? row.lastActivity.toLocaleDateString(getIntlLocale(locale)) : t("noActivity")}
                   </p>
                 </div>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${row.status === "engaged" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                  {row.status === "engaged" ? "Engaged" : "Inactive"}
+                  {row.status === "engaged" ? t("engaged") : t("inactive")}
                 </span>
               </div>
             </div>

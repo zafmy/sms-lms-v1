@@ -10,6 +10,7 @@ import { Course, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 type CourseList = Course & {
   teacher: Teacher;
@@ -26,49 +27,50 @@ const CourseListPage = async ({
   const resolvedParams = await searchParams;
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const t = await getTranslations("entities");
 
   const columns = [
     {
-      header: "Code",
+      header: t("courses.code"),
       accessor: "code",
     },
     {
-      header: "Title",
+      header: t("common.title"),
       accessor: "title",
     },
     {
-      header: "Teacher",
+      header: t("common.teacher"),
       accessor: "teacher",
       className: "hidden md:table-cell",
     },
     {
-      header: "Subject",
+      header: t("common.subject"),
       accessor: "subject",
       className: "hidden md:table-cell",
     },
     ...(role !== "student"
       ? [
           {
-            header: "Status",
+            header: t("common.status"),
             accessor: "status",
             className: "hidden md:table-cell",
           },
         ]
       : []),
     {
-      header: "Modules",
+      header: t("courses.modules"),
       accessor: "modules",
       className: "hidden lg:table-cell",
     },
     {
-      header: "Enrollments",
+      header: t("courses.enrollments"),
       accessor: "enrollments",
       className: "hidden lg:table-cell",
     },
     ...(role === "student"
       ? [
           {
-            header: "Action",
+            header: t("courses.action"),
             accessor: "action",
           },
         ]
@@ -76,7 +78,7 @@ const CourseListPage = async ({
     ...(role === "admin" || role === "teacher"
       ? [
           {
-            header: "Actions",
+            header: t("common.actions"),
             accessor: "action",
           },
         ]
@@ -111,7 +113,11 @@ const CourseListPage = async ({
                   : "bg-gray-100 text-gray-700"
               }`}
             >
-              {item.status}
+              {item.status === "ACTIVE"
+                ? t("courses.active")
+                : item.status === "DRAFT"
+                ? t("courses.draft")
+                : t("courses.archived")}
             </span>
           </td>
         )}
@@ -224,7 +230,7 @@ const CourseListPage = async ({
       {/* TOP */}
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">
-          {role === "student" ? "Available Courses" : "All Courses"}
+          {role === "student" ? t("courses.pageTitleAvailable") : t("courses.pageTitleAll")}
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />

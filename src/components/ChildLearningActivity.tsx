@@ -1,27 +1,5 @@
 import prisma from "@/lib/prisma";
-
-// Format a date into a relative human-readable string
-function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSeconds = Math.floor(diffMs / 1000);
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
-  const diffWeeks = Math.floor(diffDays / 7);
-
-  if (diffSeconds < 60) return "just now";
-  if (diffMinutes < 60) {
-    return diffMinutes === 1 ? "1 minute ago" : `${diffMinutes} minutes ago`;
-  }
-  if (diffHours < 24) {
-    return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
-  }
-  if (diffDays < 7) {
-    return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`;
-  }
-  return diffWeeks === 1 ? "1 week ago" : `${diffWeeks} weeks ago`;
-}
+import { getTranslations } from "next-intl/server";
 
 interface ActivityEvent {
   date: Date;
@@ -35,6 +13,39 @@ const ChildLearningActivity = async ({
   studentId: string;
   studentName: string;
 }) => {
+  const t = await getTranslations("dashboard");
+
+  // Format a date into a relative human-readable string
+  function formatRelativeTime(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+
+    if (diffSeconds < 60) return t("common.justNow");
+    if (diffMinutes < 60) {
+      return diffMinutes === 1
+        ? t("common.minuteAgo", { count: 1 })
+        : t("common.minutesAgo", { count: diffMinutes });
+    }
+    if (diffHours < 24) {
+      return diffHours === 1
+        ? t("common.hourAgo", { count: 1 })
+        : t("common.hoursAgo", { count: diffHours });
+    }
+    if (diffDays < 7) {
+      return diffDays === 1
+        ? t("common.dayAgo", { count: 1 })
+        : t("common.daysAgo", { count: diffDays });
+    }
+    return diffWeeks === 1
+      ? t("common.weekAgo", { count: 1 })
+      : t("common.weeksAgo", { count: diffWeeks });
+  }
+
   // Fetch 3 types of LMS events in parallel
   const [completedLessons, quizAttempts, recentEnrollments] =
     await Promise.all([
@@ -102,7 +113,7 @@ const ChildLearningActivity = async ({
       const courseTitle = lp.lesson.module.course.title;
       events.push({
         date: new Date(lp.completedAt),
-        description: `Completed lesson "${lp.lesson.title}" in ${courseTitle}`,
+        description: t("common.completedLesson", { name: lp.lesson.title, course: courseTitle }),
       });
     }
   }
@@ -112,10 +123,10 @@ const ChildLearningActivity = async ({
       const quizTitle = qa.quiz.title;
       const courseTitle = qa.quiz.lesson.module.course.title;
       const pct = qa.percentage != null ? Math.round(qa.percentage) : 0;
-      const passLabel = qa.passed ? "Pass" : "Fail";
+      const passLabel = qa.passed ? t("common.passLabel") : t("common.failLabel");
       events.push({
         date: new Date(qa.submittedAt),
-        description: `Took quiz "${quizTitle}" in ${courseTitle} - scored ${pct}% (${passLabel})`,
+        description: t("common.tookQuiz", { name: quizTitle, course: courseTitle, score: pct, result: passLabel }),
       });
     }
   }
@@ -123,7 +134,7 @@ const ChildLearningActivity = async ({
   for (const enr of recentEnrollments) {
     events.push({
       date: new Date(enr.enrolledAt),
-      description: `Enrolled in ${enr.course.title}`,
+      description: t("common.enrolledIn", { course: enr.course.title }),
     });
   }
 
@@ -135,9 +146,9 @@ const ChildLearningActivity = async ({
     return (
       <div className="bg-white p-4 rounded-md">
         <h3 className="text-lg font-semibold">
-          {studentName} - Learning Activity
+          {studentName} - {t("parent.learningActivity")}
         </h3>
-        <p className="text-gray-400 mt-2 text-sm">No learning activity yet.</p>
+        <p className="text-gray-400 mt-2 text-sm">{t("parent.noLearningActivity")}</p>
       </div>
     );
   }
@@ -145,7 +156,7 @@ const ChildLearningActivity = async ({
   return (
     <div className="bg-white p-4 rounded-md">
       <h3 className="text-lg font-semibold">
-        {studentName} - Learning Activity
+        {studentName} - {t("parent.learningActivity")}
       </h3>
       <ul className="mt-3 space-y-2">
         {topEvents.map((event, idx) => (

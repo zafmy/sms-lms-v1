@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+import { getIntlLocale } from "@/lib/formatUtils";
+
 interface BadgeData {
   id: number;
   name: string;
@@ -9,12 +12,15 @@ interface BadgeData {
 }
 
 const RecentBadges = ({ badges }: { badges: BadgeData[] }) => {
+  const t = useTranslations("dashboard.student");
+  const locale = useLocale();
+
   if (badges.length === 0) {
     return (
       <div className="bg-white p-4 rounded-md">
-        <h2 className="text-lg font-semibold mb-2">Recent Badges</h2>
+        <h2 className="text-lg font-semibold mb-2">{t("recentBadges")}</h2>
         <p className="text-gray-400 text-sm">
-          No badges earned yet. Start learning!
+          {t("noBadgesYet")}
         </p>
       </div>
     );
@@ -22,7 +28,7 @@ const RecentBadges = ({ badges }: { badges: BadgeData[] }) => {
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h2 className="text-lg font-semibold mb-3">Recent Badges</h2>
+      <h2 className="text-lg font-semibold mb-3">{t("recentBadges")}</h2>
       <div className="flex flex-col gap-3">
         {badges.map((badge) => (
           <div
@@ -44,7 +50,7 @@ const RecentBadges = ({ badges }: { badges: BadgeData[] }) => {
             <div className="min-w-0">
               <p className="text-sm font-medium truncate">{badge.name}</p>
               <p className="text-xs text-gray-400">
-                {new Date(badge.earnedAt).toLocaleDateString()}
+                {new Date(badge.earnedAt).toLocaleDateString(getIntlLocale(locale))}
               </p>
             </div>
           </div>

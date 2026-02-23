@@ -1,10 +1,12 @@
 "use client";
 
 import type { AtRiskStudent } from "@/lib/lmsAnalyticsUtils";
+import { useLocale } from "next-intl";
+import { getIntlLocale } from "@/lib/formatUtils";
 
-const formatDate = (date: Date | null): string => {
+const formatDateWithLocale = (date: Date | null, locale: string): string => {
   if (!date) return "No activity";
-  return new Date(date).toLocaleDateString("en-US", {
+  return new Date(date).toLocaleDateString(getIntlLocale(locale), {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -22,6 +24,7 @@ const AtRiskStudentsList = ({
 }: {
   students: AtRiskStudent[];
 }) => {
+  const locale = useLocale();
   if (students.length === 0) {
     return (
       <div className="bg-white rounded-md p-4 border border-gray-100">
@@ -66,7 +69,7 @@ const AtRiskStudentsList = ({
                   {student.studentName}
                 </td>
                 <td className="py-2 px-3 text-gray-600">
-                  {formatDate(student.lastActivityDate)}
+                  {formatDateWithLocale(student.lastActivityDate, locale)}
                 </td>
                 <td className={`py-2 px-3 ${getDaysColor(student.daysInactive)}`}>
                   {student.daysInactive >= 999

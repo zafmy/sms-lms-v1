@@ -1,6 +1,9 @@
 import prisma from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 
 const StudentAttendanceCard = async ({ id }: { id: string }) => {
+  const t = await getTranslations("dashboard.student");
+
   const attendance = await prisma.attendance.findMany({
     where: {
       studentId: id,
@@ -16,7 +19,7 @@ const StudentAttendanceCard = async ({ id }: { id: string }) => {
   return (
     <div className="">
       <h1 className="text-xl font-semibold">{percentage || "-"}%</h1>
-      <span className="text-sm text-gray-400">Attendance</span>
+      <span className="text-sm text-gray-400">{t("attendanceLabel")}</span>
     </div>
   );
 };

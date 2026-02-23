@@ -1,7 +1,10 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 const PendingGrading = async ({ teacherId }: { teacherId: string }) => {
+  const t = await getTranslations("dashboard.teacher");
+
   const exams = await prisma.exam.findMany({
     where: {
       lesson: { teacherId },
@@ -54,9 +57,9 @@ const PendingGrading = async ({ teacherId }: { teacherId: string }) => {
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Pending Grading</h1>
+      <h1 className="text-xl font-semibold">{t("pendingGrading")}</h1>
       {nothingPending ? (
-        <p className="text-sm text-green-600 mt-4">All caught up!</p>
+        <p className="text-sm text-green-600 mt-4">{t("allCaughtUp")}</p>
       ) : (
         <div className="flex flex-col gap-4 mt-4">
           {/* Pending Exams */}
@@ -64,7 +67,7 @@ const PendingGrading = async ({ teacherId }: { teacherId: string }) => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">
-                  Exams ({pendingExamsList.length})
+                  {t("exams")} ({pendingExamsList.length})
                 </span>
               </div>
               {pendingExamsList.slice(0, 3).map((exam) => (
@@ -92,7 +95,7 @@ const PendingGrading = async ({ teacherId }: { teacherId: string }) => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">
-                  Assignments ({pendingAssignmentsList.length})
+                  {t("assignments")} ({pendingAssignmentsList.length})
                 </span>
               </div>
               {pendingAssignmentsList.slice(0, 3).map((assignment) => (

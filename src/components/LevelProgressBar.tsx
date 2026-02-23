@@ -4,6 +4,7 @@ import {
   computeLevelProgress,
   LEVEL_THRESHOLDS,
 } from "@/lib/gamificationUtils";
+import { useTranslations } from "next-intl";
 
 const LevelProgressBar = ({
   totalXp,
@@ -12,6 +13,7 @@ const LevelProgressBar = ({
   totalXp: number;
   currentLevel: number;
 }) => {
+  const t = useTranslations("gamification.xp");
   const progress = computeLevelProgress(totalXp);
   const maxXp = LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
 
@@ -24,12 +26,12 @@ const LevelProgressBar = ({
   return (
     <div className="bg-white p-4 rounded-md">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold">Level Progress</h2>
+        <h2 className="text-lg font-semibold">{t("levelProgress")}</h2>
         <div className="text-right">
           <span className="text-2xl font-bold text-purple-600">
-            Level {currentLevel}
+            {t("levelNum", { level: currentLevel })}
           </span>
-          <p className="text-xs text-gray-500">{totalXp} total XP</p>
+          <p className="text-xs text-gray-500">{t("totalXp", { xp: totalXp })}</p>
         </div>
       </div>
 
@@ -79,13 +81,13 @@ const LevelProgressBar = ({
       {/* Current level progress details */}
       {progress.nextLevelXp > 0 && (
         <p className="text-xs text-gray-500 text-center">
-          {progress.currentXp} / {progress.nextLevelXp} XP to Level{" "}
-          {currentLevel + 1}
+          {progress.currentXp} / {progress.nextLevelXp}{" "}
+          {t("xpToNextLevel", { level: currentLevel + 1 })}
         </p>
       )}
       {progress.nextLevelXp === 0 && (
         <p className="text-xs text-green-600 text-center font-medium">
-          Maximum level reached!
+          {t("maxLevelReached")}
         </p>
       )}
     </div>

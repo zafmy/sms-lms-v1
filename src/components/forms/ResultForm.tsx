@@ -14,6 +14,7 @@ import {
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const ResultForm = ({
   type,
@@ -26,6 +27,8 @@ const ResultForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const t = useTranslations("forms");
+
   const {
     register,
     handleSubmit,
@@ -52,7 +55,7 @@ const ResultForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`Result has been ${type === "create" ? "created" : "updated"}!`);
+      toast(type === "create" ? t("messages.created", { entity: "Result" }) : t("messages.updated", { entity: "Result" }));
       setOpen(false);
       router.refresh();
     }
@@ -63,12 +66,12 @@ const ResultForm = ({
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new result" : "Update the result"}
+        {type === "create" ? t("results.createTitle") : t("results.updateTitle")}
       </h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
-          label="Score"
+          label={t("labels.score")}
           name="score"
           defaultValue={data?.score}
           register={register}
@@ -77,7 +80,7 @@ const ResultForm = ({
         />
         {data && (
           <InputField
-            label="Id"
+            label={t("labels.id")}
             name="id"
             defaultValue={data?.id}
             register={register}
@@ -86,13 +89,13 @@ const ResultForm = ({
           />
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Exam</label>
+          <label className="text-xs text-gray-500">{t("labels.exam")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("examId")}
             defaultValue={data?.examId}
           >
-            <option value="">None</option>
+            <option value="">{t("common.none")}</option>
             {exams.map((exam: { id: number; title: string }) => (
               <option value={exam.id} key={exam.id}>
                 {exam.title}
@@ -106,13 +109,13 @@ const ResultForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Assignment</label>
+          <label className="text-xs text-gray-500">{t("labels.assignment")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("assignmentId")}
             defaultValue={data?.assignmentId}
           >
-            <option value="">None</option>
+            <option value="">{t("common.none")}</option>
             {assignments.map((assignment: { id: number; title: string }) => (
               <option value={assignment.id} key={assignment.id}>
                 {assignment.title}
@@ -126,7 +129,7 @@ const ResultForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Student</label>
+          <label className="text-xs text-gray-500">{t("labels.student")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("studentId")}
@@ -148,10 +151,10 @@ const ResultForm = ({
         </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{t("common.somethingWentWrong")}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
+        {type === "create" ? t("common.create") : t("common.update")}
       </button>
     </form>
   );

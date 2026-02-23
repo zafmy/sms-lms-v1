@@ -4,6 +4,7 @@ import { startQuizAttempt } from "@/lib/actions";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 const QuizPage = async ({
   params,
@@ -16,6 +17,8 @@ const QuizPage = async ({
   const { attempt: attemptParam } = await searchParams;
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const tc = await getTranslations("lms.courses");
+  const tq = await getTranslations("lms.quizzes");
 
   const quiz = await prisma.quiz.findUnique({
     where: { id: parseInt(quizId) },
@@ -66,7 +69,7 @@ const QuizPage = async ({
       <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
           <Link href="/list/courses" className="hover:text-lamaPurple">
-            Courses
+            {tc("breadcrumbCourses")}
           </Link>
           <span>/</span>
           <Link
@@ -85,11 +88,11 @@ const QuizPage = async ({
         )}
 
         <div className="flex gap-6 text-sm text-gray-500 mb-6">
-          <span>Questions: {quiz.questions.length}</span>
-          {quiz.timeLimit && <span>Time Limit: {quiz.timeLimit} min</span>}
-          <span>Max Attempts: {quiz.maxAttempts}</span>
-          <span>Pass Score: {quiz.passScore}%</span>
-          <span>Scoring: {quiz.scoringPolicy}</span>
+          <span>{tq("questionsCount", { count: quiz.questions.length })}</span>
+          {quiz.timeLimit && <span>{tq("timeLimitLabel", { minutes: quiz.timeLimit })}</span>}
+          <span>{tq("maxAttemptsLabel", { count: quiz.maxAttempts })}</span>
+          <span>{tq("passScoreLabel", { score: quiz.passScore })}</span>
+          <span>{tq("scoringLabel", { policy: quiz.scoringPolicy })}</span>
         </div>
 
         <div className="flex items-center gap-2 mb-4">
@@ -97,13 +100,13 @@ const QuizPage = async ({
             href={`/list/courses/${course.id}/quiz/${quiz.id}/results`}
             className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md text-sm hover:bg-blue-200"
           >
-            View Results
+            {tq("viewResults")}
           </Link>
         </div>
 
-        <h2 className="text-lg font-semibold mb-3">Questions</h2>
+        <h2 className="text-lg font-semibold mb-3">{tq("questionsHeading")}</h2>
         {quiz.questions.length === 0 ? (
-          <p className="text-gray-400 text-sm">No questions added yet.</p>
+          <p className="text-gray-400 text-sm">{tq("noQuestionsYet")}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {quiz.questions.map((q, i) => (
@@ -117,7 +120,7 @@ const QuizPage = async ({
                     {q.text}
                   </span>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                    {q.points} pt{q.points !== 1 ? "s" : ""} | {q.type}
+                    {tq("ptAbbrev", { points: q.points, suffix: q.points !== 1 ? "s" : "" })} | {q.type}
                   </span>
                 </div>
               </div>
@@ -198,7 +201,7 @@ const QuizPage = async ({
         <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
             <Link href="/list/courses" className="hover:text-lamaPurple">
-              Courses
+              {tc("breadcrumbCourses")}
             </Link>
             <span>/</span>
             <Link
@@ -248,13 +251,12 @@ const QuizPage = async ({
   };
 
   const displayScore = getDisplayScore();
-  const hasPassed = studentAttempts.some((a) => a.passed);
 
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
         <Link href="/list/courses" className="hover:text-lamaPurple">
-          Courses
+          {tc("breadcrumbCourses")}
         </Link>
         <span>/</span>
         <Link
@@ -273,15 +275,15 @@ const QuizPage = async ({
       )}
 
       <div className="flex gap-6 text-sm text-gray-500 mb-6">
-        <span>Questions: {quiz.questions.length}</span>
-        {quiz.timeLimit && <span>Time Limit: {quiz.timeLimit} min</span>}
-        <span>Pass Score: {quiz.passScore}%</span>
+        <span>{tq("questionsCount", { count: quiz.questions.length })}</span>
+        {quiz.timeLimit && <span>{tq("timeLimitLabel", { minutes: quiz.timeLimit })}</span>}
+        <span>{tq("passScoreLabel", { score: quiz.passScore })}</span>
       </div>
 
       {/* Previous attempts info */}
       {studentAttempts.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Your Attempts</h2>
+          <h2 className="text-lg font-semibold mb-2">{tq("yourAttempts")}</h2>
           <div className="flex flex-col gap-2">
             {studentAttempts
               .filter((a) => a.submittedAt)
@@ -290,7 +292,7 @@ const QuizPage = async ({
                   key={a.id}
                   className="flex items-center justify-between border border-gray-200 rounded-md p-3 text-sm"
                 >
-                  <span>Attempt #{a.attemptNumber}</span>
+                  <span>{tq("attemptNum", { number: a.attemptNumber })}</span>
                   <div className="flex items-center gap-3">
                     <span>{a.percentage}%</span>
                     <span
@@ -300,7 +302,7 @@ const QuizPage = async ({
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {a.passed ? "PASSED" : "FAILED"}
+                      {a.passed ? tq("passed") : tq("failed")}
                     </span>
                   </div>
                 </div>
@@ -308,7 +310,7 @@ const QuizPage = async ({
           </div>
           {displayScore !== null && (
             <p className="text-sm text-gray-500 mt-2">
-              Score ({quiz.scoringPolicy.toLowerCase()}):{" "}
+              {tq("scorePolicy", { policy: quiz.scoringPolicy.toLowerCase() })}{" "}
               <span className="font-medium">{displayScore}%</span>
             </p>
           )}
@@ -319,22 +321,21 @@ const QuizPage = async ({
       <div className="flex items-center gap-4">
         {maxReached ? (
           <p className="text-sm text-gray-500">
-            Maximum attempts reached ({quiz.maxAttempts}/{quiz.maxAttempts}).
+            {tq("maxAttemptsReached", { used: quiz.maxAttempts, max: quiz.maxAttempts })}
           </p>
         ) : activeAttempt ? (
           <Link
             href={`/list/courses/${id}/quiz/${quizId}?attempt=${activeAttempt.id}`}
             className="px-6 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
           >
-            Continue Quiz
+            {tq("continueQuiz")}
           </Link>
         ) : (
           <Link
             href={`/list/courses/${id}/quiz/${quizId}?attempt=start`}
             className="px-6 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600"
           >
-            Start Quiz (Attempt {studentAttempts.length + 1} of{" "}
-            {quiz.maxAttempts})
+            {tq("startQuiz", { current: studentAttempts.length + 1, max: quiz.maxAttempts })}
           </Link>
         )}
 
@@ -343,7 +344,7 @@ const QuizPage = async ({
             href={`/list/courses/${id}/quiz/${quizId}/results`}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200"
           >
-            View Results
+            {tq("viewResults")}
           </Link>
         )}
       </div>

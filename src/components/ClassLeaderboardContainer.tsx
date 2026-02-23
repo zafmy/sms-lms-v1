@@ -4,12 +4,15 @@ import {
   computeWeeklyXp,
 } from "@/lib/gamificationUtils";
 import ClassLeaderboard from "./ClassLeaderboard";
+import { getTranslations } from "next-intl/server";
 
 const ClassLeaderboardContainer = async ({
   teacherId,
 }: {
   teacherId: string;
 }) => {
+  const t = await getTranslations("dashboard.teacher");
+
   // Find distinct classIds for lessons taught by this teacher
   const lessons = await prisma.lesson.findMany({
     where: { teacherId },
@@ -22,8 +25,8 @@ const ClassLeaderboardContainer = async ({
   if (classIds.length === 0) {
     return (
       <div className="bg-white p-4 rounded-md">
-        <h3 className="text-lg font-semibold">Class Leaderboard</h3>
-        <p className="text-gray-400 text-sm mt-2">No student data available</p>
+        <h3 className="text-lg font-semibold">{t("classLeaderboard")}</h3>
+        <p className="text-gray-400 text-sm mt-2">{t("noStudentData")}</p>
       </div>
     );
   }

@@ -1,4 +1,6 @@
 import prisma from "@/lib/prisma";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const bgColors = [
   "bg-lamaSkyLight",
@@ -13,11 +15,14 @@ const RecentActivity = async ({
 }: {
   studentIds: string[];
 }) => {
+  const t = await getTranslations("dashboard.parent");
+  const locale = await getLocale();
+
   if (studentIds.length === 0) {
     return (
       <div className="bg-white rounded-md p-4">
-        <h1 className="text-xl font-semibold">Recent Activity</h1>
-        <p className="text-gray-400 mt-4">No recent activity</p>
+        <h1 className="text-xl font-semibold">{t("recentActivity")}</h1>
+        <p className="text-gray-400 mt-4">{t("noRecentActivity")}</p>
       </div>
     );
   }
@@ -60,7 +65,7 @@ const RecentActivity = async ({
     return {
       type: "grade",
       studentName: r.student.name,
-      description: `Scored ${r.score} on ${title}`,
+      description: `${t("scored")} ${r.score} on ${title}`,
       date: new Date(),
       id: `grade-${r.id}`,
     };
@@ -69,7 +74,7 @@ const RecentActivity = async ({
   const attendanceActivities: ActivityItem[] = attendanceRecords.map((a) => ({
     type: "attendance",
     studentName: a.student.name,
-    description: `${a.present ? "Present" : "Absent"} in ${a.lesson.name}`,
+    description: `${a.present ? t("present") : t("absent")} in ${a.lesson.name}`,
     date: a.date,
     present: a.present,
     id: `attendance-${a.id}`,
@@ -83,15 +88,15 @@ const RecentActivity = async ({
   if (allActivities.length === 0) {
     return (
       <div className="bg-white rounded-md p-4">
-        <h1 className="text-xl font-semibold">Recent Activity</h1>
-        <p className="text-gray-400 mt-4">No recent activity</p>
+        <h1 className="text-xl font-semibold">{t("recentActivity")}</h1>
+        <p className="text-gray-400 mt-4">{t("noRecentActivity")}</p>
       </div>
     );
   }
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Recent Activity</h1>
+      <h1 className="text-xl font-semibold">{t("recentActivity")}</h1>
       <div className="flex flex-col gap-4 mt-4">
         {allActivities.map((activity, index) => (
           <div
@@ -113,7 +118,7 @@ const RecentActivity = async ({
               {activity.description}
             </p>
             <span className="text-xs text-gray-400">
-              {new Intl.DateTimeFormat("en-GB").format(activity.date)}
+              {new Intl.DateTimeFormat(getIntlLocale(locale)).format(activity.date)}
             </span>
           </div>
         ))}

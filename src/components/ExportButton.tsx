@@ -1,9 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
 const ExportButton = ({ table }: { table: string }) => {
+  const t = useTranslations("common");
   const [loading, setLoading] = useState(false);
 
   const handleExport = async () => {
@@ -37,7 +39,7 @@ const ExportButton = ({ table }: { table: string }) => {
       onClick={handleExport}
       disabled={loading}
       className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow disabled:opacity-50"
-      title="Export CSV"
+      title={t("exportCsv")}
     >
       {loading ? (
         <span className="text-xs">...</span>

@@ -1,11 +1,14 @@
 import prisma from "@/lib/prisma";
 import { formatTimeSpent } from "@/lib/lmsAnalyticsUtils";
+import { getTranslations } from "next-intl/server";
 
 const LmsProgressOverview = async ({
   studentId,
 }: {
   studentId: string;
 }) => {
+  const t = await getTranslations("dashboard.student");
+
   // Fetch ACTIVE enrollments with course modules and lessons
   const enrollments = await prisma.enrollment.findMany({
     where: { studentId, status: "ACTIVE" },
@@ -68,12 +71,12 @@ const LmsProgressOverview = async ({
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h2 className="text-lg font-semibold mb-3">Learning Progress</h2>
+      <h2 className="text-lg font-semibold mb-3">{t("learningProgress")}</h2>
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Enrolled Courses */}
         <div className="text-center">
           <p className="text-2xl font-bold text-blue-600">{totalCourses}</p>
-          <p className="text-xs text-gray-500">Enrolled Courses</p>
+          <p className="text-xs text-gray-500">{t("enrolledCourses")}</p>
         </div>
 
         {/* Avg Completion */}
@@ -81,7 +84,7 @@ const LmsProgressOverview = async ({
           <p className={`text-2xl font-bold ${completionColor}`}>
             {avgCompletion}%
           </p>
-          <p className="text-xs text-gray-500">Avg Completion</p>
+          <p className="text-xs text-gray-500">{t("avgCompletion")}</p>
         </div>
 
         {/* Lessons Completed */}
@@ -89,7 +92,7 @@ const LmsProgressOverview = async ({
           <p className="text-2xl font-bold text-purple-600">
             {completedLessons}
           </p>
-          <p className="text-xs text-gray-500">Lessons Done</p>
+          <p className="text-xs text-gray-500">{t("lessonsDone")}</p>
         </div>
 
         {/* Total Time Spent */}
@@ -97,7 +100,7 @@ const LmsProgressOverview = async ({
           <p className="text-2xl font-bold text-gray-700">
             {formatTimeSpent(totalTimeSeconds)}
           </p>
-          <p className="text-xs text-gray-500">Time Spent</p>
+          <p className="text-xs text-gray-500">{t("timeSpent")}</p>
         </div>
       </div>
     </div>

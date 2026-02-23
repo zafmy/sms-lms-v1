@@ -5,6 +5,7 @@ import { startLessonProgress } from "@/lib/actions";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 const LessonViewerPage = async ({
   params,
@@ -14,6 +15,7 @@ const LessonViewerPage = async ({
   const { id, lessonId } = await params;
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const t = await getTranslations("lms.courses");
 
   const lesson = await prisma.lmsLesson.findUnique({
     where: { id: parseInt(lessonId) },
@@ -118,7 +120,7 @@ const LessonViewerPage = async ({
           href="/list/courses"
           className="hover:text-lamaPurple"
         >
-          Courses
+          {t("breadcrumbCourses")}
         </Link>
         <span>/</span>
         <Link
@@ -142,7 +144,7 @@ const LessonViewerPage = async ({
               {lesson.contentType}
             </span>
             {lesson.estimatedMinutes && (
-              <span>{lesson.estimatedMinutes} min estimated</span>
+              <span>{t("minEstimated", { minutes: lesson.estimatedMinutes })}</span>
             )}
           </div>
         </div>
@@ -174,7 +176,7 @@ const LessonViewerPage = async ({
               rel="noopener noreferrer"
               className="text-lamaPurple hover:underline flex items-center gap-1"
             >
-              External Resource
+              {t("externalResource")}
               <span className="text-xs">&#8599;</span>
             </a>
           )}
@@ -191,7 +193,7 @@ const LessonViewerPage = async ({
       {/* QUIZZES */}
       {lesson.quizzes.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-3">Quizzes</h2>
+          <h2 className="text-lg font-semibold mb-3">{t("quizzesHeading")}</h2>
           <div className="flex flex-col gap-3">
             {lesson.quizzes.map((quiz) => (
               <QuizCard

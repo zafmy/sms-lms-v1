@@ -13,6 +13,7 @@ import {
 } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const BadgeForm = ({
   type,
@@ -25,6 +26,8 @@ const BadgeForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const t = useTranslations("forms");
+
   const {
     register,
     handleSubmit,
@@ -49,7 +52,7 @@ const BadgeForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`Badge has been ${type === "create" ? "created" : "updated"}!`);
+      toast(type === "create" ? t("messages.created", { entity: "Badge" }) : t("messages.updated", { entity: "Badge" }));
       setOpen(false);
       router.refresh();
     }
@@ -58,12 +61,12 @@ const BadgeForm = ({
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new badge" : "Update the badge"}
+        {type === "create" ? t("badges.createTitle") : t("badges.updateTitle")}
       </h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
-          label="Badge Name"
+          label={t("labels.badgeName")}
           name="name"
           defaultValue={data?.name}
           register={register}
@@ -71,7 +74,7 @@ const BadgeForm = ({
         />
         {data && (
           <InputField
-            label="Id"
+            label={t("labels.id")}
             name="id"
             defaultValue={data?.id}
             register={register}
@@ -80,7 +83,7 @@ const BadgeForm = ({
           />
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Description</label>
+          <label className="text-xs text-gray-500">{t("labels.description")}</label>
           <textarea
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("description")}
@@ -94,25 +97,25 @@ const BadgeForm = ({
           )}
         </div>
         <InputField
-          label="Icon URL"
+          label={t("labels.iconUrl")}
           name="iconUrl"
           defaultValue={data?.iconUrl}
           register={register}
           error={errors?.iconUrl}
         />
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Category</label>
+          <label className="text-xs text-gray-500">{t("labels.category")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("category")}
             defaultValue={data?.category}
           >
-            <option value="">Select category</option>
-            <option value="streak">Streak</option>
-            <option value="quiz">Quiz</option>
-            <option value="course">Course</option>
-            <option value="xp">XP</option>
-            <option value="special">Special</option>
+            <option value="">{t("common.selectCategory")}</option>
+            <option value="streak">{t("badges.streak")}</option>
+            <option value="quiz">{t("badges.quiz")}</option>
+            <option value="course">{t("badges.course")}</option>
+            <option value="xp">{t("badges.xp")}</option>
+            <option value="special">{t("badges.special")}</option>
           </select>
           {errors.category?.message && (
             <p className="text-xs text-red-400">
@@ -121,7 +124,7 @@ const BadgeForm = ({
           )}
         </div>
         <InputField
-          label="Threshold"
+          label={t("labels.threshold")}
           name="threshold"
           defaultValue={data?.threshold}
           register={register}
@@ -129,7 +132,7 @@ const BadgeForm = ({
           type="number"
         />
         <InputField
-          label="XP Reward"
+          label={t("labels.xpReward")}
           name="xpReward"
           defaultValue={data?.xpReward}
           register={register}
@@ -138,10 +141,10 @@ const BadgeForm = ({
         />
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{t("common.somethingWentWrong")}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
+        {type === "create" ? t("common.create") : t("common.update")}
       </button>
     </form>
   );

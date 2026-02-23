@@ -7,11 +7,13 @@ import {
   computeCardDistribution,
 } from "@/lib/spacedRepetitionUtils";
 import ReviewQueue from "@/components/ReviewQueue";
+import { getTranslations } from "next-intl/server";
 
 const ReviewsPage = async () => {
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!userId || role !== "student") return null;
+  const t = await getTranslations("entities");
 
   // Fetch active review cards with subject info
   const cards = await prisma.reviewCard.findMany({
@@ -61,7 +63,7 @@ const ReviewsPage = async () => {
   const masteryData = Array.from(mastery.entries()).map(
     ([subjectId, pct]) => ({
       subjectId,
-      subjectName: subjectNames.get(subjectId) || "Unknown",
+      subjectName: subjectNames.get(subjectId) || t("reviews.unknown"),
       percentage: pct,
     })
   );
@@ -75,7 +77,7 @@ const ReviewsPage = async () => {
 
   return (
     <div className="p-4 flex flex-col gap-4">
-      <h1 className="text-xl font-semibold">Review Cards</h1>
+      <h1 className="text-xl font-semibold">{t("reviews.pageTitle")}</h1>
       <ReviewQueue
         totalDue={totalDue}
         estimatedMinutes={Math.ceil(estimatedSeconds / 60)}

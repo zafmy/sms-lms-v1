@@ -8,6 +8,7 @@ import { createCourse, updateCourse } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const CourseForm = ({
   type,
@@ -20,6 +21,8 @@ const CourseForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const t = useTranslations("forms");
+
   const {
     register,
     handleSubmit,
@@ -44,7 +47,7 @@ const CourseForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`Course has been ${type === "create" ? "created" : "updated"}!`);
+      toast(type === "create" ? t("messages.created", { entity: "Course" }) : t("messages.updated", { entity: "Course" }));
       setOpen(false);
       router.refresh();
     }
@@ -55,19 +58,19 @@ const CourseForm = ({
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new course" : "Update the course"}
+        {type === "create" ? t("courses.createTitle") : t("courses.updateTitle")}
       </h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
-          label="Title"
+          label={t("labels.title")}
           name="title"
           defaultValue={data?.title}
           register={register}
           error={errors?.title}
         />
         <InputField
-          label="Code"
+          label={t("labels.code")}
           name="code"
           defaultValue={data?.code}
           register={register}
@@ -75,7 +78,7 @@ const CourseForm = ({
         />
         {data && (
           <InputField
-            label="Id"
+            label={t("labels.id")}
             name="id"
             defaultValue={data?.id}
             register={register}
@@ -84,7 +87,7 @@ const CourseForm = ({
           />
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Description</label>
+          <label className="text-xs text-gray-500">{t("labels.description")}</label>
           <textarea
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("description")}
@@ -98,15 +101,15 @@ const CourseForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Status</label>
+          <label className="text-xs text-gray-500">{t("labels.status")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("status")}
             defaultValue={data?.status || "DRAFT"}
           >
-            <option value="DRAFT">Draft</option>
-            <option value="ACTIVE">Active</option>
-            <option value="ARCHIVED">Archived</option>
+            <option value="DRAFT">{t("courses.draft")}</option>
+            <option value="ACTIVE">{t("courses.active")}</option>
+            <option value="ARCHIVED">{t("courses.archived")}</option>
           </select>
           {errors.status?.message && (
             <p className="text-xs text-red-400">
@@ -115,7 +118,7 @@ const CourseForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Teacher</label>
+          <label className="text-xs text-gray-500">{t("labels.teacher")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("teacherId")}
@@ -136,7 +139,7 @@ const CourseForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Subject</label>
+          <label className="text-xs text-gray-500">{t("labels.subject")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("subjectId")}
@@ -157,7 +160,7 @@ const CourseForm = ({
           )}
         </div>
         <InputField
-          label="Max Enrollments"
+          label={t("labels.maxEnrollments")}
           name="maxEnrollments"
           defaultValue={data?.maxEnrollments}
           register={register}
@@ -166,10 +169,10 @@ const CourseForm = ({
         />
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{t("common.somethingWentWrong")}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
+        {type === "create" ? t("common.create") : t("common.update")}
       </button>
     </form>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 interface ReviewQueueProps {
   totalDue: number;
@@ -29,19 +31,25 @@ const ReviewQueue = ({
   masteryData,
   recentSessions,
 }: ReviewQueueProps) => {
+  const tReviews = useTranslations("spaced_repetition.reviews");
+  const tCards = useTranslations("spaced_repetition.cards");
+  const tSessions = useTranslations("spaced_repetition.sessions");
+  const tAnalytics = useTranslations("spaced_repetition.analytics");
+  const tXp = useTranslations("gamification.xp");
+  const locale = useLocale();
   const maxDistribution = Math.max(...distribution, 1);
 
   if (totalDue === 0) {
     return (
       <div className="bg-white p-6 rounded-md shadow-sm text-center">
-        <h2 className="text-lg font-semibold mb-2">No Reviews Due</h2>
+        <h2 className="text-lg font-semibold mb-2">{tReviews("noReviewsDue")}</h2>
         <p className="text-gray-500">
-          Great job staying on top of your studies!
+          {tReviews("greatJob")}
         </p>
         {/* Show card distribution and mastery even when no cards are due */}
         {distribution.some((d) => d > 0) && (
           <div className="mt-6 text-left">
-            <h3 className="text-md font-medium mb-2">Your Card Collection</h3>
+            <h3 className="text-md font-medium mb-2">{tCards("yourCardCollection")}</h3>
             <div className="flex gap-2 items-end h-24">
               {distribution.map((count, i) => (
                 <div key={i} className="flex flex-col items-center flex-1">
@@ -58,7 +66,7 @@ const ReviewQueue = ({
                     }}
                   />
                   <span className="text-xs mt-1">{count}</span>
-                  <span className="text-xs text-gray-500">Box {i + 1}</span>
+                  <span className="text-xs text-gray-500">{tCards("box", { number: i + 1 })}</span>
                 </div>
               ))}
             </div>
@@ -75,17 +83,17 @@ const ReviewQueue = ({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold">
-              {totalDue} cards due for review
+              {tReviews("cardsDueForReview", { count: totalDue })}
             </h2>
             <p className="text-gray-500 text-sm">
-              ~{estimatedMinutes} minutes estimated
+              {tReviews("minutesEstimated", { minutes: estimatedMinutes })}
             </p>
           </div>
           <Link
             href="/list/reviews/session"
             className="bg-lamaSky text-gray-700 px-6 py-2 rounded-md hover:opacity-90 transition font-medium"
           >
-            Start Review
+            {tReviews("startReview")}
           </Link>
         </div>
 
@@ -104,7 +112,7 @@ const ReviewQueue = ({
 
       {/* Card distribution */}
       <div className="bg-white p-4 rounded-md shadow-sm">
-        <h3 className="text-md font-medium mb-3">Card Distribution</h3>
+        <h3 className="text-md font-medium mb-3">{tCards("cardDistribution")}</h3>
         <div className="flex gap-2 items-end h-24">
           {distribution.map((count, i) => (
             <div key={i} className="flex flex-col items-center flex-1">
@@ -121,7 +129,7 @@ const ReviewQueue = ({
                 }}
               />
               <span className="text-xs mt-1">{count}</span>
-              <span className="text-xs text-gray-500">Box {i + 1}</span>
+              <span className="text-xs text-gray-500">{tCards("box", { number: i + 1 })}</span>
             </div>
           ))}
         </div>
@@ -130,7 +138,7 @@ const ReviewQueue = ({
       {/* Subject mastery */}
       {masteryData.length > 0 && (
         <div className="bg-white p-4 rounded-md shadow-sm">
-          <h3 className="text-md font-medium mb-3">Subject Mastery</h3>
+          <h3 className="text-md font-medium mb-3">{tAnalytics("subjectMastery")}</h3>
           <div className="space-y-2">
             {masteryData.map(({ subjectId, subjectName, percentage }) => (
               <div key={subjectId}>
@@ -161,7 +169,7 @@ const ReviewQueue = ({
       {/* Recent sessions */}
       {recentSessions.length > 0 && (
         <div className="bg-white p-4 rounded-md shadow-sm">
-          <h3 className="text-md font-medium mb-3">Recent Sessions</h3>
+          <h3 className="text-md font-medium mb-3">{tSessions("recentSessions")}</h3>
           <div className="space-y-2">
             {recentSessions.map((session) => (
               <div
@@ -169,12 +177,12 @@ const ReviewQueue = ({
                 className="flex justify-between text-sm border-b pb-2"
               >
                 <span>
-                  {new Date(session.completedAt).toLocaleDateString()}
+                  {new Date(session.completedAt).toLocaleDateString(getIntlLocale(locale))}
                 </span>
                 <span>
-                  {session.correctCards}/{session.totalCards} correct
+                  {tSessions("correctOfTotal", { correct: session.correctCards, total: session.totalCards })}
                 </span>
-                <span className="text-blue-600">+{session.xpEarned} XP</span>
+                <span className="text-blue-600">{tXp("xpEarned", { xp: session.xpEarned })}</span>
               </div>
             ))}
           </div>

@@ -1,6 +1,9 @@
 import prisma from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 
 const RecentGrades = async ({ studentId }: { studentId: string }) => {
+  const t = await getTranslations("dashboard.student");
+
   const results = await prisma.result.findMany({
     where: { studentId },
     take: 5,
@@ -13,16 +16,16 @@ const RecentGrades = async ({ studentId }: { studentId: string }) => {
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Recent Grades</h1>
+      <h1 className="text-xl font-semibold">{t("recentGrades")}</h1>
       {results.length === 0 ? (
-        <p className="text-gray-400 mt-4">No grades yet</p>
+        <p className="text-gray-400 mt-4">{t("noGradesYet")}</p>
       ) : (
         <div className="flex flex-col gap-4 mt-4">
           {results.map((result) => {
             const title =
               result.exam?.title ||
               result.assignment?.title ||
-              "Unknown";
+              t("unknown");
             const isExam = result.examId !== null;
 
             return (
@@ -34,11 +37,11 @@ const RecentGrades = async ({ studentId }: { studentId: string }) => {
                   <span className="font-medium">{title}</span>
                   {isExam ? (
                     <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
-                      Exam
+                      {t("exam")}
                     </span>
                   ) : (
                     <span className="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-700">
-                      Assignment
+                      {t("assignment")}
                     </span>
                   )}
                 </div>

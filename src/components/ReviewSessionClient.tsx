@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { submitCardReview, completeReviewSession } from "@/lib/reviewActions";
 
 interface Card {
@@ -23,6 +24,7 @@ const ReviewSessionClient = ({
   cards,
 }: ReviewSessionClientProps) => {
   const router = useRouter();
+  const t = useTranslations("spaced_repetition.cards");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -152,7 +154,7 @@ const ReviewSessionClient = ({
       <div className="mb-4">
         <div className="flex justify-between text-sm text-gray-500 mb-1">
           <span>
-            Card {progress + 1} of {total}
+            {t("cardOfTotal", { current: progress + 1, total })}
           </span>
           <span>{currentCard.subjectName}</span>
         </div>
@@ -173,7 +175,7 @@ const ReviewSessionClient = ({
         role="button"
         tabIndex={0}
         aria-label={
-          isFlipped ? "Card answer shown" : "Click to reveal answer"
+          isFlipped ? t("cardAnswerShown") : t("clickToReveal")
         }
       >
         {!isFlipped ? (
@@ -183,17 +185,17 @@ const ReviewSessionClient = ({
             </span>
             <p className="text-lg text-center">{currentCard.front}</p>
             <p className="text-sm text-gray-400 mt-6">
-              Click or press Space to reveal
+              {t("clickOrPressSpace")}
             </p>
           </>
         ) : (
           <>
-            <span className="text-xs text-gray-400 mb-2">Question</span>
+            <span className="text-xs text-gray-400 mb-2">{t("question")}</span>
             <p className="text-sm text-gray-500 mb-4 text-center">
               {currentCard.front}
             </p>
             <hr className="w-full mb-4" />
-            <span className="text-xs text-gray-400 mb-2">Answer</span>
+            <span className="text-xs text-gray-400 mb-2">{t("answer")}</span>
             <p className="text-lg text-center">{currentCard.back}</p>
           </>
         )}
@@ -207,21 +209,21 @@ const ReviewSessionClient = ({
             disabled={isSubmitting}
             className="px-6 py-3 rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 transition font-medium"
           >
-            Hard (1)
+            {t("hard")}
           </button>
           <button
             onClick={() => handleRate("OK")}
             disabled={isSubmitting}
             className="px-6 py-3 rounded-md bg-yellow-100 text-yellow-700 hover:bg-yellow-200 disabled:opacity-50 transition font-medium"
           >
-            OK (2)
+            {t("ok")}
           </button>
           <button
             onClick={() => handleRate("EASY")}
             disabled={isSubmitting}
             className="px-6 py-3 rounded-md bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 transition font-medium"
           >
-            Easy (3)
+            {t("easy")}
           </button>
         </div>
       )}
@@ -229,8 +231,8 @@ const ReviewSessionClient = ({
       {/* Keyboard hints */}
       <p className="text-xs text-gray-400 text-center mt-3">
         {!isFlipped
-          ? "Space/Enter to flip"
-          : "H/1 = Hard, O/2 = OK, E/3 = Easy"}
+          ? t("keyboardFlip")
+          : t("keyboardRate")}
       </p>
     </div>
   );

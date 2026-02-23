@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import LearningActivityHeatmap from "./LearningActivityHeatmap";
 
 interface ReviewStreakCalendarProps {
@@ -7,9 +8,10 @@ interface ReviewStreakCalendarProps {
 }
 
 const ReviewStreakCalendar = ({ data }: ReviewStreakCalendarProps) => {
+  const t = useTranslations("spaced_repetition.reviews");
   return (
     <div>
-      <h3 className="text-md font-medium mb-2">Review Activity</h3>
+      <h3 className="text-md font-medium mb-2">{t("reviewActivity")}</h3>
       <LearningActivityHeatmap data={data} />
     </div>
   );

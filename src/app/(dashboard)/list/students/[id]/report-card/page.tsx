@@ -9,6 +9,8 @@ import PrintButton from "@/components/PrintButton";
 import { auth } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { getLocale } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const ReportCardPage = async ({
   params,
@@ -61,8 +63,9 @@ const ReportCardPage = async ({
   const results = await fetchStudentResults(id);
   const subjectGrades = computeSubjectGrades(results);
   const gradeSummary = computeGradeSummary(results);
+  const locale = await getLocale();
 
-  const formattedDate = new Intl.DateTimeFormat("en-US", {
+  const formattedDate = new Intl.DateTimeFormat(getIntlLocale(locale), {
     year: "numeric",
     month: "long",
     day: "numeric",

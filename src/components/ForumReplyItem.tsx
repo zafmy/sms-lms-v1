@@ -5,6 +5,7 @@ import UpvoteButton from "./UpvoteButton";
 import ForumReplyForm from "./ForumReplyForm";
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type ReplyData = {
   id: number;
@@ -20,17 +21,20 @@ type ReplyData = {
   children: ReplyData[];
 };
 
-const timeAgo = (date: string) => {
+const timeAgo = (
+  date: string,
+  t: (key: string, params?: Record<string, number>) => string
+): string => {
   const seconds = Math.floor(
     (Date.now() - new Date(date).getTime()) / 1000
   );
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return t("justNow");
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t("minutesAgo", { minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("hoursAgo", { hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t("daysAgo", { days });
 };
 
 const ForumReplyItem = ({
@@ -52,6 +56,7 @@ const ForumReplyItem = ({
   isLocked: boolean;
   depth?: number;
 }) => {
+  const t = useTranslations("lms.forums");
   const router = useRouter();
   const [showReplyForm, setShowReplyForm] = useState(false);
 
@@ -84,7 +89,7 @@ const ForumReplyItem = ({
   // Anonymous handling: show "Anonymous" to students, real name to teacher/admin
   const displayName =
     reply.isAnonymous && role === "student" && reply.authorId !== userId
-      ? "Anonymous"
+      ? t("anonymous")
       : reply.authorName;
 
   const handleAccept = () => {
@@ -92,7 +97,7 @@ const ForumReplyItem = ({
   };
 
   const handleDelete = () => {
-    if (window.confirm("Delete this reply?")) {
+    if (window.confirm(t("deleteReply"))) {
       deleteAction({ id: reply.id });
     }
   };
@@ -108,12 +113,12 @@ const ForumReplyItem = ({
             </span>
             {reply.authorRole === "teacher" && (
               <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
-                Teacher
+                {t("teacher")}
               </span>
             )}
             {reply.authorRole === "admin" && (
               <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
-                Admin
+                {t("admin")}
               </span>
             )}
             {reply.isAccepted && (
@@ -131,11 +136,11 @@ const ForumReplyItem = ({
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                Accepted
+                {t("accepted")}
               </span>
             )}
             <span className="text-xs text-gray-400">
-              {timeAgo(reply.createdAt)}
+              {timeAgo(reply.createdAt, t)}
             </span>
           </div>
         </div>
@@ -158,7 +163,7 @@ const ForumReplyItem = ({
               onClick={() => setShowReplyForm(!showReplyForm)}
               className="text-sm text-gray-500 hover:text-gray-700"
             >
-              Reply
+              {t("reply")}
             </button>
           )}
 
@@ -167,7 +172,7 @@ const ForumReplyItem = ({
               onClick={handleAccept}
               className="text-sm text-green-600 hover:text-green-700"
             >
-              Accept
+              {t("accept")}
             </button>
           )}
 
@@ -176,7 +181,7 @@ const ForumReplyItem = ({
               onClick={handleDelete}
               className="text-sm text-red-500 hover:text-red-700"
             >
-              Delete
+              {t("delete")}
             </button>
           )}
         </div>

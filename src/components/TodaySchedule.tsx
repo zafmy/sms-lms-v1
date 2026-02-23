@@ -2,15 +2,19 @@ import prisma from "@/lib/prisma";
 import { getTodayDayEnum } from "@/lib/utils";
 import { Day } from "@prisma/client";
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const TodaySchedule = async ({ teacherId }: { teacherId: string }) => {
   const todayDay = getTodayDayEnum();
+  const t = await getTranslations("dashboard.teacher");
+  const locale = await getLocale();
 
   if (!todayDay) {
     return (
       <div className="bg-white rounded-md p-4">
-        <h1 className="text-xl font-semibold">Today&apos;s Schedule</h1>
-        <p className="text-sm text-gray-400 mt-4">No lessons on weekends.</p>
+        <h1 className="text-xl font-semibold">{t("todaysSchedule")}</h1>
+        <p className="text-sm text-gray-400 mt-4">{t("noLessonsWeekend")}</p>
       </div>
     );
   }
@@ -29,23 +33,23 @@ const TodaySchedule = async ({ teacherId }: { teacherId: string }) => {
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Today&apos;s Schedule</h1>
+      <h1 className="text-xl font-semibold">{t("todaysSchedule")}</h1>
       {lessons.length === 0 ? (
         <p className="text-sm text-gray-400 mt-4">
-          No lessons scheduled for today.
+          {t("noLessonsToday")}
         </p>
       ) : (
         <div className="flex flex-col gap-4 mt-4">
           {lessons.map((lesson) => (
             <div key={lesson.id} className="flex items-center gap-4">
               <span className="text-sm text-gray-500">
-                {lesson.startTime.toLocaleTimeString("en-US", {
+                {lesson.startTime.toLocaleTimeString(getIntlLocale(locale), {
                   hour: "2-digit",
                   minute: "2-digit",
                   hour12: false,
                 })}
                 {" - "}
-                {lesson.endTime.toLocaleTimeString("en-US", {
+                {lesson.endTime.toLocaleTimeString(getIntlLocale(locale), {
                   hour: "2-digit",
                   minute: "2-digit",
                   hour12: false,
@@ -59,7 +63,7 @@ const TodaySchedule = async ({ teacherId }: { teacherId: string }) => {
                 href={`/list/attendance?lessonId=${lesson.id}`}
                 className="text-xs text-lamaSky hover:underline ml-auto"
               >
-                Attendance
+                {t("attendanceLink")}
               </Link>
             </div>
           ))}

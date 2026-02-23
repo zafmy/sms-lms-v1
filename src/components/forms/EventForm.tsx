@@ -8,6 +8,7 @@ import { createEvent, updateEvent } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const EventForm = ({
   type,
@@ -20,6 +21,8 @@ const EventForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const t = useTranslations("forms");
+
   const {
     register,
     handleSubmit,
@@ -46,7 +49,7 @@ const EventForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`Event has been ${type === "create" ? "created" : "updated"}!`);
+      toast(type === "create" ? t("messages.created", { entity: "Event" }) : t("messages.updated", { entity: "Event" }));
       setOpen(false);
       router.refresh();
     }
@@ -57,26 +60,26 @@ const EventForm = ({
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new event" : "Update the event"}
+        {type === "create" ? t("events.createTitle") : t("events.updateTitle")}
       </h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
-          label="Event title"
+          label={t("events.eventTitle")}
           name="title"
           defaultValue={data?.title}
           register={register}
           error={errors?.title}
         />
         <InputField
-          label="Description"
+          label={t("labels.description")}
           name="description"
           defaultValue={data?.description}
           register={register}
           error={errors?.description}
         />
         <InputField
-          label="Start Time"
+          label={t("labels.startTime")}
           name="startTime"
           defaultValue={data?.startTime}
           register={register}
@@ -84,7 +87,7 @@ const EventForm = ({
           type="datetime-local"
         />
         <InputField
-          label="End Time"
+          label={t("labels.endTime")}
           name="endTime"
           defaultValue={data?.endTime}
           register={register}
@@ -93,7 +96,7 @@ const EventForm = ({
         />
         {data && (
           <InputField
-            label="Id"
+            label={t("labels.id")}
             name="id"
             defaultValue={data?.id}
             register={register}
@@ -102,13 +105,13 @@ const EventForm = ({
           />
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Class</label>
+          <label className="text-xs text-gray-500">{t("labels.class")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("classId")}
             defaultValue={data?.classId}
           >
-            <option value="">None</option>
+            <option value="">{t("common.none")}</option>
             {classes.map((classItem: { id: number; name: string }) => (
               <option value={classItem.id} key={classItem.id}>
                 {classItem.name}
@@ -123,10 +126,10 @@ const EventForm = ({
         </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{t("common.somethingWentWrong")}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
+        {type === "create" ? t("common.create") : t("common.update")}
       </button>
     </form>
   );

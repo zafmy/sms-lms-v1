@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+import { getIntlLocale } from "@/lib/formatUtils";
+
 interface BadgeInfo {
   id: number;
   name: string;
@@ -20,6 +23,8 @@ const BadgeGallery = ({
   badges: BadgeInfo[];
   earnedBadges: EarnedBadgeInfo[];
 }) => {
+  const t = useTranslations("gamification.badges");
+  const locale = useLocale();
   const earnedMap = new Map(
     earnedBadges.map((eb) => [eb.badgeId, eb.earnedAt])
   );
@@ -27,15 +32,15 @@ const BadgeGallery = ({
   if (badges.length === 0) {
     return (
       <div className="bg-white p-4 rounded-md">
-        <h2 className="text-lg font-semibold mb-2">Badge Gallery</h2>
-        <p className="text-gray-400 text-sm">No badges available yet.</p>
+        <h2 className="text-lg font-semibold mb-2">{t("gallery")}</h2>
+        <p className="text-gray-400 text-sm">{t("noBadgesAvailable")}</p>
       </div>
     );
   }
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h2 className="text-lg font-semibold mb-4">Badge Gallery</h2>
+      <h2 className="text-lg font-semibold mb-4">{t("gallery")}</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {badges.map((badge) => {
           const earnedAt = earnedMap.get(badge.id);
@@ -87,7 +92,7 @@ const BadgeGallery = ({
 
               {isEarned && (
                 <p className="text-xs text-green-600 mt-2">
-                  Earned {new Date(earnedAt).toLocaleDateString()}
+                  {t("earned", { date: new Date(earnedAt).toLocaleDateString(getIntlLocale(locale)) })}
                 </p>
               )}
 

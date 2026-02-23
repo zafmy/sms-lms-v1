@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 const BOX_COLORS = [
   "bg-red-400",    // Box 1 - New / Reset
   "bg-orange-400", // Box 2
@@ -7,8 +9,6 @@ const BOX_COLORS = [
   "bg-blue-400",   // Box 4
   "bg-green-400",  // Box 5 - Mastered
 ];
-
-const BOX_LABELS = ["Box 1", "Box 2", "Box 3", "Box 4", "Box 5"];
 
 interface ChildReviewActivityProps {
   studentName: string;
@@ -29,14 +29,16 @@ const ChildReviewActivity = ({
   distribution,
   isEmpty,
 }: ChildReviewActivityProps) => {
+  const t = useTranslations("dashboard.parent");
+
   if (isEmpty) {
     return (
       <div className="bg-white rounded-md p-4">
         <h2 className="text-lg font-semibold border-b pb-2">
-          {studentName} - Review Activity
+          {studentName} - {t("reviewActivity")}
         </h2>
         <p className="text-gray-400 text-sm mt-3">
-          No review cards yet.
+          {t("noReviewCards")}
         </p>
       </div>
     );
@@ -57,7 +59,7 @@ const ChildReviewActivity = ({
   return (
     <div className="bg-white rounded-md p-4">
       <h2 className="text-lg font-semibold border-b pb-2">
-        {studentName} - Review Activity
+        {studentName} - {t("reviewActivity")}
       </h2>
 
       {/* Stats Row */}
@@ -67,7 +69,7 @@ const ChildReviewActivity = ({
           <span className={`text-2xl font-bold ${completionColor}`}>
             {completionRate}%
           </span>
-          <span className="text-xs text-gray-400">Completion</span>
+          <span className="text-xs text-gray-400">{t("completionLabel")}</span>
         </div>
 
         {/* Current Streak */}
@@ -75,13 +77,13 @@ const ChildReviewActivity = ({
           <span className={`text-2xl font-bold ${streakColor}`}>
             {currentStreak > 0 ? `${currentStreak}` : "0"}
           </span>
-          <span className="text-xs text-gray-400">Streak</span>
+          <span className="text-xs text-gray-400">{t("streakLabel")}</span>
         </div>
 
         {/* Total Cards */}
         <div className="flex-1 flex flex-col items-center">
           <span className="text-2xl font-bold">{totalCards}</span>
-          <span className="text-xs text-gray-400">Cards</span>
+          <span className="text-xs text-gray-400">{t("cards")}</span>
         </div>
       </div>
 
@@ -89,7 +91,7 @@ const ChildReviewActivity = ({
       {subjects.length > 0 && (
         <div className="mt-4">
           <h3 className="text-sm font-medium text-gray-600 mb-2">
-            Subject Mastery
+            {t("subjectMastery")}
           </h3>
           <div className="space-y-2">
             {subjects.map((subject) => (
@@ -116,7 +118,7 @@ const ChildReviewActivity = ({
       {totalDistribution > 0 && (
         <div className="mt-4">
           <h3 className="text-sm font-medium text-gray-600 mb-2">
-            Box Distribution
+            {t("boxDistribution")}
           </h3>
           <div className="flex h-4 rounded-full overflow-hidden">
             {distribution.map((count, index) => {
@@ -127,7 +129,7 @@ const ChildReviewActivity = ({
                   key={index}
                   className={`${BOX_COLORS[index]} transition-all`}
                   style={{ width: `${widthPercent}%` }}
-                  title={`${BOX_LABELS[index]}: ${count} cards`}
+                  title={`${t("box")} ${index + 1}: ${count} ${t("cards").toLowerCase()}`}
                 />
               );
             })}

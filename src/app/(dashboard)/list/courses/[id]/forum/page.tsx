@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 const ForumPage = async ({
   params,
@@ -16,6 +17,7 @@ const ForumPage = async ({
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   const courseId = parseInt(id);
+  const t = await getTranslations("lms.forums");
 
   if (!userId || !role) return notFound();
 
@@ -48,10 +50,10 @@ const ForumPage = async ({
             href={`/list/courses/${courseId}`}
             className="text-sm text-gray-500 hover:underline"
           >
-            &larr; Back to course
+            &larr; {t("backToCourse")}
           </Link>
           <h1 className="text-xl font-semibold">
-            {course.title} - Discussion Forum
+            {t("discussionForum", { title: course.title })}
           </h1>
         </div>
       </div>

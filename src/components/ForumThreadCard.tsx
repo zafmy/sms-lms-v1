@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 type ThreadCardData = {
   id: number;
@@ -14,18 +15,21 @@ type ThreadCardData = {
   hasAcceptedReply: boolean;
 };
 
-const timeAgo = (date: Date) => {
+const timeAgo = (
+  date: Date,
+  t: (key: string, params?: Record<string, number>) => string
+): string => {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return t("justNow");
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t("minutesAgo", { minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("hoursAgo", { hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t("daysAgo", { days });
 };
 
-const ForumThreadCard = ({
+const ForumThreadCard = async ({
   thread,
   courseId,
   role,
@@ -36,10 +40,12 @@ const ForumThreadCard = ({
   role: string;
   userId: string;
 }) => {
+  const t = await getTranslations("lms.forums");
+
   // Anonymous handling: show "Anonymous" to students unless they are the author
   const displayName =
     thread.isAnonymous && role === "student" && thread.authorId !== userId
-      ? "Anonymous"
+      ? t("anonymous")
       : thread.authorName;
 
   return (
@@ -52,17 +58,17 @@ const ForumThreadCard = ({
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             {thread.isPinned && (
               <span className="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium">
-                Pinned
+                {t("pinned")}
               </span>
             )}
             {thread.isLocked && (
               <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">
-                Locked
+                {t("locked")}
               </span>
             )}
             {thread.hasAcceptedReply && (
               <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">
-                Answered
+                {t("answered")}
               </span>
             )}
             <h3 className="text-sm font-semibold text-gray-800 truncate">
@@ -73,10 +79,10 @@ const ForumThreadCard = ({
             <span>{displayName}</span>
             {thread.authorRole === "teacher" && (
               <span className="bg-blue-50 text-blue-600 px-1 py-0.5 rounded">
-                Teacher
+                {t("teacher")}
               </span>
             )}
-            <span>{timeAgo(thread.lastActivityAt)}</span>
+            <span>{timeAgo(thread.lastActivityAt, t)}</span>
           </div>
         </div>
         <div className="text-xs text-gray-400 whitespace-nowrap flex items-center gap-1">

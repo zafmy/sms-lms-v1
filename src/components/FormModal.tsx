@@ -22,6 +22,8 @@ import {
   deleteQuestionBank,
 } from "@/lib/actions";
 import { deleteBadge } from "@/lib/gamificationActions";
+import { deleteGuide } from "@/lib/guideActions";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -50,6 +52,7 @@ const deleteActionMap = {
   question: deleteQuestion,
   questionBank: deleteQuestionBank,
   badge: deleteBadge,
+  guide: deleteGuide,
 };
 
 // USE LAZY LOADING
@@ -57,65 +60,76 @@ const deleteActionMap = {
 // import TeacherForm from "./forms/TeacherForm";
 // import StudentForm from "./forms/StudentForm";
 
+const DynamicLoading = () => {
+  const t = useTranslations("common");
+  return <h1>{t("loading")}</h1>;
+};
+
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const StudentForm = dynamic(() => import("./forms/StudentForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const SubjectForm = dynamic(() => import("./forms/SubjectForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const ClassForm = dynamic(() => import("./forms/ClassForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const ExamForm = dynamic(() => import("./forms/ExamForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const AssignmentForm = dynamic(() => import("./forms/AssignmentForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const EventForm = dynamic(() => import("./forms/EventForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const AnnouncementForm = dynamic(() => import("./forms/AnnouncementForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const ResultForm = dynamic(() => import("./forms/ResultForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const LessonForm = dynamic(() => import("./forms/LessonForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const ParentForm = dynamic(() => import("./forms/ParentForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const AttendanceForm = dynamic(() => import("./forms/AttendanceForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const CourseForm = dynamic(() => import("./forms/CourseForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const ModuleForm = dynamic(() => import("./forms/ModuleForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const EnrollmentForm = dynamic(() => import("./forms/EnrollmentForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const LmsLessonForm = dynamic(() => import("./forms/LmsLessonForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const QuizForm = dynamic(() => import("./forms/QuizForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const QuestionForm = dynamic(() => import("./forms/QuestionForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const QuestionBankForm = dynamic(() => import("./forms/QuestionBankForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
 });
 const BadgeForm = dynamic(() => import("./forms/BadgeForm"), {
-  loading: () => <h1>Loading...</h1>,
+  loading: () => <DynamicLoading />,
+});
+const GuideForm = dynamic(() => import("./forms/GuideForm"), {
+  loading: () => <DynamicLoading />,
+});
+const GuideCategoryForm = dynamic(() => import("./forms/GuideCategoryForm"), {
+  loading: () => <DynamicLoading />,
 });
 
 const forms: {
@@ -286,6 +300,22 @@ const forms: {
       relatedData={relatedData}
     />
   ),
+  guide: (setOpen, type, data, relatedData) => (
+    <GuideForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  guideCategory: (setOpen, type, data, relatedData) => (
+    <GuideCategoryForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
 };
 
 const DeleteForm = ({
@@ -297,6 +327,7 @@ const DeleteForm = ({
   id: string | number;
   setOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const t = useTranslations("common");
   const [state, formAction] = useActionState(deleteActionMap[table as keyof typeof deleteActionMap], {
     success: false,
     error: false,
@@ -306,20 +337,20 @@ const DeleteForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`${table} has been deleted!`);
+      toast(t("deletedSuccess", { table }));
       setOpen(false);
       router.refresh();
     }
-  }, [state, router, table, setOpen]);
+  }, [state, router, table, setOpen, t]);
 
   return (
     <form action={formAction} className="p-4 flex flex-col gap-4">
       <input type="text" name="id" value={id} hidden readOnly />
       <span className="text-center font-medium">
-        All data will be lost. Are you sure you want to delete this {table}?
+        {t("deleteConfirm", { table })}
       </span>
       <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center">
-        Delete
+        {t("delete")}
       </button>
     </form>
   );
@@ -332,6 +363,7 @@ const FormModal = ({
   id,
   relatedData,
 }: FormContainerProps & { relatedData?: any }) => {
+  const t = useTranslations("common");
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =
     type === "create"
@@ -358,7 +390,7 @@ const FormModal = ({
             ) : (type === "create" || type === "update") && forms[table] ? (
               forms[table](setOpen, type, data, relatedData)
             ) : (
-              "Form not found!"
+              t("formNotFound")
             )}
             <div
               className="absolute top-4 right-4 cursor-pointer"

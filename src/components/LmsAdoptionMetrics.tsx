@@ -1,6 +1,9 @@
 import prisma from "@/lib/prisma";
+import { getTranslations } from "next-intl/server";
 
 const LmsAdoptionMetrics = async () => {
+  const t = await getTranslations("dashboard.admin");
+
   const fourteenDaysAgo = new Date();
   fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
@@ -79,24 +82,24 @@ const LmsAdoptionMetrics = async () => {
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h3 className="text-lg font-semibold">LMS Adoption Metrics</h3>
+      <h3 className="text-lg font-semibold">{t("lmsAdoption")}</h3>
       <div className="flex gap-4 mt-3">
         {/* Active Courses */}
         <div className="flex-1 flex flex-col items-center">
           <span className="text-2xl font-bold">{activeCourses}</span>
-          <span className="text-xs text-gray-400">Active Courses</span>
+          <span className="text-xs text-gray-400">{t("activeCourses")}</span>
         </div>
         {/* Active Enrollments */}
         <div className="flex-1 flex flex-col items-center">
           <span className="text-2xl font-bold">{activeEnrollments}</span>
-          <span className="text-xs text-gray-400">Enrollments</span>
+          <span className="text-xs text-gray-400">{t("enrollments")}</span>
         </div>
         {/* Engagement Rate */}
         <div className="flex-1 flex flex-col items-center">
           <span className={`text-2xl font-bold ${rateColor(engagementRate)}`}>
             {engagementRate}%
           </span>
-          <span className="text-xs text-gray-400">Engagement</span>
+          <span className="text-xs text-gray-400">{t("engagement")}</span>
         </div>
         {/* Teacher Adoption */}
         <div className="flex-1 flex flex-col items-center">
@@ -105,7 +108,7 @@ const LmsAdoptionMetrics = async () => {
           >
             {teacherAdoptionRate}%
           </span>
-          <span className="text-xs text-gray-400">Teacher Adoption</span>
+          <span className="text-xs text-gray-400">{t("teacherAdoption")}</span>
         </div>
       </div>
     </div>

@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useMemo } from "react";
 import { SubjectGradeRow } from "@/lib/gradeUtils";
 
 type SortKey = keyof SubjectGradeRow;
 
 const ReportCardTable = ({ data }: { data: SubjectGradeRow[] }) => {
+  const t = useTranslations("common");
   const [sortConfig, setSortConfig] = useState<{
     key: SortKey;
     direction: "asc" | "desc";
@@ -101,11 +103,11 @@ const ReportCardTable = ({ data }: { data: SubjectGradeRow[] }) => {
   }, [data]);
 
   const columns: { key: SortKey; label: string }[] = [
-    { key: "subjectName", label: "Subject Name" },
-    { key: "examAverage", label: "Exam Average" },
-    { key: "assignmentAverage", label: "Assignment Average" },
-    { key: "overallAverage", label: "Overall Average" },
-    { key: "totalAssessments", label: "Assessments" },
+    { key: "subjectName", label: t("reportCard.subjectName") },
+    { key: "examAverage", label: t("reportCard.examAverage") },
+    { key: "assignmentAverage", label: t("reportCard.assignmentAverage") },
+    { key: "overallAverage", label: t("reportCard.overallAverage") },
+    { key: "totalAssessments", label: t("reportCard.assessments") },
   ];
 
   return (
@@ -146,7 +148,7 @@ const ReportCardTable = ({ data }: { data: SubjectGradeRow[] }) => {
           ))}
           {/* Summary Row */}
           <tr className="font-bold bg-gray-50">
-            <td className="p-3">Overall</td>
+            <td className="p-3">{t("reportCard.overall")}</td>
             <td className={`p-3 ${getScoreColor(summary.avgExam)}`}>
               {summary.avgExam === null ? "-" : summary.avgExam}
             </td>

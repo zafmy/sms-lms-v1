@@ -1,6 +1,11 @@
 import prisma from "@/lib/prisma";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const UpcomingExams = async ({ classId }: { classId: number }) => {
+  const t = await getTranslations("dashboard.student");
+  const locale = await getLocale();
+
   const now = new Date();
   const nextWeek = new Date();
   nextWeek.setDate(now.getDate() + 7);
@@ -22,9 +27,9 @@ const UpcomingExams = async ({ classId }: { classId: number }) => {
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Upcoming Exams</h1>
+      <h1 className="text-xl font-semibold">{t("upcomingExams")}</h1>
       {exams.length === 0 ? (
-        <p className="text-gray-400 mt-4">No exams in the next 7 days</p>
+        <p className="text-gray-400 mt-4">{t("noExamsNextWeek")}</p>
       ) : (
         <div className="flex flex-col gap-4 mt-4">
           {exams.map((exam) => (
@@ -32,7 +37,7 @@ const UpcomingExams = async ({ classId }: { classId: number }) => {
               <p className="font-medium">{exam.lesson.subject.name}</p>
               <p className="text-sm text-gray-500">{exam.title}</p>
               <p className="text-sm text-gray-500">
-                {new Intl.DateTimeFormat("en-US", {
+                {new Intl.DateTimeFormat(getIntlLocale(locale), {
                   dateStyle: "medium",
                   timeStyle: "short",
                 }).format(exam.startTime)}

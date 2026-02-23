@@ -1,10 +1,12 @@
 "use client";
 
 import { ITEM_PER_PAGE } from "@/lib/settings";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 const Pagination = ({ page, count }: { page: number; count: number }) => {
   const router = useRouter();
+  const t = useTranslations("common");
 
   const hasPrev = ITEM_PER_PAGE * (page - 1) > 0;
   const hasNext = ITEM_PER_PAGE * (page - 1) + ITEM_PER_PAGE < count;
@@ -23,7 +25,7 @@ const Pagination = ({ page, count }: { page: number; count: number }) => {
           changePage(page - 1);
         }}
       >
-        Prev
+        {t("prev")}
       </button>
       <div className="flex items-center gap-2 text-sm">
         {Array.from(
@@ -53,7 +55,7 @@ const Pagination = ({ page, count }: { page: number; count: number }) => {
           changePage(page + 1);
         }}
       >
-        Next
+        {t("next")}
       </button>
     </div>
   );

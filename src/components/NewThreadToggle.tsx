@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import ThreadForm from "./forms/ThreadForm";
 
 const NewThreadToggle = ({
@@ -10,6 +11,7 @@ const NewThreadToggle = ({
   courseId: number;
   role: string;
 }) => {
+  const t = useTranslations("lms.forums");
   const [showForm, setShowForm] = useState(false);
 
   return (
@@ -18,7 +20,7 @@ const NewThreadToggle = ({
         onClick={() => setShowForm(!showForm)}
         className="bg-lamaSky text-white py-2 px-4 rounded-md text-sm hover:opacity-90"
       >
-        {showForm ? "Cancel" : "New Thread"}
+        {showForm ? t("cancel") : t("newThread")}
       </button>
       {showForm && (
         <div className="mt-4 p-4 border border-gray-200 rounded-md">

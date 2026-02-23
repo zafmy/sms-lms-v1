@@ -3,6 +3,7 @@
 import { markLessonComplete } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 const LessonCompleteButton = ({
   lessonId,
@@ -11,6 +12,7 @@ const LessonCompleteButton = ({
   lessonId: number;
   isCompleted: boolean;
 }) => {
+  const t = useTranslations("lms.courses");
   const [loading, setLoading] = useState(false);
   const [completed, setCompleted] = useState(isCompleted);
   const router = useRouter();
@@ -31,7 +33,7 @@ const LessonCompleteButton = ({
         disabled
         className="bg-green-500 text-white px-4 py-2 rounded-md"
       >
-        Completed
+        {t("completed")}
       </button>
     );
   }
@@ -42,7 +44,7 @@ const LessonCompleteButton = ({
       disabled={loading}
       className="bg-lamaPurple text-white px-4 py-2 rounded-md disabled:opacity-50"
     >
-      {loading ? "Saving..." : "Mark as Completed"}
+      {loading ? t("saving") : t("markCompleted")}
     </button>
   );
 };

@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const CourseReviewsPage = async ({
   params,
@@ -12,6 +14,7 @@ const CourseReviewsPage = async ({
   const courseId = parseInt(id);
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const locale = await getLocale();
 
   if (!userId || (role !== "admin" && role !== "teacher")) {
     return notFound();
@@ -114,7 +117,7 @@ const CourseReviewsPage = async ({
                   </span>
                 </td>
                 <td className="py-3 px-2 text-sm text-gray-500">
-                  {card.createdAt.toLocaleDateString()}
+                  {card.createdAt.toLocaleDateString(getIntlLocale(locale))}
                 </td>
                 <td className="py-3 px-2 text-sm text-gray-500">
                   {card._count.reviewLogs}

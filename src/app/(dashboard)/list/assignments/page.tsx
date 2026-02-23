@@ -9,6 +9,8 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Assignment, Class, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 type AssignmentList = Assignment & {
   lesson: {
@@ -28,31 +30,33 @@ const AssignmentListPage = async ({
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   const currentUserId = userId;
-  
-  
+  const t = await getTranslations("entities");
+  const locale = await getLocale();
+
+
   const columns = [
     {
-      header: "Subject Name",
+      header: t("assignments.subjectName"),
       accessor: "name",
     },
     {
-      header: "Class",
+      header: t("common.class"),
       accessor: "class",
     },
     {
-      header: "Teacher",
+      header: t("common.teacher"),
       accessor: "teacher",
       className: "hidden md:table-cell",
     },
     {
-      header: "Due Date",
+      header: t("assignments.dueDate"),
       accessor: "dueDate",
       className: "hidden md:table-cell",
     },
     ...(role === "admin" || role === "teacher"
       ? [
           {
-            header: "Actions",
+            header: t("common.actions"),
             accessor: "action",
           },
         ]
@@ -70,7 +74,7 @@ const AssignmentListPage = async ({
         {item.lesson.teacher.name + " " + item.lesson.teacher.surname}
       </td>
       <td className="hidden md:table-cell">
-        {new Intl.DateTimeFormat("en-US").format(item.dueDate)}
+        {new Intl.DateTimeFormat(getIntlLocale(locale)).format(item.dueDate)}
       </td>
       <td>
         <div className="flex items-center gap-2">
@@ -173,12 +177,12 @@ const AssignmentListPage = async ({
       {/* TOP */}
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">
-          All Assignments
+          {t("assignments.pageTitle")}
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <ListFilter paramKey="classId" label="Class" options={classOptions} />
+            <ListFilter paramKey="classId" label={t("common.class")} options={classOptions} />
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>

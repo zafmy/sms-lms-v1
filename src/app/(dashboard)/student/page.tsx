@@ -16,9 +16,11 @@ import SubjectMasteryMeterContainer from "@/components/SubjectMasteryMeterContai
 import UpcomingExams from "@/components/UpcomingExams";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 const StudentPage = async () => {
   const { userId } = await auth();
+  const t = await getTranslations("dashboard.student");
 
   const classItem = await prisma.class.findMany({
     where: {
@@ -32,12 +34,12 @@ const StudentPage = async () => {
       <div className="w-full xl:w-2/3">
         <div className="h-full bg-white p-4 rounded-md">
           <h1 className="text-xl font-semibold">
-            Schedule ({classItem[0]?.name || "No Class"})
+            {t("schedule")} ({classItem[0]?.name || t("noClass")})
           </h1>
           {classItem[0] ? (
             <BigCalendarContainer type="classId" id={classItem[0].id} />
           ) : (
-            <p className="text-gray-400">No class schedule available</p>
+            <p className="text-gray-400">{t("noClassSchedule")}</p>
           )}
         </div>
       </div>
@@ -48,13 +50,13 @@ const StudentPage = async () => {
         <EnrolledCourses studentId={userId!} />
         <LmsProgressOverview studentId={userId!} />
         <div className="bg-white p-4 rounded-md h-[300px]">
-          <h2 className="text-lg font-semibold mb-2">Quiz Performance Trend</h2>
+          <h2 className="text-lg font-semibold mb-2">{t("quizPerformanceTrend")}</h2>
           <QuizPerformanceTrendContainer studentId={userId!} />
         </div>
         <LearningActivityHeatmapContainer studentId={userId!} />
         {/* Review Progress */}
         <div className="bg-white p-4 rounded-md">
-          <h2 className="text-lg font-semibold mb-3">Review Progress</h2>
+          <h2 className="text-lg font-semibold mb-3">{t("reviewProgress")}</h2>
           <div className="space-y-4">
             <SubjectMasteryMeterContainer studentId={userId!} />
             <CardProgressionChartContainer studentId={userId!} />

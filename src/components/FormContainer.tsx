@@ -23,7 +23,9 @@ export type FormContainerProps = {
     | "quiz"
     | "question"
     | "questionBank"
-    | "badge";
+    | "badge"
+    | "guide"
+    | "guideCategory";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number | string;
@@ -218,6 +220,15 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
         relatedData = { subjects: questionBankSubjects };
         break;
       case "badge":
+        break;
+      case "guide":
+        const guideCategories = await prisma.guideCategory.findMany({
+          select: { id: true, nameEn: true, nameMs: true },
+          orderBy: { order: "asc" },
+        });
+        relatedData = { categories: guideCategories };
+        break;
+      case "guideCategory":
         break;
 
       default:

@@ -7,6 +7,8 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Announcement, Class, Prisma } from "@prisma/client";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 
 type AnnouncementList = Announcement & { class: Class };
@@ -20,25 +22,27 @@ const AnnouncementListPage = async ({
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   const currentUserId = userId;
-  
+  const t = await getTranslations("entities");
+  const locale = await getLocale();
+
   const columns = [
     {
-      header: "Title",
+      header: t("common.title"),
       accessor: "title",
     },
     {
-      header: "Class",
+      header: t("common.class"),
       accessor: "class",
     },
     {
-      header: "Date",
+      header: t("common.date"),
       accessor: "date",
       className: "hidden md:table-cell",
     },
     ...(role === "admin"
       ? [
           {
-            header: "Actions",
+            header: t("common.actions"),
             accessor: "action",
           },
         ]
@@ -51,9 +55,9 @@ const AnnouncementListPage = async ({
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">{item.title}</td>
-      <td>{item.class?.name || "-"}</td>
+      <td>{item.class?.name || t("common.none")}</td>
       <td className="hidden md:table-cell">
-        {new Intl.DateTimeFormat("en-US").format(item.date)}
+        {new Intl.DateTimeFormat(getIntlLocale(locale)).format(item.date)}
       </td>
       <td>
         <div className="flex items-center gap-2">
@@ -121,7 +125,7 @@ const AnnouncementListPage = async ({
       {/* TOP */}
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">
-          All Announcements
+          {t("announcements.pageTitle")}
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />

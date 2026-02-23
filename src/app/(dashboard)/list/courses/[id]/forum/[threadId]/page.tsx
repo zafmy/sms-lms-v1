@@ -5,16 +5,20 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
-const timeAgo = (date: Date) => {
+const timeAgo = (
+  date: Date,
+  t: (key: string, params?: Record<string, number>) => string
+): string => {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return t("justNow");
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t("minutesAgo", { minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("hoursAgo", { hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t("daysAgo", { days });
 };
 
 const ThreadDetailPage = async ({
@@ -27,6 +31,7 @@ const ThreadDetailPage = async ({
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   const courseId = parseInt(id);
   const threadIdNum = parseInt(threadId);
+  const t = await getTranslations("lms.forums");
 
   if (!userId || !role) return notFound();
 
@@ -105,14 +110,14 @@ const ThreadDetailPage = async ({
   ]);
 
   const authorMap = new Map<string, string>();
-  teachers.forEach((t) => authorMap.set(t.id, `${t.name} ${t.surname}`));
+  teachers.forEach((tc) => authorMap.set(tc.id, `${tc.name} ${tc.surname}`));
   students.forEach((s) => authorMap.set(s.id, `${s.name} ${s.surname}`));
 
   // Thread author display name
   const threadAuthorName =
     thread.isAnonymous && role === "student" && thread.authorId !== userId
-      ? "Anonymous"
-      : authorMap.get(thread.authorId) || "Unknown";
+      ? t("anonymous")
+      : authorMap.get(thread.authorId) || t("unknown");
 
   // Build reply tree: top-level replies with their children
   type ReplyData = {
@@ -142,7 +147,7 @@ const ThreadDetailPage = async ({
       createdAt: r.createdAt.toISOString(),
       authorId: r.authorId,
       authorRole: r.authorRole,
-      authorName: authorMap.get(r.authorId) || "Unknown",
+      authorName: authorMap.get(r.authorId) || t("unknown"),
       voteCount: r._count.votes,
       hasVoted: r.votes.length > 0,
       children: [],
@@ -172,7 +177,7 @@ const ThreadDetailPage = async ({
           href={`/list/courses/${courseId}/forum`}
           className="text-sm text-gray-500 hover:underline"
         >
-          &larr; Back to forum
+          &larr; {t("backToForum")}
         </Link>
       </div>
 
@@ -183,12 +188,12 @@ const ThreadDetailPage = async ({
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               {thread.isPinned && (
                 <span className="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-medium">
-                  Pinned
+                  {t("pinned")}
                 </span>
               )}
               {thread.isLocked && (
                 <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-medium">
-                  Locked
+                  {t("locked")}
                 </span>
               )}
               <h1 className="text-xl font-semibold text-gray-900">
@@ -199,15 +204,15 @@ const ThreadDetailPage = async ({
               <span className="font-medium">{threadAuthorName}</span>
               {thread.authorRole === "teacher" && (
                 <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
-                  Teacher
+                  {t("teacher")}
                 </span>
               )}
               {thread.authorRole === "admin" && (
                 <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
-                  Admin
+                  {t("admin")}
                 </span>
               )}
-              <span>{timeAgo(thread.createdAt)}</span>
+              <span>{timeAgo(thread.createdAt, t)}</span>
             </div>
           </div>
         </div>
@@ -235,14 +240,14 @@ const ThreadDetailPage = async ({
       {/* Locked Banner */}
       {thread.isLocked && (
         <div className="bg-orange-50 border border-orange-200 rounded-md p-3 mb-4 text-sm text-orange-700">
-          This thread is locked. No new replies can be posted.
+          {t("threadLocked")}
         </div>
       )}
 
       {/* Replies */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-4">
-          Replies ({replies.length})
+          {t("repliesCount", { count: replies.length })}
         </h2>
         <ForumReplyList
           replies={topLevelReplies}
@@ -257,7 +262,7 @@ const ThreadDetailPage = async ({
 
       {/* Reply Form */}
       <div className="border-t border-gray-200 pt-4">
-        <h3 className="text-sm font-semibold mb-3">Post a Reply</h3>
+        <h3 className="text-sm font-semibold mb-3">{t("postReply")}</h3>
         <ForumReplyForm
           threadId={thread.id}
           isLocked={thread.isLocked}

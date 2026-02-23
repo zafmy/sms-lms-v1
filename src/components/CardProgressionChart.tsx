@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 interface CardProgressionChartProps {
   distribution: number[];
@@ -19,8 +20,9 @@ const COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#10b981"];
 const CardProgressionChart = ({
   distribution,
 }: CardProgressionChartProps) => {
+  const t = useTranslations("spaced_repetition.cards");
   const data = distribution.map((count, i) => ({
-    name: `Box ${i + 1}`,
+    name: t("box", { number: i + 1 }),
     cards: count,
   }));
 
@@ -29,15 +31,15 @@ const CardProgressionChart = ({
   if (total === 0) {
     return (
       <div className="bg-white p-4 rounded-md">
-        <h3 className="text-md font-medium mb-2">Card Progression</h3>
-        <p className="text-gray-400 text-sm">No cards yet.</p>
+        <h3 className="text-md font-medium mb-2">{t("cardProgression")}</h3>
+        <p className="text-gray-400 text-sm">{t("noCardsYet")}</p>
       </div>
     );
   }
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h3 className="text-md font-medium mb-3">Card Progression</h3>
+      <h3 className="text-md font-medium mb-3">{t("cardProgression")}</h3>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data}>
           <XAxis dataKey="name" tick={{ fontSize: 12 }} />

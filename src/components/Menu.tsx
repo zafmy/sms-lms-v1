@@ -1,145 +1,158 @@
 import { currentUser } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
 const menuItems = [
   {
-    title: "MENU",
+    titleKey: "sectionMenu",
     items: [
       {
         icon: "/home.png",
-        label: "Home",
+        key: "home",
         href: "/",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/teacher.png",
-        label: "Teachers",
+        key: "teachers",
         href: "/list/teachers",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/student.png",
-        label: "Students",
+        key: "students",
         href: "/list/students",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/parent.png",
-        label: "Parents",
+        key: "parents",
         href: "/list/parents",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/subject.png",
-        label: "Subjects",
+        key: "subjects",
         href: "/list/subjects",
         visible: ["admin"],
       },
       {
         icon: "/class.png",
-        label: "Classes",
+        key: "classes",
         href: "/list/classes",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/lesson.png",
-        label: "Lessons",
+        key: "lessons",
         href: "/list/lessons",
         visible: ["admin", "teacher"],
       },
       {
         icon: "/class.png",
-        label: "Courses",
+        key: "courses",
         href: "/list/courses",
-        visible: ["admin", "teacher"],
+        visible: ["admin", "teacher", "student"],
+      },
+      {
+        icon: "/message.png",
+        key: "forums",
+        href: "/list/forums",
+        visible: ["admin", "teacher", "student"],
       },
       {
         icon: "/result.png",
-        label: "Enrollments",
+        key: "enrollments",
         href: "/list/enrollments",
         visible: ["admin"],
       },
       {
         icon: "/result.png",
-        label: "Badges",
+        key: "badges",
         href: "/list/badges",
         visible: ["admin"],
       },
       {
         icon: "/result.png",
-        label: "Achievements",
+        key: "achievements",
         href: "/list/achievements",
         visible: ["student"],
       },
       {
         icon: "/exam.png",
-        label: "Exams",
+        key: "exams",
         href: "/list/exams",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/assignment.png",
-        label: "Assignments",
+        key: "assignments",
         href: "/list/assignments",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/result.png",
-        label: "Reviews",
+        key: "reviews",
         href: "/list/reviews",
         visible: ["student"],
       },
       {
         icon: "/result.png",
-        label: "Results",
+        key: "results",
         href: "/list/results",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/attendance.png",
-        label: "Attendance",
+        key: "attendance",
         href: "/list/attendance",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/calendar.png",
-        label: "Events",
+        key: "events",
         href: "/list/events",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/message.png",
-        label: "Messages",
+        key: "messages",
         href: "/list/messages",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/announcement.png",
-        label: "Announcements",
+        key: "announcements",
         href: "/list/announcements",
+        visible: ["admin", "teacher", "student", "parent"],
+      },
+      {
+        icon: "/result.png",
+        key: "guides",
+        href: "/list/guides",
         visible: ["admin", "teacher", "student", "parent"],
       },
     ],
   },
   {
-    title: "OTHER",
+    titleKey: "sectionOther",
     items: [
       {
         icon: "/profile.png",
-        label: "Profile",
+        key: "profile",
         href: "/profile",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/setting.png",
-        label: "Settings",
+        key: "settings",
         href: "/settings",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
         icon: "/logout.png",
-        label: "Logout",
+        key: "logout",
         href: "/logout",
         visible: ["admin", "teacher", "student", "parent"],
       },
@@ -150,23 +163,25 @@ const menuItems = [
 const Menu = async () => {
   const user = await currentUser();
   const role = user?.publicMetadata.role as string;
+  const t = await getTranslations("menu");
+
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((i) => (
-        <div className="flex flex-col gap-2" key={i.title}>
+        <div className="flex flex-col gap-2" key={i.titleKey}>
           <span className="hidden lg:block text-gray-400 font-light my-4">
-            {i.title}
+            {t(i.titleKey)}
           </span>
           {i.items.map((item) => {
             if (item.visible.includes(role)) {
               return (
                 <Link
                   href={item.href}
-                  key={item.label}
+                  key={item.key}
                   className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
                 >
                   <Image src={item.icon} alt="" width={20} height={20} />
-                  <span className="hidden lg:block">{item.label}</span>
+                  <span className="hidden lg:block">{t(item.key)}</span>
                 </Link>
               );
             }

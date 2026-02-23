@@ -4,6 +4,7 @@ import {
   computeCourseCompletion,
   computeEngagementDays,
 } from "@/lib/lmsAnalyticsUtils";
+import { getTranslations } from "next-intl/server";
 
 // Get the Monday (start) and Sunday (end) of the current week in UTC
 function getCurrentWeekRange(): { start: Date; end: Date } {
@@ -30,6 +31,8 @@ const ChildLmsProgressCard = async ({
   studentId: string;
   studentName: string;
 }) => {
+  const t = await getTranslations("dashboard.parent");
+
   // Fetch ACTIVE enrollments with course -> modules -> lessons
   const enrollments = await prisma.enrollment.findMany({
     where: { studentId, status: "ACTIVE" },
@@ -49,8 +52,8 @@ const ChildLmsProgressCard = async ({
   if (enrollments.length === 0) {
     return (
       <div className="bg-white p-4 rounded-md">
-        <h3 className="text-lg font-semibold">{studentName} - LMS Progress</h3>
-        <p className="text-gray-400 mt-2 text-sm">No courses enrolled yet.</p>
+        <h3 className="text-lg font-semibold">{studentName} - {t("lmsProgress")}</h3>
+        <p className="text-gray-400 mt-2 text-sm">{t("noCoursesEnrolled")}</p>
       </div>
     );
   }
@@ -111,19 +114,19 @@ const ChildLmsProgressCard = async ({
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h3 className="text-lg font-semibold">{studentName} - LMS Progress</h3>
+      <h3 className="text-lg font-semibold">{studentName} - {t("lmsProgress")}</h3>
       <div className="flex gap-4 mt-3">
         {/* Courses Enrolled */}
         <div className="flex-1 flex flex-col items-center">
           <span className="text-2xl font-bold">{enrollments.length}</span>
-          <span className="text-xs text-gray-400">Courses</span>
+          <span className="text-xs text-gray-400">{t("courses")}</span>
         </div>
         {/* Overall Completion */}
         <div className="flex-1 flex flex-col items-center">
           <span className={`text-2xl font-bold ${completionColor}`}>
             {overallPercentage}%
           </span>
-          <span className="text-xs text-gray-400">Completion</span>
+          <span className="text-xs text-gray-400">{t("completion")}</span>
         </div>
         {/* Recent Quiz Score */}
         <div className="flex-1 flex flex-col items-center">
@@ -137,14 +140,14 @@ const ChildLmsProgressCard = async ({
           <span className="text-2xl font-bold">
             {engagement.daysActive}/7
           </span>
-          <span className="text-xs text-gray-400">Days Active</span>
+          <span className="text-xs text-gray-400">{t("daysActive")}</span>
         </div>
       </div>
       <Link
         href="/list/courses"
         className="text-sm text-blue-500 hover:underline mt-2 block"
       >
-        View Courses
+        {t("viewCourses")}
       </Link>
     </div>
   );

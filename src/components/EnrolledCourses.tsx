@@ -1,8 +1,11 @@
 import CourseProgressBar from "@/components/CourseProgressBar";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 const EnrolledCourses = async ({ studentId }: { studentId: string }) => {
+  const t = await getTranslations("dashboard.student");
+
   const enrollments = await prisma.enrollment.findMany({
     where: {
       studentId,
@@ -57,9 +60,9 @@ const EnrolledCourses = async ({ studentId }: { studentId: string }) => {
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h2 className="text-lg font-semibold mb-4">My Courses</h2>
+      <h2 className="text-lg font-semibold mb-4">{t("myCourses")}</h2>
       {enrollments.length === 0 ? (
-        <p className="text-gray-400 text-sm">No courses enrolled yet.</p>
+        <p className="text-gray-400 text-sm">{t("noCoursesEnrolled")}</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {enrollments.map((enrollment) => {
@@ -103,8 +106,8 @@ const EnrolledCourses = async ({ studentId }: { studentId: string }) => {
                 {enrollment.course.modules.length > 0 && (
                   <details className="mt-3">
                     <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700 select-none">
-                      Module breakdown ({enrollment.course.modules.length}{" "}
-                      module{enrollment.course.modules.length !== 1 ? "s" : ""})
+                      {t("moduleBreakdown")} ({enrollment.course.modules.length}{" "}
+                      {t("modules")})
                     </summary>
                     <div className="mt-2 space-y-2 pl-2 border-l-2 border-gray-100">
                       {enrollment.course.modules.map((mod) => {
@@ -133,10 +136,10 @@ const EnrolledCourses = async ({ studentId }: { studentId: string }) => {
                               {mod.title}
                             </p>
                             <p className="text-gray-500">
-                              {modCompleted}/{modTotal} lessons completed
+                              {modCompleted}/{modTotal} {t("lessonsCompleted")}
                               {avgQuizPct !== null && (
                                 <span className="ml-2 text-purple-600">
-                                  Quiz avg: {avgQuizPct}%
+                                  {t("quizAvg")}: {avgQuizPct}%
                                 </span>
                               )}
                             </p>

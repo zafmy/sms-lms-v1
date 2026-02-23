@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { CourseQuizGroup } from "./ClassQuizAnalyticsContainer";
 
 function truncate(text: string, maxLength: number): string {
@@ -11,17 +12,19 @@ function colorClass(value: number): string {
   return "text-red-600";
 }
 
-const ClassQuizAnalytics = ({
+const ClassQuizAnalytics = async ({
   courseGroups,
 }: {
   courseGroups: CourseQuizGroup[];
 }) => {
+  const t = await getTranslations("dashboard.teacher");
+
   if (courseGroups.length === 0) {
     return (
       <div className="bg-white rounded-md p-4">
-        <h1 className="text-xl font-semibold">Quiz Analytics</h1>
+        <h1 className="text-xl font-semibold">{t("quizAnalytics")}</h1>
         <p className="text-sm text-gray-400 mt-4">
-          No quiz data available.
+          {t("noQuizData")}
         </p>
       </div>
     );
@@ -29,7 +32,7 @@ const ClassQuizAnalytics = ({
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Quiz Analytics</h1>
+      <h1 className="text-xl font-semibold">{t("quizAnalytics")}</h1>
       <div className="flex flex-col gap-4 mt-4">
         {courseGroups.map((group) => (
           <div key={group.courseId}>
@@ -45,13 +48,13 @@ const ClassQuizAnalytics = ({
                   <p className="text-sm font-medium mb-2">{quiz.title}</p>
                   <div className="grid grid-cols-3 gap-2 text-center mb-2">
                     <div>
-                      <p className="text-xs text-gray-500">Attempts</p>
+                      <p className="text-xs text-gray-500">{t("attempts")}</p>
                       <p className="text-sm font-bold">
                         {quiz.studentsAttempted}/{quiz.totalEnrolled}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Avg Score</p>
+                      <p className="text-xs text-gray-500">{t("avgScore")}</p>
                       <p
                         className={`text-sm font-bold ${colorClass(quiz.avgScore)}`}
                       >
@@ -59,7 +62,7 @@ const ClassQuizAnalytics = ({
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Pass Rate</p>
+                      <p className="text-xs text-gray-500">{t("passRate")}</p>
                       <p
                         className={`text-sm font-bold ${colorClass(quiz.passRate)}`}
                       >
@@ -70,7 +73,7 @@ const ClassQuizAnalytics = ({
                   {quiz.mostMissedQuestion && (
                     <p className="text-xs text-gray-500">
                       <span className="font-medium text-orange-600">
-                        Most missed:
+                        {t("mostMissed")}
                       </span>{" "}
                       {truncate(quiz.mostMissedQuestion, 80)}
                     </p>

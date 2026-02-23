@@ -1,7 +1,10 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 const MyStudentsOverview = async ({ teacherId }: { teacherId: string }) => {
+  const t = await getTranslations("dashboard.teacher");
+
   const classes = await prisma.class.findMany({
     where: {
       lessons: { some: { teacherId } },
@@ -22,11 +25,11 @@ const MyStudentsOverview = async ({ teacherId }: { teacherId: string }) => {
   return (
     <div className="bg-white rounded-md p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">My Students</h1>
-        <span className="text-sm text-gray-500">{totalStudents} total</span>
+        <h1 className="text-xl font-semibold">{t("myStudents")}</h1>
+        <span className="text-sm text-gray-500">{totalStudents} {t("total")}</span>
       </div>
       {classes.length === 0 ? (
-        <p className="text-sm text-gray-400 mt-4">No classes assigned.</p>
+        <p className="text-sm text-gray-400 mt-4">{t("noClassesAssigned")}</p>
       ) : (
         <div className="flex flex-col gap-3 mt-4">
           {classes.map((cls) => (
@@ -36,7 +39,7 @@ const MyStudentsOverview = async ({ teacherId }: { teacherId: string }) => {
               className="flex items-center justify-between p-3 rounded-md bg-lamaPurpleLight hover:bg-lamaPurple hover:text-white transition-colors"
             >
               <span className="font-medium">{cls.name}</span>
-              <span className="text-sm">{cls._count.students} students</span>
+              <span className="text-sm">{cls._count.students} {t("studentsCount")}</span>
             </Link>
           ))}
         </div>

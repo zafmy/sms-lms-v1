@@ -8,6 +8,8 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Attendance, Prisma } from "@prisma/client";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 type AttendanceList = Attendance & {
   student: { name: string; surname: string };
@@ -23,29 +25,31 @@ const AttendanceListPage = async ({
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   const currentUserId = userId;
+  const t = await getTranslations("entities");
+  const locale = await getLocale();
 
   const columns = [
     {
-      header: "Student",
+      header: t("common.student"),
       accessor: "student",
     },
     {
-      header: "Lesson",
+      header: t("attendance.lesson"),
       accessor: "lesson",
     },
     {
-      header: "Date",
+      header: t("common.date"),
       accessor: "date",
       className: "hidden md:table-cell",
     },
     {
-      header: "Status",
+      header: t("common.status"),
       accessor: "present",
     },
     ...(role === "admin" || role === "teacher"
       ? [
           {
-            header: "Actions",
+            header: t("common.actions"),
             accessor: "action",
           },
         ]
@@ -62,7 +66,7 @@ const AttendanceListPage = async ({
       </td>
       <td>{item.lesson.name}</td>
       <td className="hidden md:table-cell">
-        {new Intl.DateTimeFormat("en-US").format(item.date)}
+        {new Intl.DateTimeFormat(getIntlLocale(locale)).format(item.date)}
       </td>
       <td>
         <span
@@ -72,7 +76,7 @@ const AttendanceListPage = async ({
               : "bg-red-100 text-red-700"
           }`}
         >
-          {item.present ? "Present" : "Absent"}
+          {item.present ? t("common.present") : t("common.absent")}
         </span>
       </td>
       <td>
@@ -154,7 +158,7 @@ const AttendanceListPage = async ({
       {/* TOP */}
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">
-          All Attendance
+          {t("attendance.pageTitle")}
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />

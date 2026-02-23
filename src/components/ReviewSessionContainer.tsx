@@ -1,12 +1,14 @@
 import { startReviewSession } from "@/lib/reviewActions";
 import ReviewSessionClient from "./ReviewSessionClient";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 const ReviewSessionContainer = async ({
   studentId,
 }: {
   studentId: string;
 }) => {
+  const t = await getTranslations("entities");
   const result = await startReviewSession(studentId);
 
   if (
@@ -26,7 +28,7 @@ const ReviewSessionContainer = async ({
     back: c.back as string,
     leitnerBox: c.leitnerBox as number,
     cardType: c.cardType as string,
-    subjectName: (c.subject?.name as string) || "Unknown",
+    subjectName: (c.subject?.name as string) || t("reviews.unknown"),
   }));
 
   return <ReviewSessionClient sessionId={result.sessionId} cards={cards} />;

@@ -8,6 +8,8 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Course, Enrollment, Prisma, Student } from "@prisma/client";
 
 import { auth } from "@clerk/nextjs/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 type EnrollmentList = Enrollment & {
   student: Student;
@@ -22,37 +24,39 @@ const EnrollmentListPage = async ({
   const resolvedParams = await searchParams;
   const { sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const t = await getTranslations("entities");
+  const locale = await getLocale();
 
   // Admin only
   if (role !== "admin") {
     return (
       <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-        <h1 className="text-lg font-semibold">Access Denied</h1>
+        <h1 className="text-lg font-semibold">{t("common.accessDenied")}</h1>
       </div>
     );
   }
 
   const columns = [
     {
-      header: "Student",
+      header: t("common.student"),
       accessor: "student",
     },
     {
-      header: "Course",
+      header: t("enrollments.course"),
       accessor: "course",
     },
     {
-      header: "Status",
+      header: t("common.status"),
       accessor: "status",
       className: "hidden md:table-cell",
     },
     {
-      header: "Enrolled At",
+      header: t("enrollments.enrolledAt"),
       accessor: "enrolledAt",
       className: "hidden md:table-cell",
     },
     {
-      header: "Actions",
+      header: t("common.actions"),
       accessor: "action",
     },
   ];
@@ -76,11 +80,15 @@ const EnrollmentListPage = async ({
               : "bg-red-100 text-red-700"
           }`}
         >
-          {item.status}
+          {item.status === "ACTIVE"
+            ? t("courses.active")
+            : item.status === "COMPLETED"
+            ? t("enrollments.completed")
+            : t("enrollments.dropped")}
         </span>
       </td>
       <td className="hidden md:table-cell">
-        {new Intl.DateTimeFormat("en-US").format(item.enrolledAt)}
+        {new Intl.DateTimeFormat(getIntlLocale(locale)).format(item.enrolledAt)}
       </td>
       <td>
         <div className="flex items-center gap-2">
@@ -146,7 +154,7 @@ const EnrollmentListPage = async ({
       {/* TOP */}
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">
-          All Enrollments
+          {t("enrollments.pageTitle")}
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />

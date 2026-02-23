@@ -4,6 +4,7 @@ import { selfEnrollStudent, unenrollSelf } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useTransition } from "react";
 import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 
 type EnrollButtonProps = {
   courseId: number;
@@ -20,6 +21,7 @@ const EnrollButton = ({
   isFull,
   courseName,
 }: EnrollButtonProps) => {
+  const t = useTranslations("lms.courses");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -35,21 +37,21 @@ const EnrollButton = ({
 
   useEffect(() => {
     if (enrollState.success) {
-      toast(`Successfully enrolled in ${courseName}!`);
+      toast(t("enrollSuccess", { courseName }));
       router.refresh();
     } else if (enrollState.error) {
-      toast(enrollState.message || "Failed to enroll. Please try again.");
+      toast(enrollState.message || t("enrollError"));
     }
-  }, [enrollState, courseName, router]);
+  }, [enrollState, courseName, router, t]);
 
   useEffect(() => {
     if (dropState.success) {
-      toast(`Successfully dropped ${courseName}.`);
+      toast(t("dropSuccess", { courseName }));
       router.refresh();
     } else if (dropState.error) {
-      toast(dropState.message || "Failed to drop course. Please try again.");
+      toast(dropState.message || t("dropError"));
     }
-  }, [dropState, courseName, router]);
+  }, [dropState, courseName, router, t]);
 
   const handleEnroll = () => {
     startTransition(() => {
@@ -58,7 +60,7 @@ const EnrollButton = ({
   };
 
   const handleDrop = () => {
-    if (!window.confirm(`Are you sure you want to drop "${courseName}"?`)) {
+    if (!window.confirm(t("dropConfirm", { courseName }))) {
       return;
     }
     startTransition(() => {
@@ -70,7 +72,7 @@ const EnrollButton = ({
   if (enrollmentStatus === "COMPLETED") {
     return (
       <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-md text-sm">
-        Completed
+        {t("completed")}
       </span>
     );
   }
@@ -85,7 +87,7 @@ const EnrollButton = ({
           isPending ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
-        {isPending ? "Dropping..." : "Drop Course"}
+        {isPending ? t("dropping") : t("dropCourse")}
       </button>
     );
   }
@@ -94,7 +96,7 @@ const EnrollButton = ({
   if (isFull) {
     return (
       <span className="bg-gray-200 text-gray-500 px-4 py-2 rounded-md text-sm cursor-not-allowed">
-        Full
+        {t("full")}
       </span>
     );
   }
@@ -108,7 +110,7 @@ const EnrollButton = ({
         isPending ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
-      {isPending ? "Enrolling..." : "Enroll"}
+      {isPending ? t("enrolling") : t("enroll")}
     </button>
   );
 };

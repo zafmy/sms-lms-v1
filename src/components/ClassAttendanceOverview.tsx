@@ -1,10 +1,15 @@
 import prisma from "@/lib/prisma";
+import { getLocale, getTranslations } from "next-intl/server";
+import { formatPercent } from "@/lib/formatUtils";
 
 const ClassAttendanceOverview = async ({
   teacherId,
 }: {
   teacherId: string;
 }) => {
+  const t = await getTranslations("dashboard.teacher");
+  const locale = await getLocale();
+
   const today = new Date();
   const dayOfWeek = today.getDay();
   const monday = new Date(today);
@@ -52,10 +57,10 @@ const ClassAttendanceOverview = async ({
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Class Attendance (This Week)</h1>
+      <h1 className="text-xl font-semibold">{t("classAttendance")}</h1>
       {!hasData ? (
         <p className="text-sm text-gray-400 mt-4">
-          No attendance data this week.
+          {t("noAttendanceData")}
         </p>
       ) : (
         <div className="flex flex-col gap-4 mt-4">
@@ -63,7 +68,7 @@ const ClassAttendanceOverview = async ({
             <div key={cls.className} className="flex items-center justify-between">
               <span className="text-sm font-medium">{cls.className}</span>
               {cls.percentage < 0 ? (
-                <span className="text-sm text-gray-400">No data</span>
+                <span className="text-sm text-gray-400">{t("noData")}</span>
               ) : (
                 <span
                   className={`text-sm font-bold ${
@@ -74,7 +79,7 @@ const ClassAttendanceOverview = async ({
                         : "text-red-600"
                   }`}
                 >
-                  {cls.percentage.toFixed(1)}%
+                  {formatPercent(cls.percentage, locale)}
                 </span>
               )}
             </div>

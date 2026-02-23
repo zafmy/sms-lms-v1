@@ -1,6 +1,11 @@
 import prisma from "@/lib/prisma";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const AssignmentsDue = async ({ classId }: { classId: number }) => {
+  const t = await getTranslations("dashboard.student");
+  const locale = await getLocale();
+
   const now = new Date();
   const nextWeek = new Date();
   nextWeek.setDate(now.getDate() + 7);
@@ -22,10 +27,10 @@ const AssignmentsDue = async ({ classId }: { classId: number }) => {
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Assignments Due</h1>
+      <h1 className="text-xl font-semibold">{t("assignmentsDue")}</h1>
       {assignments.length === 0 ? (
         <p className="text-gray-400 mt-4">
-          No assignments due in the next 7 days
+          {t("noAssignmentsNextWeek")}
         </p>
       ) : (
         <div className="flex flex-col gap-4 mt-4">
@@ -36,8 +41,8 @@ const AssignmentsDue = async ({ classId }: { classId: number }) => {
               </p>
               <p className="text-sm text-gray-500">{assignment.title}</p>
               <p className="text-sm text-gray-500">
-                Due:{" "}
-                {new Intl.DateTimeFormat("en-US", {
+                {t("due")}:{" "}
+                {new Intl.DateTimeFormat(getIntlLocale(locale), {
                   dateStyle: "medium",
                 }).format(assignment.dueDate)}
               </p>

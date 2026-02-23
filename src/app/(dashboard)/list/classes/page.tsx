@@ -7,6 +7,7 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Prisma, Teacher } from "@prisma/client";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 type ClassList = Class & { supervisor: Teacher };
 
@@ -19,32 +20,33 @@ const ClassListPage = async ({
 
 const { sessionClaims } = await auth();
 const role = (sessionClaims?.metadata as { role?: string })?.role;
+const t = await getTranslations("entities");
 
 
 const columns = [
   {
-    header: "Class Name",
+    header: t("classes.className"),
     accessor: "name",
   },
   {
-    header: "Capacity",
+    header: t("classes.capacity"),
     accessor: "capacity",
     className: "hidden md:table-cell",
   },
   {
-    header: "Grade",
+    header: t("classes.grade"),
     accessor: "grade",
     className: "hidden md:table-cell",
   },
   {
-    header: "Supervisor",
+    header: t("classes.supervisor"),
     accessor: "supervisor",
     className: "hidden md:table-cell",
   },
   ...(role === "admin"
     ? [
         {
-          header: "Actions",
+          header: t("common.actions"),
           accessor: "action",
         },
       ]
@@ -116,7 +118,7 @@ const renderRow = (item: ClassList) => (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Classes</h1>
+        <h1 className="hidden md:block text-lg font-semibold">{t("classes.pageTitle")}</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">

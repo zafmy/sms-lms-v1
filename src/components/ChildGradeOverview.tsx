@@ -4,6 +4,7 @@ import {
   computeSubjectGrades,
   computeGradeSummary,
 } from "@/lib/gradeUtils";
+import { getTranslations } from "next-intl/server";
 
 const ChildGradeOverview = async ({
   studentId,
@@ -12,6 +13,8 @@ const ChildGradeOverview = async ({
   studentId: string;
   studentName: string;
 }) => {
+  const t = await getTranslations("dashboard.parent");
+
   const results = await fetchStudentResults(studentId);
   const subjectGrades = computeSubjectGrades(results);
   const summary = computeGradeSummary(results);
@@ -19,8 +22,8 @@ const ChildGradeOverview = async ({
   if (summary.totalResults === 0) {
     return (
       <div className="bg-white p-4 rounded-md">
-        <h3 className="text-lg font-semibold">{studentName} - Grades</h3>
-        <p className="text-gray-400 mt-2 text-sm">No grades recorded</p>
+        <h3 className="text-lg font-semibold">{studentName} - {t("grades")}</h3>
+        <p className="text-gray-400 mt-2 text-sm">{t("noGradesRecorded")}</p>
       </div>
     );
   }
@@ -39,14 +42,14 @@ const ChildGradeOverview = async ({
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h3 className="text-lg font-semibold">{studentName} - Grades</h3>
+      <h3 className="text-lg font-semibold">{studentName} - {t("grades")}</h3>
       <div className="mt-3 flex items-center gap-4">
         {/* Overall average with accent background */}
         <div className="bg-lamaSkyLight rounded-md px-4 py-2 flex flex-col items-center">
           <span className={`text-3xl font-bold ${averageColor}`}>
             {summary.overallAverage}
           </span>
-          <span className="text-xs text-gray-400">Overall Avg</span>
+          <span className="text-xs text-gray-400">{t("overallAvg")}</span>
         </div>
         {/* Per-subject compact list */}
         <div className="flex-1">
@@ -63,7 +66,7 @@ const ChildGradeOverview = async ({
           </ul>
           {remainingCount > 0 && (
             <p className="text-xs text-gray-400 mt-1">
-              and {remainingCount} more...
+              {t("andMore", { count: remainingCount })}
             </p>
           )}
         </div>
@@ -72,7 +75,7 @@ const ChildGradeOverview = async ({
         href={`/list/students/${studentId}/report-card`}
         className="text-sm text-blue-500 hover:underline mt-2 block"
       >
-        View Report Card
+        {t("viewReportCard")}
       </Link>
     </div>
   );

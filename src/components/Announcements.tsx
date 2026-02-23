@@ -1,9 +1,13 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const Announcements = async () => {
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const t = await getTranslations("dashboard.common");
+  const locale = await getLocale();
 
   const roleConditions = {
     teacher: { lessons: { some: { teacherId: userId! } } },
@@ -27,8 +31,8 @@ const Announcements = async () => {
   return (
     <div className="bg-white p-4 rounded-md">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Announcements</h1>
-        <span className="text-xs text-gray-400">View All</span>
+        <h1 className="text-xl font-semibold">{t("announcements")}</h1>
+        <span className="text-xs text-gray-400">{t("viewAll")}</span>
       </div>
       <div className="flex flex-col gap-4 mt-4">
         {data[0] && (
@@ -36,7 +40,7 @@ const Announcements = async () => {
             <div className="flex items-center justify-between">
               <h2 className="font-medium">{data[0].title}</h2>
               <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat("en-GB").format(data[0].date)}
+                {new Intl.DateTimeFormat(getIntlLocale(locale)).format(data[0].date)}
               </span>
             </div>
             <p className="text-sm text-gray-400 mt-1">{data[0].description}</p>
@@ -47,7 +51,7 @@ const Announcements = async () => {
             <div className="flex items-center justify-between">
               <h2 className="font-medium">{data[1].title}</h2>
               <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat("en-GB").format(data[1].date)}
+                {new Intl.DateTimeFormat(getIntlLocale(locale)).format(data[1].date)}
               </span>
             </div>
             <p className="text-sm text-gray-400 mt-1">{data[1].description}</p>
@@ -58,7 +62,7 @@ const Announcements = async () => {
             <div className="flex items-center justify-between">
               <h2 className="font-medium">{data[2].title}</h2>
               <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
-                {new Intl.DateTimeFormat("en-GB").format(data[2].date)}
+                {new Intl.DateTimeFormat(getIntlLocale(locale)).format(data[2].date)}
               </span>
             </div>
             <p className="text-sm text-gray-400 mt-1">{data[2].description}</p>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 const StreakCalendar = ({
   activityDates,
   currentStreak,
@@ -7,6 +9,7 @@ const StreakCalendar = ({
   activityDates: string[];
   currentStreak: number;
 }) => {
+  const t = useTranslations("gamification.streaks");
   const activitySet = new Set(activityDates);
 
   // Build last 30 days
@@ -26,12 +29,12 @@ const StreakCalendar = ({
   return (
     <div className="bg-white p-4 rounded-md">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold">Activity Streak</h2>
+        <h2 className="text-lg font-semibold">{t("activityStreak")}</h2>
         <div className="flex items-center gap-1">
           <span className="text-orange-500 text-lg">&#128293;</span>
           <span className="text-sm font-bold">{currentStreak}</span>
           <span className="text-xs text-gray-500">
-            day{currentStreak !== 1 ? "s" : ""}
+            {currentStreak !== 1 ? t("days") : t("day")}
           </span>
         </div>
       </div>
@@ -53,13 +56,13 @@ const StreakCalendar = ({
       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-sm bg-green-400" />
-          <span className="text-xs text-gray-500">Active</span>
+          <span className="text-xs text-gray-500">{t("active")}</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-sm bg-gray-100" />
-          <span className="text-xs text-gray-500">Inactive</span>
+          <span className="text-xs text-gray-500">{t("inactive")}</span>
         </div>
-        <span className="text-xs text-gray-400 ml-auto">Last 30 days</span>
+        <span className="text-xs text-gray-400 ml-auto">{t("last30Days")}</span>
       </div>
     </div>
   );

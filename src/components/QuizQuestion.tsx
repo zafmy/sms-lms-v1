@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 type QuizQuestionProps = {
   question: {
     id: number;
@@ -21,14 +23,16 @@ const QuizQuestion = ({
   currentAnswer,
   onChange,
 }: QuizQuestionProps) => {
+  const t = useTranslations("lms.quizzes");
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <span className="text-sm text-gray-500">
-          Question {questionNumber} of {totalQuestions}
+          {t("questionOf", { current: questionNumber, total: totalQuestions })}
         </span>
         <span className="text-sm text-gray-500">
-          {question.points} {question.points === 1 ? "point" : "points"}
+          {question.points} {question.points === 1 ? t("point") : t("points")}
         </span>
       </div>
 
@@ -65,7 +69,7 @@ const QuizQuestion = ({
           <input
             type="text"
             className="ring-[1.5px] ring-gray-300 p-3 rounded-md text-sm w-full"
-            placeholder="Type your answer..."
+            placeholder={t("typeAnswer")}
             value={currentAnswer?.textResponse || ""}
             onChange={(e) => onChange({ textResponse: e.target.value })}
           />

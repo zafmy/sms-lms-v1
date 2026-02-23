@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { CourseEngagementData } from "./CourseEngagementOverviewContainer";
 
 function colorClass(value: number): string {
@@ -6,23 +7,25 @@ function colorClass(value: number): string {
   return "text-red-600";
 }
 
-const CourseEngagementOverview = ({
+const CourseEngagementOverview = async ({
   courses,
 }: {
   courses: CourseEngagementData[];
 }) => {
+  const t = await getTranslations("dashboard.teacher");
+
   if (courses.length === 0) {
     return (
       <div className="bg-white rounded-md p-4">
-        <h1 className="text-xl font-semibold">Course Engagement</h1>
-        <p className="text-sm text-gray-400 mt-4">No active courses.</p>
+        <h1 className="text-xl font-semibold">{t("courseEngagement")}</h1>
+        <p className="text-sm text-gray-400 mt-4">{t("noActiveCourses")}</p>
       </div>
     );
   }
 
   return (
     <div className="bg-white rounded-md p-4">
-      <h1 className="text-xl font-semibold">Course Engagement</h1>
+      <h1 className="text-xl font-semibold">{t("courseEngagement")}</h1>
       <div className="flex flex-col gap-4 mt-4">
         {courses.map((course) => (
           <div
@@ -35,19 +38,19 @@ const CourseEngagementOverview = ({
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
-                <p className="text-xs text-gray-500">Engaged (7d)</p>
+                <p className="text-xs text-gray-500">{t("engaged7d")}</p>
                 <p className="text-sm font-bold">
                   {course.engagedStudents}/{course.totalStudents}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Completion</p>
+                <p className="text-xs text-gray-500">{t("completion")}</p>
                 <p className={`text-sm font-bold ${colorClass(course.completionRate)}`}>
                   {course.completionRate}%
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Avg Quiz</p>
+                <p className="text-xs text-gray-500">{t("avgQuiz")}</p>
                 <p className={`text-sm font-bold ${colorClass(course.avgQuizScore)}`}>
                   {course.avgQuizScore}%
                 </p>

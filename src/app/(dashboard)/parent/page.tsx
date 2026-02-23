@@ -9,10 +9,12 @@ import ChildQuickStats from "@/components/ChildQuickStats";
 import RecentActivity from "@/components/RecentActivity";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 const ParentPage = async () => {
   const { userId } = await auth();
   const currentUserId = userId;
+  const t = await getTranslations("dashboard.parent");
 
   const students = await prisma.student.findMany({
     where: {
@@ -26,7 +28,7 @@ const ParentPage = async () => {
       <div className="w-full xl:w-2/3">
         {students.length === 0 ? (
           <div className="bg-white p-4 rounded-md">
-            <p className="text-gray-400">No children found</p>
+            <p className="text-gray-400">{t("noChildren")}</p>
           </div>
         ) : (
           students.map((student) => (
@@ -67,7 +69,7 @@ const ParentPage = async () => {
               </div>
               <div className="mt-4 bg-white p-4 rounded-md">
                 <h1 className="text-xl font-semibold">
-                  Schedule ({student.name + " " + student.surname})
+                  {t("schedule")} ({student.name + " " + student.surname})
                 </h1>
                 <BigCalendarContainer type="classId" id={student.classId} />
               </div>

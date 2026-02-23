@@ -7,6 +7,7 @@ import { enrollStudent } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const EnrollmentForm = ({
   type,
@@ -19,6 +20,8 @@ const EnrollmentForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const t = useTranslations("forms");
+
   const {
     register,
     handleSubmit,
@@ -40,7 +43,7 @@ const EnrollmentForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast("Student has been enrolled!");
+      toast(t("messages.enrolled"));
       setOpen(false);
       router.refresh();
     }
@@ -50,11 +53,11 @@ const EnrollmentForm = ({
 
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
-      <h1 className="text-xl font-semibold">Enroll a student</h1>
+      <h1 className="text-xl font-semibold">{t("enrollments.enrollTitle")}</h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Student</label>
+          <label className="text-xs text-gray-500">{t("labels.student")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("studentId")}
@@ -75,7 +78,7 @@ const EnrollmentForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Course</label>
+          <label className="text-xs text-gray-500">{t("labels.course")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("courseId")}
@@ -97,10 +100,10 @@ const EnrollmentForm = ({
         </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{t("common.somethingWentWrong")}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
-        Enroll
+        {t("common.enroll")}
       </button>
     </form>
   );

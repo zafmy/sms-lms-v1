@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 const CourseDetailPage = async ({
   params,
@@ -13,6 +14,7 @@ const CourseDetailPage = async ({
   const { id } = await params;
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const t = await getTranslations("lms.courses");
 
   const course = await prisma.course.findUnique({
     where: { id: parseInt(id) },
@@ -95,7 +97,7 @@ const CourseDetailPage = async ({
                 href={`/list/courses/${course.id}/forum`}
                 className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-700 hover:bg-green-200"
               >
-                Forum
+                {t("forum")}
               </Link>
             )}
             {(role === "admin" ||
@@ -104,7 +106,7 @@ const CourseDetailPage = async ({
                 href={`/list/courses/${course.id}/analytics`}
                 className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700 hover:bg-blue-200"
               >
-                Analytics
+                {t("analytics")}
               </Link>
             )}
           </div>
@@ -114,11 +116,11 @@ const CourseDetailPage = async ({
         )}
         <div className="flex gap-6 text-sm text-gray-500">
           <span>
-            Teacher: {course.teacher.name} {course.teacher.surname}
+            {t("teacherLabel", { name: `${course.teacher.name} ${course.teacher.surname}` })}
           </span>
-          <span>Subject: {course.subject.name}</span>
-          <span>Enrolled: {course._count.enrollments}</span>
-          <span>Modules: {course.modules.length}</span>
+          <span>{t("subjectLabel", { name: course.subject.name })}</span>
+          <span>{t("enrolledLabel", { count: course._count.enrollments })}</span>
+          <span>{t("modulesLabel", { count: course.modules.length })}</span>
         </div>
       </div>
 

@@ -305,3 +305,56 @@ export const reviewCardSchema = z.object({
   targetStudents: z.string().optional(), // JSON string of student IDs
 });
 export type ReviewCardSchema = z.infer<typeof reviewCardSchema>;
+
+export const guideSchema = z.object({
+  id: z.string().optional(),
+  slug: z
+    .string()
+    .min(1, { message: "Slug is required!" })
+    .regex(/^[a-z0-9-]+$/, {
+      message:
+        "Slug must be URL-safe (lowercase, numbers, hyphens only)!",
+    }),
+  categoryId: z.string().min(1, { message: "Category is required!" }),
+  roleAccess: z
+    .array(z.enum(["admin", "teacher", "student", "parent"]))
+    .min(1, { message: "At least one role is required!" }),
+  isPublished: z.boolean().default(false),
+  order: z.coerce.number().default(0),
+  tourSteps: z.string().optional(),
+  translations: z.object({
+    en: z.object({
+      title: z.string().min(1, { message: "English title is required!" }),
+      excerpt: z
+        .string()
+        .min(1, { message: "English excerpt is required!" }),
+      content: z
+        .string()
+        .min(1, { message: "English content is required!" }),
+    }),
+    ms: z.object({
+      title: z.string().min(1, { message: "Malay title is required!" }),
+      excerpt: z
+        .string()
+        .min(1, { message: "Malay excerpt is required!" }),
+      content: z
+        .string()
+        .min(1, { message: "Malay content is required!" }),
+    }),
+  }),
+});
+
+export type GuideSchema = z.infer<typeof guideSchema>;
+
+export const guideCategorySchema = z.object({
+  id: z.string().optional(),
+  slug: z
+    .string()
+    .min(1, { message: "Slug is required!" })
+    .regex(/^[a-z0-9-]+$/, { message: "Slug must be URL-safe!" }),
+  nameEn: z.string().min(1, { message: "English name is required!" }),
+  nameMs: z.string().min(1, { message: "Malay name is required!" }),
+  order: z.coerce.number().default(0),
+});
+
+export type GuideCategorySchema = z.infer<typeof guideCategorySchema>;

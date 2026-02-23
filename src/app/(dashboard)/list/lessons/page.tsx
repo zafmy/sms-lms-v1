@@ -9,6 +9,7 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 type LessonList = Lesson & { subject: Subject } & { class: Class } & {
   teacher: Teacher;
@@ -24,26 +25,27 @@ const LessonListPage = async ({
 
 const { sessionClaims } = await auth();
 const role = (sessionClaims?.metadata as { role?: string })?.role;
+const t = await getTranslations("entities");
 
 
 const columns = [
   {
-    header: "Subject Name",
+    header: t("lessons.subjectName"),
     accessor: "name",
   },
   {
-    header: "Class",
+    header: t("common.class"),
     accessor: "class",
   },
   {
-    header: "Teacher",
+    header: t("common.teacher"),
     accessor: "teacher",
     className: "hidden md:table-cell",
   },
   ...(role === "admin"
     ? [
         {
-          header: "Actions",
+          header: t("common.actions"),
           accessor: "action",
         },
       ]
@@ -116,11 +118,11 @@ const renderRow = (item: LessonList) => (
   const classOptions = classes.map((c) => ({ value: String(c.id), label: c.name }));
   const teacherOptions = teachers.map((t) => ({ value: t.id, label: `${t.name} ${t.surname}` }));
   const dayOptions = [
-    { value: "MONDAY", label: "Monday" },
-    { value: "TUESDAY", label: "Tuesday" },
-    { value: "WEDNESDAY", label: "Wednesday" },
-    { value: "THURSDAY", label: "Thursday" },
-    { value: "FRIDAY", label: "Friday" },
+    { value: "MONDAY", label: t("lessons.monday") },
+    { value: "TUESDAY", label: t("lessons.tuesday") },
+    { value: "WEDNESDAY", label: t("lessons.wednesday") },
+    { value: "THURSDAY", label: t("lessons.thursday") },
+    { value: "FRIDAY", label: t("lessons.friday") },
   ];
 
   const [data, count] = await prisma.$transaction([
@@ -141,13 +143,13 @@ const renderRow = (item: LessonList) => (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Lessons</h1>
+        <h1 className="hidden md:block text-lg font-semibold">{t("lessons.pageTitle")}</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <ListFilter paramKey="classId" label="Class" options={classOptions} />
-            <ListFilter paramKey="teacherId" label="Teacher" options={teacherOptions} />
-            <ListFilter paramKey="day" label="Day" options={dayOptions} />
+            <ListFilter paramKey="classId" label={t("common.class")} options={classOptions} />
+            <ListFilter paramKey="teacherId" label={t("common.teacher")} options={teacherOptions} />
+            <ListFilter paramKey="day" label={t("lessons.day")} options={dayOptions} />
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>

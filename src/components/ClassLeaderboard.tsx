@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 type RankedStudent = {
   rank: number;
@@ -17,6 +19,8 @@ const ClassLeaderboard = ({
   allTimeRanking: RankedStudent[];
   weeklyRanking: RankedStudent[];
 }) => {
+  const t = useTranslations("dashboard.teacher");
+  const locale = useLocale();
   const [tab, setTab] = useState<"allTime" | "weekly">("allTime");
   const [showAll, setShowAll] = useState(false);
 
@@ -32,7 +36,7 @@ const ClassLeaderboard = ({
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h3 className="text-lg font-semibold">Class Leaderboard</h3>
+      <h3 className="text-lg font-semibold">{t("classLeaderboard")}</h3>
       {/* Tab toggle */}
       <div className="flex gap-2 mt-3">
         <button
@@ -46,7 +50,7 @@ const ClassLeaderboard = ({
             setShowAll(false);
           }}
         >
-          All Time
+          {t("allTime")}
         </button>
         <button
           className={`px-3 py-1 rounded-md text-sm ${
@@ -59,20 +63,20 @@ const ClassLeaderboard = ({
             setShowAll(false);
           }}
         >
-          This Week
+          {t("thisWeek")}
         </button>
       </div>
       {/* Leaderboard list */}
       <div className="mt-3">
         {displayedRanking.length === 0 ? (
-          <p className="text-gray-400 text-sm">No student data available</p>
+          <p className="text-gray-400 text-sm">{t("noStudentData")}</p>
         ) : (
           <>
             <div className="flex text-xs text-gray-400 font-medium mb-1 px-2">
               <span className="w-8">#</span>
-              <span className="flex-1">Student</span>
-              <span className="w-12 text-center">Lv</span>
-              <span className="w-16 text-right">XP</span>
+              <span className="flex-1">{t("student")}</span>
+              <span className="w-12 text-center">{t("level")}</span>
+              <span className="w-16 text-right">{t("xp")}</span>
             </div>
             {displayedRanking.map((student) => (
               <div
@@ -87,7 +91,7 @@ const ClassLeaderboard = ({
                   {student.currentLevel}
                 </span>
                 <span className="w-16 text-right font-semibold">
-                  {student.totalXp.toLocaleString()}
+                  {student.totalXp.toLocaleString(getIntlLocale(locale))}
                 </span>
               </div>
             ))}
@@ -96,7 +100,7 @@ const ClassLeaderboard = ({
                 className="text-sm text-blue-500 mt-2 hover:underline"
                 onClick={() => setShowAll(true)}
               >
-                View All ({ranking.length})
+                {t("viewAll")} ({ranking.length})
               </button>
             )}
           </>

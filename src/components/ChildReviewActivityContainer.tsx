@@ -4,6 +4,7 @@ import {
   computeCardDistribution,
 } from "@/lib/spacedRepetitionUtils";
 import ChildReviewActivity from "./ChildReviewActivity";
+import { getTranslations } from "next-intl/server";
 
 const ChildReviewActivityContainer = async ({
   studentId,
@@ -39,6 +40,8 @@ const ChildReviewActivityContainer = async ({
       select: { currentStreak: true },
     }),
   ]);
+
+  const t = await getTranslations("entities");
 
   if (activeCards.length === 0) {
     return (
@@ -78,7 +81,7 @@ const ChildReviewActivityContainer = async ({
 
   const subjects = Array.from(masteryMap.entries())
     .map(([subjectId, percentage]) => ({
-      name: subjectNameMap.get(subjectId) ?? "Unknown",
+      name: subjectNameMap.get(subjectId) ?? t("reviews.unknown"),
       percentage: Math.round(percentage),
     }))
     .sort((a, b) => b.percentage - a.percentage)

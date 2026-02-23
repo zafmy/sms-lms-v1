@@ -8,6 +8,7 @@ import { createQuestion, updateQuestion } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const QuestionForm = ({
   type,
@@ -20,6 +21,8 @@ const QuestionForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   relatedData?: any;
 }) => {
+  const t = useTranslations("forms");
+
   const defaultOptions = data?.options
     ? data.options.map((opt: any) => ({
         text: opt.text,
@@ -59,13 +62,13 @@ const QuestionForm = ({
   useEffect(() => {
     if (questionType === "TRUE_FALSE") {
       setValue("options", [
-        { text: "True", isCorrect: true, order: 1 },
-        { text: "False", isCorrect: false, order: 2 },
+        { text: t("common.true"), isCorrect: true, order: 1 },
+        { text: t("common.false"), isCorrect: false, order: 2 },
       ]);
     } else if (questionType === "FILL_IN_BLANK") {
       setValue("options", [
         { text: "", isCorrect: true, order: 1 },
-        { text: "(blank)", isCorrect: false, order: 2 },
+        { text: t("common.blank"), isCorrect: false, order: 2 },
       ]);
     }
   }, [questionType, setValue]);
@@ -86,9 +89,7 @@ const QuestionForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(
-        `Question has been ${type === "create" ? "created" : "updated"}!`
-      );
+      toast(type === "create" ? t("messages.created", { entity: "Question" }) : t("messages.updated", { entity: "Question" }));
       setOpen(false);
       router.refresh();
     }
@@ -108,13 +109,13 @@ const QuestionForm = ({
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new question" : "Update the question"}
+        {type === "create" ? t("questions.createTitle") : t("questions.updateTitle")}
       </h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         {data && (
           <InputField
-            label="Id"
+            label={t("labels.id")}
             name="id"
             defaultValue={data?.id}
             register={register}
@@ -123,7 +124,7 @@ const QuestionForm = ({
           />
         )}
         <div className="flex flex-col gap-2 w-full">
-          <label className="text-xs text-gray-500">Question Text</label>
+          <label className="text-xs text-gray-500">{t("labels.questionText")}</label>
           <textarea
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("text")}
@@ -137,15 +138,15 @@ const QuestionForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Type</label>
+          <label className="text-xs text-gray-500">{t("labels.type")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("type")}
             defaultValue={data?.type || "MULTIPLE_CHOICE"}
           >
-            <option value="MULTIPLE_CHOICE">Multiple Choice</option>
-            <option value="TRUE_FALSE">True / False</option>
-            <option value="FILL_IN_BLANK">Fill in the Blank</option>
+            <option value="MULTIPLE_CHOICE">{t("questions.multipleChoice")}</option>
+            <option value="TRUE_FALSE">{t("questions.trueFalse")}</option>
+            <option value="FILL_IN_BLANK">{t("questions.fillInBlank")}</option>
           </select>
           {errors.type?.message && (
             <p className="text-xs text-red-400">
@@ -154,7 +155,7 @@ const QuestionForm = ({
           )}
         </div>
         <InputField
-          label="Points"
+          label={t("labels.points")}
           name="points"
           type="number"
           defaultValue={data?.points || "1"}
@@ -162,7 +163,7 @@ const QuestionForm = ({
           error={errors?.points}
         />
         <InputField
-          label="Order"
+          label={t("labels.order")}
           name="order"
           type="number"
           defaultValue={data?.order || "1"}
@@ -170,7 +171,7 @@ const QuestionForm = ({
           error={errors?.order}
         />
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Quiz</label>
+          <label className="text-xs text-gray-500">{t("labels.quiz")}</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("quizId")}
@@ -190,7 +191,7 @@ const QuestionForm = ({
         </div>
         <div className="flex flex-col gap-2 w-full">
           <label className="text-xs text-gray-500">
-            Explanation (optional)
+            {t("labels.explanation")}
           </label>
           <textarea
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
@@ -209,7 +210,7 @@ const QuestionForm = ({
         <div className="w-full">
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs text-gray-500 font-semibold">
-              Answer Options
+              {t("common.answerOptions")}
             </label>
             {questionType === "MULTIPLE_CHOICE" && fields.length < 6 && (
               <button
@@ -223,7 +224,7 @@ const QuestionForm = ({
                 }
                 className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded"
               >
-                + Add Option
+                {t("common.addOption")}
               </button>
             )}
           </div>
@@ -236,7 +237,7 @@ const QuestionForm = ({
           {questionType === "FILL_IN_BLANK" ? (
             <div className="flex flex-col gap-2">
               <label className="text-xs text-gray-500">
-                Correct Answer Text
+                {t("common.correctAnswer")}
               </label>
               <input
                 type="text"
@@ -245,7 +246,7 @@ const QuestionForm = ({
               />
               <input type="hidden" {...register("options.0.isCorrect")} value="true" />
               <input type="hidden" {...register("options.0.order")} value="1" />
-              <input type="hidden" {...register("options.1.text")} value="(blank)" />
+              <input type="hidden" {...register("options.1.text")} value={t("common.blank")} />
               <input type="hidden" {...register("options.1.isCorrect")} value="" />
               <input type="hidden" {...register("options.1.order")} value="2" />
               {errors.options?.[0]?.text?.message && (
@@ -267,7 +268,7 @@ const QuestionForm = ({
                     checked={watch(`options.${index}.isCorrect`)}
                     onChange={() => handleCorrectChange(index)}
                     className="w-4 h-4"
-                    title="Mark as correct"
+                    title={t("common.markCorrect")}
                   />
                   <input type="hidden" {...register(`options.${index}.isCorrect`)} />
                   <input type="hidden" {...register(`options.${index}.order`)} value={index + 1} />
@@ -275,7 +276,7 @@ const QuestionForm = ({
                     type="text"
                     className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm flex-1"
                     {...register(`options.${index}.text`)}
-                    placeholder={`Option ${index + 1}`}
+                    placeholder={t("common.optionNum", { number: index + 1 })}
                     disabled={questionType === "TRUE_FALSE"}
                   />
                   {questionType === "MULTIPLE_CHOICE" && fields.length > 2 && (
@@ -294,10 +295,10 @@ const QuestionForm = ({
         </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{t("common.somethingWentWrong")}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
-        {type === "create" ? "Create" : "Update"}
+        {type === "create" ? t("common.create") : t("common.update")}
       </button>
     </form>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+import { getIntlLocale } from "@/lib/formatUtils";
 import type { StudentReviewData, StruggledCardData } from "@/lib/reviewAnalyticsUtils";
 
 interface ClassReviewAnalyticsProps {
@@ -25,31 +27,33 @@ const ClassReviewAnalytics = ({
   students,
   struggledCards,
 }: ClassReviewAnalyticsProps) => {
+  const t = useTranslations("spaced_repetition.analytics");
+  const locale = useLocale();
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
       <div>
-        <h3 className="text-lg font-semibold mb-3">Review Analytics</h3>
+        <h3 className="text-lg font-semibold mb-3">{t("reviewAnalytics")}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-gray-50 p-3 rounded-md text-center">
             <span className={`text-2xl font-bold ${rateColor(stats.avgCompletion)}`}>
               {stats.avgCompletion}%
             </span>
-            <p className="text-xs text-gray-400 mt-1">Avg Correct Rate</p>
+            <p className="text-xs text-gray-400 mt-1">{t("avgCorrectRate")}</p>
           </div>
           <div className="bg-gray-50 p-3 rounded-md text-center">
             <span className={`text-2xl font-bold ${rateColor(stats.avgMastery)}`}>
               {stats.avgMastery}%
             </span>
-            <p className="text-xs text-gray-400 mt-1">Avg Mastery</p>
+            <p className="text-xs text-gray-400 mt-1">{t("avgMastery")}</p>
           </div>
           <div className="bg-gray-50 p-3 rounded-md text-center">
             <span className="text-2xl font-bold">{stats.totalSessions}</span>
-            <p className="text-xs text-gray-400 mt-1">Total Sessions</p>
+            <p className="text-xs text-gray-400 mt-1">{t("totalSessions")}</p>
           </div>
           <div className="bg-gray-50 p-3 rounded-md text-center">
             <span className="text-2xl font-bold">{stats.activeStudents}</span>
-            <p className="text-xs text-gray-400 mt-1">Active Students</p>
+            <p className="text-xs text-gray-400 mt-1">{t("activeStudents")}</p>
           </div>
         </div>
       </div>
@@ -57,15 +61,15 @@ const ClassReviewAnalytics = ({
       {/* Struggled Cards Table */}
       {struggledCards.length > 0 && (
         <div>
-          <h4 className="text-md font-medium mb-2">Most Struggled Cards</h4>
+          <h4 className="text-md font-medium mb-2">{t("mostStruggledCards")}</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-gray-500">
-                  <th className="py-2 pr-4">Card Front</th>
-                  <th className="py-2 pr-4 text-right">Hard Rate</th>
-                  <th className="py-2 pr-4 text-right">Hard Count</th>
-                  <th className="py-2 text-right">Total Reviews</th>
+                  <th className="py-2 pr-4">{t("cardFront")}</th>
+                  <th className="py-2 pr-4 text-right">{t("hardRate")}</th>
+                  <th className="py-2 pr-4 text-right">{t("hardCount")}</th>
+                  <th className="py-2 text-right">{t("totalReviews")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,16 +94,16 @@ const ClassReviewAnalytics = ({
       {/* Per-Student Table */}
       {students.length > 0 && (
         <div>
-          <h4 className="text-md font-medium mb-2">Student Review Progress</h4>
+          <h4 className="text-md font-medium mb-2">{t("studentReviewProgress")}</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-gray-500">
-                  <th className="py-2 pr-4">Student</th>
-                  <th className="py-2 pr-4 text-right">Sessions</th>
-                  <th className="py-2 pr-4 text-right">Mastery</th>
-                  <th className="py-2 pr-4 text-right">Correct Rate</th>
-                  <th className="py-2 text-right">Last Session</th>
+                  <th className="py-2 pr-4">{t("student")}</th>
+                  <th className="py-2 pr-4 text-right">{t("sessions")}</th>
+                  <th className="py-2 pr-4 text-right">{t("mastery")}</th>
+                  <th className="py-2 pr-4 text-right">{t("correctRate")}</th>
+                  <th className="py-2 text-right">{t("lastSession")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -131,7 +135,7 @@ const ClassReviewAnalytics = ({
                       </td>
                       <td className="py-2 text-right text-gray-500">
                         {student.lastSessionDate
-                          ? new Date(student.lastSessionDate).toLocaleDateString()
+                          ? new Date(student.lastSessionDate).toLocaleDateString(getIntlLocale(locale))
                           : "-"}
                       </td>
                     </tr>

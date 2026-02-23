@@ -1,6 +1,9 @@
 import prisma from "@/lib/prisma";
+import { getLocale } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const EventList = async ({ dateParam }: { dateParam: string | undefined }) => {
+  const locale = await getLocale();
   const date = dateParam ? new Date(dateParam) : new Date();
 
   const data = await prisma.event.findMany({
@@ -20,7 +23,7 @@ const EventList = async ({ dateParam }: { dateParam: string | undefined }) => {
       <div className="flex items-center justify-between">
         <h1 className="font-semibold text-gray-600">{event.title}</h1>
         <span className="text-gray-300 text-xs">
-          {event.startTime.toLocaleTimeString("en-UK", {
+          {event.startTime.toLocaleTimeString(getIntlLocale(locale), {
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,

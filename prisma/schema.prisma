@@ -611,3 +611,46 @@ model ForumVote {
   @@unique([replyId, userId])
   @@index([replyId])
 }
+
+// Guide Models (SPEC-GUIDE-001)
+
+model GuideCategory {
+  id     String  @id @default(cuid())
+  slug   String  @unique
+  nameEn String
+  nameMs String
+  order  Int     @default(0)
+  guides Guide[]
+}
+
+model Guide {
+  id           String             @id @default(cuid())
+  slug         String             @unique
+  categoryId   String
+  category     GuideCategory      @relation(fields: [categoryId], references: [id])
+  roleAccess   String[]
+  tourSteps    Json?
+  isPublished  Boolean            @default(false)
+  order        Int                @default(0)
+  authorId     String
+  authorRole   String
+  translations GuideTranslation[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([categoryId])
+  @@index([isPublished])
+}
+
+model GuideTranslation {
+  id      String @id @default(cuid())
+  guideId String
+  guide   Guide  @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  locale  String
+  title   String
+  excerpt String
+  content String @db.Text
+
+  @@unique([guideId, locale])
+  @@index([locale])
+}

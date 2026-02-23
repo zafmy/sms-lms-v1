@@ -1,4 +1,6 @@
 import prisma from "@/lib/prisma";
+import { getLocale } from "next-intl/server";
+import { getIntlLocale } from "@/lib/formatUtils";
 
 const MONTH_NAMES = [
   "Jan",
@@ -16,6 +18,7 @@ const MONTH_NAMES = [
 ];
 
 const AttendanceHeatmap = async ({ studentId }: { studentId: string }) => {
+  const locale = await getLocale();
   const now = new Date();
   const yearStart = new Date(now.getFullYear(), 0, 1);
 
@@ -80,7 +83,7 @@ const AttendanceHeatmap = async ({ studentId }: { studentId: string }) => {
                     className={`w-3 h-3 rounded-xs ${
                       record.present ? "bg-green-400" : "bg-red-400"
                     }`}
-                    title={`${new Intl.DateTimeFormat("en-GB").format(record.date)} - ${
+                    title={`${new Intl.DateTimeFormat(getIntlLocale(locale)).format(record.date)} - ${
                       record.present ? "Present" : "Absent"
                     }`}
                   />
