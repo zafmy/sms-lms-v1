@@ -7,7 +7,7 @@
 | SPEC ID     | SPEC-DASH-001                     |
 | Title       | Dashboard Analytics Overhaul      |
 | Created     | 2026-02-21                        |
-| Status      | Planned                           |
+| Status      | Completed                         |
 | Priority    | High                              |
 | Lifecycle   | spec-first                        |
 | Related     | SPEC-ATT-001 (attendance)         |

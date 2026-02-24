@@ -2,7 +2,7 @@
 id: SPEC-FORM-001
 title: "Missing CRUD Forms for School Management Dashboard"
 version: "1.0.0"
-status: draft
+status: completed
 priority: high
 created: 2026-02-21
 tags: [forms, crud, frontend, react-hook-form, zod, server-actions]

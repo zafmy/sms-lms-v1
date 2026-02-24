@@ -1,7 +1,7 @@
 ---
 id: SPEC-FIX-001
 version: "1.0.0"
-status: approved
+status: completed
 created: "2026-02-21"
 updated: "2026-02-21"
 author: ZaF

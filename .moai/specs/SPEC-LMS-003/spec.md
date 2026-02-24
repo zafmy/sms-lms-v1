@@ -4,7 +4,7 @@
 | -------- | ---------------------------------------------------------------------- |
 | id       | SPEC-LMS-003                                                           |
 | version  | 1.0.0                                                                  |
-| status   | draft                                                                  |
+| status   | completed                                                              |
 | created  | 2026-02-21                                                             |
 | author   | MoAI                                                                   |
 | priority | Medium                                                                 |

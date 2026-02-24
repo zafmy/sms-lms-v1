@@ -2,7 +2,7 @@
 id: SPEC-ATT-001
 title: "Attendance List Page"
 version: "1.0.0"
-status: draft
+status: completed
 priority: high
 created: 2026-02-21
 tags: [attendance, list-page, server-component, prisma, role-based-access, pagination]

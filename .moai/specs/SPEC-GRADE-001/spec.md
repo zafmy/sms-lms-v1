@@ -8,7 +8,7 @@
 | Title       | Grade Reports & Performance Tracking        |
 | Version     | 1.0.0                                       |
 | Created     | 2026-02-21                                  |
-| Status      | Planned                                     |
+| Status      | Completed                                   |
 | Priority    | High                                        |
 | Lifecycle   | spec-first                                  |
 | Related     | SPEC-DASH-001 (dashboard analytics), SPEC-ATT-001 (attendance) |
