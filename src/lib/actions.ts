@@ -291,7 +291,15 @@ export const deleteTeacher = async (
         },
       });
     } catch (prismaErr) {
-      return { success: false, error: true };
+      console.error(
+        `[PARTIAL FAILURE] deleteTeacher: Clerk user ${id} deleted, but Prisma teacher record ${id} failed to delete. Manual resolution required.`,
+        prismaErr
+      );
+      return {
+        success: false,
+        error: true,
+        message: "Partial failure: user account deleted but database record remains. Contact administrator.",
+      };
     }
 
     revalidatePath("/list/teachers");
@@ -421,7 +429,15 @@ export const deleteStudent = async (
         },
       });
     } catch (prismaErr) {
-      return { success: false, error: true };
+      console.error(
+        `[PARTIAL FAILURE] deleteStudent: Clerk user ${id} deleted, but Prisma student record ${id} failed to delete. Manual resolution required.`,
+        prismaErr
+      );
+      return {
+        success: false,
+        error: true,
+        message: "Partial failure: user account deleted but database record remains. Contact administrator.",
+      };
     }
 
     revalidatePath("/list/students");
