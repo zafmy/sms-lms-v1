@@ -22,6 +22,7 @@ const ModuleForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -97,7 +98,7 @@ const ModuleForm = ({
           />
           {errors.description?.message && (
             <p className="text-xs text-red-400">
-              {errors.description.message.toString()}
+              {tv(errors.description.message.toString())}
             </p>
           )}
         </div>
@@ -114,7 +115,7 @@ const ModuleForm = ({
           </div>
           {errors.isLocked?.message && (
             <p className="text-xs text-red-400">
-              {errors.isLocked.message.toString()}
+              {tv(errors.isLocked.message.toString())}
             </p>
           )}
         </div>
@@ -135,7 +136,7 @@ const ModuleForm = ({
           </select>
           {errors.courseId?.message && (
             <p className="text-xs text-red-400">
-              {errors.courseId.message.toString()}
+              {tv(errors.courseId.message.toString())}
             </p>
           )}
         </div>

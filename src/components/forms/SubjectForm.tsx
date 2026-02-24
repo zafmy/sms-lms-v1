@@ -22,6 +22,7 @@ const SubjectForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -99,7 +100,7 @@ const SubjectForm = ({
           </select>
           {errors.teachers?.message && (
             <p className="text-xs text-red-400">
-              {errors.teachers.message.toString()}
+              {tv(errors.teachers.message.toString())}
             </p>
           )}
         </div>

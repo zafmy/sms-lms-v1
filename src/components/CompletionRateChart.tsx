@@ -9,18 +9,21 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 const CompletionRateChart = ({
   data,
 }: {
   data: { moduleTitle: string; percentage: number }[];
 }) => {
+  const t = useTranslations("lms.analytics");
+
   if (data.length === 0) {
     return (
       <div className="bg-white rounded-md p-4 border border-gray-100">
-        <h2 className="text-lg font-semibold mb-3">Module Completion Rates</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("moduleCompletionRates")}</h2>
         <p className="text-gray-400 text-sm mt-4">
-          No module data available.
+          {t("noModuleData")}
         </p>
       </div>
     );
@@ -28,7 +31,7 @@ const CompletionRateChart = ({
 
   return (
     <div className="bg-white rounded-md p-4 border border-gray-100">
-      <h2 className="text-lg font-semibold mb-3">Module Completion Rates</h2>
+      <h2 className="text-lg font-semibold mb-3">{t("moduleCompletionRates")}</h2>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} barSize={32}>
           <CartesianGrid
@@ -51,7 +54,7 @@ const CompletionRateChart = ({
           />
           <Tooltip
             contentStyle={{ borderRadius: "8px", borderColor: "lightgray" }}
-            formatter={(value) => [`${value}%`, "Completion"]}
+            formatter={(value) => [`${value}%`, t("completion")]}
           />
           <Bar
             dataKey="percentage"

@@ -27,6 +27,7 @@ const BadgeForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -92,7 +93,7 @@ const BadgeForm = ({
           />
           {errors.description?.message && (
             <p className="text-xs text-red-400">
-              {errors.description.message.toString()}
+              {tv(errors.description.message.toString())}
             </p>
           )}
         </div>
@@ -119,7 +120,7 @@ const BadgeForm = ({
           </select>
           {errors.category?.message && (
             <p className="text-xs text-red-400">
-              {errors.category.message.toString()}
+              {tv(errors.category.message.toString())}
             </p>
           )}
         </div>

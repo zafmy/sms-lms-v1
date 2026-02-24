@@ -1,22 +1,25 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface SubjectMasteryMeterProps {
   data: Array<{ subjectName: string; percentage: number }>;
 }
 
 const SubjectMasteryMeter = ({ data }: SubjectMasteryMeterProps) => {
+  const t = useTranslations("spaced_repetition.analytics");
   if (data.length === 0) {
     return (
       <div className="bg-white p-4 rounded-md">
-        <h3 className="text-md font-medium mb-2">Subject Mastery</h3>
-        <p className="text-gray-400 text-sm">No review data yet.</p>
+        <h3 className="text-md font-medium mb-2">{t("subjectMastery")}</h3>
+        <p className="text-gray-400 text-sm">{t("noReviewDataYet")}</p>
       </div>
     );
   }
 
   return (
     <div className="bg-white p-4 rounded-md">
-      <h3 className="text-md font-medium mb-3">Subject Mastery</h3>
+      <h3 className="text-md font-medium mb-3">{t("subjectMastery")}</h3>
       <div className="space-y-3">
         {data.map(({ subjectName, percentage }) => (
           <div key={subjectName}>

@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import type { DailyEngagement } from "@/lib/lmsAnalyticsUtils";
+import { useTranslations } from "next-intl";
 
-const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+const MONTH_KEYS = [
+  "jan", "feb", "mar", "apr", "may", "jun",
+  "jul", "aug", "sep", "oct", "nov", "dec",
+] as const;
 
-const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
+const DAY_KEYS = ["", "mon", "", "wed", "", "fri", ""] as const;
 
 const getIntensityClass = (total: number): string => {
   if (total === 0) return "bg-gray-200";
@@ -22,6 +23,8 @@ const LmsEngagementHeatmap = ({
 }: {
   data: DailyEngagement[];
 }) => {
+  const t = useTranslations("lms.analytics");
+  const tCommon = useTranslations("dashboard.common");
   const [hoveredCell, setHoveredCell] = useState<DailyEngagement | null>(null);
 
   const hasData = data.some((d) => d.total > 0);
@@ -30,10 +33,10 @@ const LmsEngagementHeatmap = ({
     return (
       <div className="bg-white rounded-md p-4 border border-gray-100">
         <h2 className="text-lg font-semibold mb-3">
-          Engagement Heatmap (90 Days)
+          {t("engagementHeatmap")}
         </h2>
         <p className="text-gray-400 text-sm mt-4">
-          No engagement activity recorded.
+          {t("noEngagementActivity")}
         </p>
       </div>
     );
@@ -100,7 +103,7 @@ const LmsEngagementHeatmap = ({
     if (firstCell) {
       const month = parseInt(firstCell.date.split("-")[1], 10) - 1;
       if (month !== lastMonth) {
-        monthLabels.push({ label: MONTH_NAMES[month], colIndex: colIdx });
+        monthLabels.push({ label: tCommon(MONTH_KEYS[month]), colIndex: colIdx });
         lastMonth = month;
       }
     }
@@ -109,18 +112,18 @@ const LmsEngagementHeatmap = ({
   return (
     <div className="bg-white rounded-md p-4 border border-gray-100">
       <h2 className="text-lg font-semibold mb-3">
-        Engagement Heatmap (90 Days)
+        {t("engagementHeatmap")}
       </h2>
 
       <div className="flex gap-1">
         {/* Day labels column */}
         <div className="flex flex-col gap-1 mr-1">
-          {DAY_LABELS.map((label, idx) => (
+          {DAY_KEYS.map((key, idx) => (
             <div
               key={idx}
               className="w-3 h-3 flex items-center justify-center text-[9px] text-gray-400"
             >
-              {label}
+              {key ? tCommon(key) : ""}
             </div>
           ))}
         </div>
@@ -158,7 +161,7 @@ const LmsEngagementHeatmap = ({
                   <div
                     key={colIdx}
                     className={`w-3 h-3 rounded-xs cursor-pointer ${getIntensityClass(cell.total)}`}
-                    title={`${cell.date}: ${cell.total} activities`}
+                    title={tCommon("heatmapTooltip", { date: cell.date, count: cell.total })}
                     onMouseEnter={() => setHoveredCell(cell)}
                     onMouseLeave={() => setHoveredCell(null)}
                   />
@@ -172,24 +175,25 @@ const LmsEngagementHeatmap = ({
       {/* Tooltip */}
       {hoveredCell && (
         <div className="mt-2 text-xs text-gray-600">
-          {hoveredCell.date}: {hoveredCell.lessonCompletions} lesson
-          {hoveredCell.lessonCompletions !== 1 ? "s" : ""},{" "}
-          {hoveredCell.quizSubmissions} quiz
-          {hoveredCell.quizSubmissions !== 1 ? "zes" : ""} ({hoveredCell.total}{" "}
-          total)
+          {t("heatmapDetail", {
+            date: hoveredCell.date,
+            lessons: hoveredCell.lessonCompletions,
+            quizzes: hoveredCell.quizSubmissions,
+            total: hoveredCell.total,
+          })}
         </div>
       )}
 
       {/* Legend */}
       <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100">
-        <span className="text-xs text-gray-500">Less</span>
+        <span className="text-xs text-gray-500">{t("less")}</span>
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-xs bg-gray-200" />
           <div className="w-3 h-3 rounded-xs bg-green-200" />
           <div className="w-3 h-3 rounded-xs bg-green-400" />
           <div className="w-3 h-3 rounded-xs bg-green-600" />
         </div>
-        <span className="text-xs text-gray-500">More</span>
+        <span className="text-xs text-gray-500">{t("more")}</span>
       </div>
     </div>
   );

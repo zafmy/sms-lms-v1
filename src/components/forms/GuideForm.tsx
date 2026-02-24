@@ -24,6 +24,7 @@ const GuideForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   // For update mode, extract translations by locale
   const enTranslation = data?.translations?.find(
@@ -160,7 +161,7 @@ const GuideForm = ({
           </select>
           {errors.categoryId?.message && (
             <p className="text-xs text-red-400">
-              {errors.categoryId.message.toString()}
+              {tv(errors.categoryId.message.toString())}
             </p>
           )}
         </div>
@@ -198,7 +199,7 @@ const GuideForm = ({
           </div>
           {errors.roleAccess?.message && (
             <p className="text-xs text-red-400">
-              {errors.roleAccess.message.toString()}
+              {tv(errors.roleAccess.message.toString())}
             </p>
           )}
         </div>
@@ -260,7 +261,7 @@ const GuideForm = ({
             />
             {errors.translations?.en?.title?.message && (
               <p className="text-xs text-red-400">
-                {errors.translations.en.title.message.toString()}
+                {tv(errors.translations.en.title.message.toString())}
               </p>
             )}
           </div>
@@ -275,7 +276,7 @@ const GuideForm = ({
             />
             {errors.translations?.en?.excerpt?.message && (
               <p className="text-xs text-red-400">
-                {errors.translations.en.excerpt.message.toString()}
+                {tv(errors.translations.en.excerpt.message.toString())}
               </p>
             )}
           </div>
@@ -290,7 +291,7 @@ const GuideForm = ({
             />
             {errors.translations?.en?.content?.message && (
               <p className="text-xs text-red-400">
-                {errors.translations.en.content.message.toString()}
+                {tv(errors.translations.en.content.message.toString())}
               </p>
             )}
           </div>
@@ -309,7 +310,7 @@ const GuideForm = ({
             />
             {errors.translations?.ms?.title?.message && (
               <p className="text-xs text-red-400">
-                {errors.translations.ms.title.message.toString()}
+                {tv(errors.translations.ms.title.message.toString())}
               </p>
             )}
           </div>
@@ -324,7 +325,7 @@ const GuideForm = ({
             />
             {errors.translations?.ms?.excerpt?.message && (
               <p className="text-xs text-red-400">
-                {errors.translations.ms.excerpt.message.toString()}
+                {tv(errors.translations.ms.excerpt.message.toString())}
               </p>
             )}
           </div>
@@ -339,7 +340,7 @@ const GuideForm = ({
             />
             {errors.translations?.ms?.content?.message && (
               <p className="text-xs text-red-400">
-                {errors.translations.ms.content.message.toString()}
+                {tv(errors.translations.ms.content.message.toString())}
               </p>
             )}
           </div>
@@ -359,7 +360,7 @@ const GuideForm = ({
         />
         {errors.tourSteps?.message && (
           <p className="text-xs text-red-400">
-            {errors.tourSteps.message.toString()}
+            {tv(errors.tourSteps.message.toString())}
           </p>
         )}
       </div>

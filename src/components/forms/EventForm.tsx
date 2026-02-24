@@ -22,6 +22,7 @@ const EventForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -120,7 +121,7 @@ const EventForm = ({
           </select>
           {errors.classId?.message && (
             <p className="text-xs text-red-400">
-              {errors.classId.message.toString()}
+              {tv(errors.classId.message.toString())}
             </p>
           )}
         </div>

@@ -9,6 +9,7 @@ import {
 import { createThread } from "@/lib/forumActions";
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type ThreadFormProps = {
   courseId: number;
@@ -17,6 +18,8 @@ type ThreadFormProps = {
 };
 
 const ThreadForm = ({ courseId, role, onSuccess }: ThreadFormProps) => {
+  const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
   const router = useRouter();
 
   const {
@@ -65,8 +68,8 @@ const ThreadForm = ({ courseId, role, onSuccess }: ThreadFormProps) => {
           className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
           placeholder="Thread title..."
         />
-        {errors.title && (
-          <p className="text-xs text-red-400">{errors.title.message}</p>
+        {errors.title?.message && (
+          <p className="text-xs text-red-400">{tv(errors.title.message.toString())}</p>
         )}
       </div>
 
@@ -78,8 +81,8 @@ const ThreadForm = ({ courseId, role, onSuccess }: ThreadFormProps) => {
           className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full resize-y"
           placeholder="Write your discussion content..."
         />
-        {errors.content && (
-          <p className="text-xs text-red-400">{errors.content.message}</p>
+        {errors.content?.message && (
+          <p className="text-xs text-red-400">{tv(errors.content.message.toString())}</p>
         )}
       </div>
 

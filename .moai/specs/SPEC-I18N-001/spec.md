@@ -2,7 +2,7 @@
 id: SPEC-I18N-001
 title: "Multi-Language Support (English + Bahasa Malaysia)"
 version: 1.0.0
-status: draft
+status: completed
 created: 2026-02-23
 updated: 2026-02-23
 author: MoAI

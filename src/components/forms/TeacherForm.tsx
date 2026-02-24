@@ -24,6 +24,7 @@ const TeacherForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -160,7 +161,7 @@ const TeacherForm = ({
           </select>
           {errors.sex?.message && (
             <p className="text-xs text-red-400">
-              {errors.sex.message.toString()}
+              {tv(errors.sex.message.toString())}
             </p>
           )}
         </div>
@@ -180,7 +181,7 @@ const TeacherForm = ({
           </select>
           {errors.subjects?.message && (
             <p className="text-xs text-red-400">
-              {errors.subjects.message.toString()}
+              {tv(errors.subjects.message.toString())}
             </p>
           )}
         </div>

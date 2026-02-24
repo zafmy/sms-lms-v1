@@ -22,6 +22,7 @@ const QuestionForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const defaultOptions = data?.options
     ? data.options.map((opt: any) => ({
@@ -133,7 +134,7 @@ const QuestionForm = ({
           />
           {errors.text?.message && (
             <p className="text-xs text-red-400">
-              {errors.text.message.toString()}
+              {tv(errors.text.message.toString())}
             </p>
           )}
         </div>
@@ -150,7 +151,7 @@ const QuestionForm = ({
           </select>
           {errors.type?.message && (
             <p className="text-xs text-red-400">
-              {errors.type.message.toString()}
+              {tv(errors.type.message.toString())}
             </p>
           )}
         </div>
@@ -185,7 +186,7 @@ const QuestionForm = ({
           </select>
           {errors.quizId?.message && (
             <p className="text-xs text-red-400">
-              {errors.quizId.message.toString()}
+              {tv(errors.quizId.message.toString())}
             </p>
           )}
         </div>
@@ -201,7 +202,7 @@ const QuestionForm = ({
           />
           {errors.explanation?.message && (
             <p className="text-xs text-red-400">
-              {errors.explanation.message.toString()}
+              {tv(errors.explanation.message.toString())}
             </p>
           )}
         </div>
@@ -230,7 +231,7 @@ const QuestionForm = ({
           </div>
           {errors.options?.message && (
             <p className="text-xs text-red-400 mb-2">
-              {errors.options.message.toString()}
+              {tv(errors.options.message.toString())}
             </p>
           )}
 
@@ -251,7 +252,7 @@ const QuestionForm = ({
               <input type="hidden" {...register("options.1.order")} value="2" />
               {errors.options?.[0]?.text?.message && (
                 <p className="text-xs text-red-400">
-                  {errors.options[0].text.message.toString()}
+                  {tv(errors.options[0].text.message.toString())}
                 </p>
               )}
             </div>

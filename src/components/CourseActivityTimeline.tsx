@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { DailyEngagement } from "@/lib/lmsAnalyticsUtils";
+import { useTranslations } from "next-intl";
 
 const formatDate = (dateStr: string): string => {
   const parts = dateStr.split("-");
@@ -21,14 +22,15 @@ const CourseActivityTimeline = ({
 }: {
   data: DailyEngagement[];
 }) => {
+  const t = useTranslations("lms.analytics");
   const hasData = data.some((d) => d.total > 0);
 
   if (!hasData) {
     return (
       <div className="bg-white rounded-md p-4 border border-gray-100">
-        <h2 className="text-lg font-semibold mb-3">Daily Engagement Trend</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("dailyEngagementTrend")}</h2>
         <p className="text-gray-400 text-sm mt-4">
-          No engagement data available.
+          {t("noEngagementData")}
         </p>
       </div>
     );
@@ -41,7 +43,7 @@ const CourseActivityTimeline = ({
 
   return (
     <div className="bg-white rounded-md p-4 border border-gray-100">
-      <h2 className="text-lg font-semibold mb-3">Daily Engagement Trend</h2>
+      <h2 className="text-lg font-semibold mb-3">{t("dailyEngagementTrend")}</h2>
       <ResponsiveContainer width="100%" height={250}>
         <LineChart data={chartData}>
           <CartesianGrid
@@ -64,12 +66,12 @@ const CourseActivityTimeline = ({
           />
           <Tooltip
             contentStyle={{ borderRadius: "8px", borderColor: "lightgray" }}
-            labelFormatter={(label) => `Date: ${label}`}
+            labelFormatter={(label) => `${t("dateLabel")}: ${label}`}
             formatter={(value, name) => {
               const labelMap: Record<string, string> = {
-                lessonCompletions: "Lesson Completions",
-                quizSubmissions: "Quiz Submissions",
-                total: "Total",
+                lessonCompletions: t("lessonCompletions"),
+                quizSubmissions: t("quizSubmissions"),
+                total: t("total"),
               };
               return [value, labelMap[name as string] ?? name];
             }}

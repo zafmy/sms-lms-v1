@@ -22,6 +22,7 @@ const LmsLessonForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -109,7 +110,7 @@ const LmsLessonForm = ({
           </select>
           {errors.contentType?.message && (
             <p className="text-xs text-red-400">
-              {errors.contentType.message.toString()}
+              {tv(errors.contentType.message.toString())}
             </p>
           )}
         </div>
@@ -137,7 +138,7 @@ const LmsLessonForm = ({
           </select>
           {errors.moduleId?.message && (
             <p className="text-xs text-red-400">
-              {errors.moduleId.message.toString()}
+              {tv(errors.moduleId.message.toString())}
             </p>
           )}
         </div>
@@ -163,7 +164,7 @@ const LmsLessonForm = ({
           />
           {errors.content?.message && (
             <p className="text-xs text-red-400">
-              {errors.content.message.toString()}
+              {tv(errors.content.message.toString())}
             </p>
           )}
         </div>

@@ -22,6 +22,7 @@ const QuizForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -89,7 +90,7 @@ const QuizForm = ({
           />
           {errors.description?.message && (
             <p className="text-xs text-red-400">
-              {errors.description.message.toString()}
+              {tv(errors.description.message.toString())}
             </p>
           )}
         </div>
@@ -130,7 +131,7 @@ const QuizForm = ({
           </select>
           {errors.scoringPolicy?.message && (
             <p className="text-xs text-red-400">
-              {errors.scoringPolicy.message.toString()}
+              {tv(errors.scoringPolicy.message.toString())}
             </p>
           )}
         </div>
@@ -155,7 +156,7 @@ const QuizForm = ({
           </select>
           {errors.lessonId?.message && (
             <p className="text-xs text-red-400">
-              {errors.lessonId.message.toString()}
+              {tv(errors.lessonId.message.toString())}
             </p>
           )}
         </div>

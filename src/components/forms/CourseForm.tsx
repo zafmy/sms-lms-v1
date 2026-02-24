@@ -22,6 +22,7 @@ const CourseForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -96,7 +97,7 @@ const CourseForm = ({
           />
           {errors.description?.message && (
             <p className="text-xs text-red-400">
-              {errors.description.message.toString()}
+              {tv(errors.description.message.toString())}
             </p>
           )}
         </div>
@@ -113,7 +114,7 @@ const CourseForm = ({
           </select>
           {errors.status?.message && (
             <p className="text-xs text-red-400">
-              {errors.status.message.toString()}
+              {tv(errors.status.message.toString())}
             </p>
           )}
         </div>
@@ -134,7 +135,7 @@ const CourseForm = ({
           </select>
           {errors.teacherId?.message && (
             <p className="text-xs text-red-400">
-              {errors.teacherId.message.toString()}
+              {tv(errors.teacherId.message.toString())}
             </p>
           )}
         </div>
@@ -155,7 +156,7 @@ const CourseForm = ({
           </select>
           {errors.subjectId?.message && (
             <p className="text-xs text-red-400">
-              {errors.subjectId.message.toString()}
+              {tv(errors.subjectId.message.toString())}
             </p>
           )}
         </div>

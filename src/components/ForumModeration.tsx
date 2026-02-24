@@ -7,6 +7,7 @@ import {
 } from "@/lib/forumActions";
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const ForumModeration = ({
   threadId,
@@ -20,6 +21,7 @@ const ForumModeration = ({
   isLocked: boolean;
 }) => {
   const router = useRouter();
+  const t = useTranslations("lms.forums");
 
   const [pinState, pinAction] = useActionState(pinThread, {
     success: false,
@@ -57,7 +59,7 @@ const ForumModeration = ({
   };
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this thread? This action cannot be undone.")) {
+    if (window.confirm(t("deleteThreadConfirm"))) {
       deleteAction({ id: threadId });
     }
   };
@@ -72,7 +74,7 @@ const ForumModeration = ({
             : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
         }`}
       >
-        {isPinned ? "Unpin" : "Pin"}
+        {isPinned ? t("unpin") : t("pin")}
       </button>
       <button
         onClick={handleLock}
@@ -82,13 +84,13 @@ const ForumModeration = ({
             : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
         }`}
       >
-        {isLocked ? "Unlock" : "Lock"}
+        {isLocked ? t("unlock") : t("lock")}
       </button>
       <button
         onClick={handleDelete}
         className="px-3 py-1 text-sm rounded-md border border-red-300 text-red-600 hover:bg-red-50"
       >
-        Delete
+        {t("delete")}
       </button>
       {pinState.error && (
         <span className="text-xs text-red-500">{pinState.message}</span>

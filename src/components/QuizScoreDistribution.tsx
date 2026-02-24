@@ -9,20 +9,22 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 const QuizScoreDistribution = ({
   data,
 }: {
   data: { range: string; count: number }[];
 }) => {
+  const t = useTranslations("lms.analytics");
   const hasData = data.some((d) => d.count > 0);
 
   if (!hasData) {
     return (
       <div className="bg-white rounded-md p-4 border border-gray-100">
-        <h2 className="text-lg font-semibold mb-3">Quiz Score Distribution</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("quizScoreDistribution")}</h2>
         <p className="text-gray-400 text-sm mt-4">
-          No quiz attempts recorded.
+          {t("noQuizAttempts")}
         </p>
       </div>
     );
@@ -30,7 +32,7 @@ const QuizScoreDistribution = ({
 
   return (
     <div className="bg-white rounded-md p-4 border border-gray-100">
-      <h2 className="text-lg font-semibold mb-3">Quiz Score Distribution</h2>
+      <h2 className="text-lg font-semibold mb-3">{t("quizScoreDistribution")}</h2>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} barSize={32}>
           <CartesianGrid
@@ -52,7 +54,7 @@ const QuizScoreDistribution = ({
           />
           <Tooltip
             contentStyle={{ borderRadius: "8px", borderColor: "lightgray" }}
-            formatter={(value) => [value, "Attempts"]}
+            formatter={(value) => [value, t("attempts")]}
           />
           <Bar
             dataKey="count"

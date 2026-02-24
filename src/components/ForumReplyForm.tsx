@@ -6,6 +6,7 @@ import { replySchema, type ReplyFormData } from "@/lib/forumValidationSchemas";
 import { createReply } from "@/lib/forumActions";
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const ForumReplyForm = ({
   threadId,
@@ -21,6 +22,7 @@ const ForumReplyForm = ({
   onSuccess?: () => void;
 }) => {
   const router = useRouter();
+  const t = useTranslations("lms.forums");
 
   const {
     register,
@@ -57,7 +59,7 @@ const ForumReplyForm = ({
   if (isLocked) {
     return (
       <div className="bg-orange-50 border border-orange-200 rounded-md p-3 text-sm text-orange-700">
-        This thread is locked. No new replies can be posted.
+        {t("threadLocked")}
       </div>
     );
   }
@@ -74,7 +76,7 @@ const ForumReplyForm = ({
           {...register("content")}
           rows={3}
           className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full resize-y"
-          placeholder={parentId ? "Write a reply..." : "Write your reply..."}
+          placeholder={parentId ? t("writeReply") : t("writeYourReply")}
         />
         {errors.content && (
           <p className="text-xs text-red-400">{errors.content.message}</p>
@@ -95,7 +97,7 @@ const ForumReplyForm = ({
                 htmlFor={`reply-anonymous-${parentId ?? "root"}`}
                 className="text-sm text-gray-600"
               >
-                Post anonymously
+                {t("postAnonymously")}
               </label>
             </>
           )}
@@ -105,13 +107,13 @@ const ForumReplyForm = ({
           type="submit"
           className="bg-lamaSky text-white py-1.5 px-4 rounded-md text-sm hover:opacity-90"
         >
-          Reply
+          {t("reply")}
         </button>
       </div>
 
       {state.error && (
         <p className="text-sm text-red-500">
-          {state.message || "Failed to post reply."}
+          {state.message || t("failedToPostReply")}
         </p>
       )}
     </form>

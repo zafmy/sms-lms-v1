@@ -25,6 +25,7 @@ const QuestionBankForm = ({
   relatedData?: any;
 }) => {
   const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
 
   const {
     register,
@@ -94,7 +95,7 @@ const QuestionBankForm = ({
           />
           {errors.description?.message && (
             <p className="text-xs text-red-400">
-              {errors.description.message.toString()}
+              {tv(errors.description.message.toString())}
             </p>
           )}
         </div>
@@ -113,7 +114,7 @@ const QuestionBankForm = ({
           </select>
           {errors.subjectId?.message && (
             <p className="text-xs text-red-400">
-              {errors.subjectId.message.toString()}
+              {tv(errors.subjectId.message.toString())}
             </p>
           )}
         </div>

@@ -10,6 +10,7 @@ import { createTeacherReviewCard } from "@/lib/reviewActions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const ReviewCardForm = ({
   courseId,
@@ -20,6 +21,9 @@ const ReviewCardForm = ({
   setOpen: Dispatch<SetStateAction<boolean>>;
   enrolledStudents?: { id: string; name: string }[];
 }) => {
+  const t = useTranslations("forms");
+  const tv = useTranslations("forms.validation");
+
   const {
     register,
     handleSubmit,
@@ -85,7 +89,7 @@ const ReviewCardForm = ({
           />
           {errors.front?.message && (
             <p className="text-xs text-red-400">
-              {errors.front.message.toString()}
+              {tv(errors.front.message.toString())}
             </p>
           )}
         </div>
@@ -100,7 +104,7 @@ const ReviewCardForm = ({
           />
           {errors.back?.message && (
             <p className="text-xs text-red-400">
-              {errors.back.message.toString()}
+              {tv(errors.back.message.toString())}
             </p>
           )}
         </div>
@@ -116,7 +120,7 @@ const ReviewCardForm = ({
           </select>
           {errors.cardType?.message && (
             <p className="text-xs text-red-400">
-              {errors.cardType.message.toString()}
+              {tv(errors.cardType.message.toString())}
             </p>
           )}
         </div>

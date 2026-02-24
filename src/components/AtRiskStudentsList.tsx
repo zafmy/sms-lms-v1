@@ -1,11 +1,11 @@
 "use client";
 
 import type { AtRiskStudent } from "@/lib/lmsAnalyticsUtils";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { getIntlLocale } from "@/lib/formatUtils";
 
-const formatDateWithLocale = (date: Date | null, locale: string): string => {
-  if (!date) return "No activity";
+const formatDateWithLocale = (date: Date | null, locale: string, noActivityLabel: string): string => {
+  if (!date) return noActivityLabel;
   return new Date(date).toLocaleDateString(getIntlLocale(locale), {
     year: "numeric",
     month: "short",
@@ -25,12 +25,13 @@ const AtRiskStudentsList = ({
   students: AtRiskStudent[];
 }) => {
   const locale = useLocale();
+  const t = useTranslations("lms.analytics");
   if (students.length === 0) {
     return (
       <div className="bg-white rounded-md p-4 border border-gray-100">
-        <h2 className="text-lg font-semibold mb-3">At-Risk Students</h2>
+        <h2 className="text-lg font-semibold mb-3">{t("atRiskStudents")}</h2>
         <p className="text-gray-400 text-sm mt-4">
-          No at-risk students detected.
+          {t("noAtRiskStudents")}
         </p>
       </div>
     );
@@ -39,7 +40,7 @@ const AtRiskStudentsList = ({
   return (
     <div className="bg-white rounded-md p-4 border border-gray-100">
       <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-lg font-semibold">At-Risk Students</h2>
+        <h2 className="text-lg font-semibold">{t("atRiskStudents")}</h2>
         <span className="bg-red-100 text-red-700 text-xs font-medium px-2 py-0.5 rounded-full">
           {students.length}
         </span>
@@ -49,13 +50,13 @@ const AtRiskStudentsList = ({
           <thead>
             <tr className="border-b border-gray-200">
               <th className="text-left py-2 px-3 text-gray-500 font-medium">
-                Student Name
+                {t("studentName")}
               </th>
               <th className="text-left py-2 px-3 text-gray-500 font-medium">
-                Last Activity
+                {t("lastActivity")}
               </th>
               <th className="text-left py-2 px-3 text-gray-500 font-medium">
-                Days Inactive
+                {t("daysInactive")}
               </th>
             </tr>
           </thead>
@@ -69,12 +70,12 @@ const AtRiskStudentsList = ({
                   {student.studentName}
                 </td>
                 <td className="py-2 px-3 text-gray-600">
-                  {formatDateWithLocale(student.lastActivityDate, locale)}
+                  {formatDateWithLocale(student.lastActivityDate, locale, t("noActivity"))}
                 </td>
                 <td className={`py-2 px-3 ${getDaysColor(student.daysInactive)}`}>
                   {student.daysInactive >= 999
-                    ? "Never active"
-                    : `${student.daysInactive} days`}
+                    ? t("neverActive")
+                    : t("daysCount", { days: student.daysInactive })}
                 </td>
               </tr>
             ))}
