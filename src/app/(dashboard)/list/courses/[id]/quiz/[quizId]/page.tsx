@@ -1,10 +1,39 @@
 import QuizTakingClient from "@/components/QuizTakingClient";
 import prisma from "@/lib/prisma";
 import { startQuizAttempt } from "@/lib/actions";
+import { fisherYatesShuffle } from "@/lib/shuffleUtils";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+
+/**
+ * Reorder items to match a stored ID order.
+ * When strict is false (default), items not in the order array are appended at the end.
+ * When strict is true, only items present in the order array are returned (pool filtering).
+ */
+function reorderByIds<T extends { id: number }>(
+  items: T[],
+  order: number[],
+  strict = false
+): T[] {
+  const map = new Map(items.map((item) => [item.id, item]));
+  const ordered: T[] = [];
+  for (const id of order) {
+    const item = map.get(id);
+    if (item) {
+      ordered.push(item);
+      map.delete(id);
+    }
+  }
+  if (!strict) {
+    // Append any items not in the stored order (backward compatibility)
+    for (const item of map.values()) {
+      ordered.push(item);
+    }
+  }
+  return ordered;
+}
 
 const QuizPage = async ({
   params,
@@ -89,6 +118,11 @@ const QuizPage = async ({
 
         <div className="flex gap-6 text-sm text-gray-500 mb-6">
           <span>{tq("questionsCount", { count: quiz.questions.length })}</span>
+          {quiz.poolSize && quiz.poolSize > 0 && quiz.poolSize < quiz.questions.length && (
+            <span>
+              {tq("poolSizeDisplay", { count: quiz.poolSize, total: quiz.questions.length })}
+            </span>
+          )}
           {quiz.timeLimit && <span>{tq("timeLimitLabel", { minutes: quiz.timeLimit })}</span>}
           <span>{tq("maxAttemptsLabel", { count: quiz.maxAttempts })}</span>
           <span>{tq("passScoreLabel", { score: quiz.passScore })}</span>
@@ -177,23 +211,35 @@ const QuizPage = async ({
     });
 
     if (currentAttempt) {
-      // Prepare questions (randomize if needed)
+      // Prepare questions using stored order or compute new shuffle
       let preparedQuestions = [...quiz.questions];
-      if (quiz.randomizeQuestions) {
-        preparedQuestions = preparedQuestions.sort(() => Math.random() - 0.5);
+
+      const storedQuestionOrder = currentAttempt.questionOrder as number[] | null;
+      const storedOptionOrder = currentAttempt.optionOrder as Record<string, number[]> | null;
+
+      if (storedQuestionOrder) {
+        // Restore persisted question order (also filters to pool-selected questions only)
+        preparedQuestions = reorderByIds(preparedQuestions, storedQuestionOrder, true);
+      } else if (quiz.randomizeQuestions) {
+        preparedQuestions = fisherYatesShuffle(preparedQuestions);
       }
 
       const questionsForClient = preparedQuestions.map((q) => {
         let options = [...q.options];
-        if (quiz.randomizeOptions) {
-          options = options.sort(() => Math.random() - 0.5);
+
+        if (storedOptionOrder && storedOptionOrder[String(q.id)]) {
+          // Restore persisted option order
+          options = reorderByIds(options, storedOptionOrder[String(q.id)]);
+        } else if (quiz.randomizeOptions && q.type !== "FILL_IN_BLANK") {
+          options = fisherYatesShuffle(options);
         }
+
         return {
           id: q.id,
           text: q.text,
           type: q.type,
           points: q.points,
-          options,
+          options: options.map((o) => ({ id: o.id, text: o.text })),
         };
       });
 
@@ -276,6 +322,11 @@ const QuizPage = async ({
 
       <div className="flex gap-6 text-sm text-gray-500 mb-6">
         <span>{tq("questionsCount", { count: quiz.questions.length })}</span>
+        {quiz.poolSize && quiz.poolSize > 0 && quiz.poolSize < quiz.questions.length && (
+          <span>
+            {tq("poolSizeDisplay", { count: quiz.poolSize, total: quiz.questions.length })}
+          </span>
+        )}
         {quiz.timeLimit && <span>{tq("timeLimitLabel", { minutes: quiz.timeLimit })}</span>}
         <span>{tq("passScoreLabel", { score: quiz.passScore })}</span>
       </div>

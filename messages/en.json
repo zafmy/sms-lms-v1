@@ -496,7 +496,10 @@
       "updateTitle": "Update the quiz",
       "bestScore": "Best Score",
       "latestScore": "Latest Score",
-      "averageScore": "Average Score"
+      "averageScore": "Average Score",
+      "poolSize": "Questions per attempt",
+      "poolSizeHelper": "Leave empty to use all questions",
+      "poolSizeDisplay": "{count} of {total} questions per attempt"
     },
     "questions": {
       "createTitle": "Create a new question",
@@ -721,6 +724,7 @@
       "attemptCount": "{count} attempt{suffix}",
       "bestScore": "Best: {score}/{max} ({percentage}%)",
       "noSubmittedAttempts": "No submitted attempts found.",
+      "poolSizeDisplay": "{count} of {total} questions per attempt",
       "allAttempts": "All Attempts"
     },
     "enrollment": {},

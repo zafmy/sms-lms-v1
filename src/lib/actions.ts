@@ -2092,6 +2092,7 @@ export const createQuiz = async (
         scoringPolicy: data.scoringPolicy,
         randomizeQuestions: data.randomizeQuestions,
         randomizeOptions: data.randomizeOptions,
+        poolSize: data.poolSize ?? null,
         lessonId: data.lessonId,
       },
     });
@@ -2133,6 +2134,7 @@ export const updateQuiz = async (
         scoringPolicy: data.scoringPolicy,
         randomizeQuestions: data.randomizeQuestions,
         randomizeOptions: data.randomizeOptions,
+        poolSize: data.poolSize ?? null,
         lessonId: data.lessonId,
       },
     });
@@ -2408,6 +2410,9 @@ export const deleteQuestionBank = async (
 
 // QUIZ ATTEMPT ACTIONS
 
+// @MX:ANCHOR: [AUTO] startQuizAttempt -- entry point for quiz attempt creation, handles pool selection and shuffle persistence
+// @MX:REASON: fan_in >= 3 (quiz page, enrollment flow, retry logic)
+// @MX:SPEC: SPEC-QUIZ-002
 export const startQuizAttempt = async (quizId: number) => {
   const { userId, sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
@@ -2435,6 +2440,12 @@ export const startQuizAttempt = async (quizId: number) => {
           },
         },
         attempts: { where: { studentId: userId } },
+        questions: {
+          orderBy: { order: "asc" },
+          include: {
+            options: { orderBy: { order: "asc" } },
+          },
+        },
       },
     });
 
@@ -2446,11 +2457,38 @@ export const startQuizAttempt = async (quizId: number) => {
       return { success: false, error: true, message: "Maximum attempts reached" };
     }
 
+    // Compute shuffled order for persistence
+    const { fisherYatesShuffle, selectPool } = await import("./shuffleUtils");
+
+    let selectedQuestions = [...quiz.questions];
+
+    // Pool selection: pick N random questions from total
+    if (quiz.poolSize && quiz.poolSize > 0 && quiz.poolSize < selectedQuestions.length) {
+      selectedQuestions = selectPool(selectedQuestions, quiz.poolSize);
+    } else if (quiz.randomizeQuestions) {
+      selectedQuestions = fisherYatesShuffle(selectedQuestions);
+    }
+
+    // Compute question order (IDs in presentation sequence)
+    const questionOrder = selectedQuestions.map((q) => q.id);
+
+    // Compute option order per question
+    const optionOrder: Record<string, number[]> = {};
+    for (const q of selectedQuestions) {
+      if (quiz.randomizeOptions && q.type !== "FILL_IN_BLANK") {
+        optionOrder[String(q.id)] = fisherYatesShuffle(q.options).map((o) => o.id);
+      } else {
+        optionOrder[String(q.id)] = q.options.map((o) => o.id);
+      }
+    }
+
     const attempt = await prisma.quizAttempt.create({
       data: {
         quizId,
         studentId: userId,
         attemptNumber: quiz.attempts.length + 1,
+        questionOrder,
+        optionOrder,
       },
     });
 
@@ -2480,8 +2518,16 @@ export const submitQuizAttempt = async (
       return { success: false, error: true, message: "Invalid attempt" };
     }
 
+    // Filter questions to pool-selected subset if questionOrder exists
+    // @MX:NOTE: [AUTO] Pool selection: grade only the questions the student actually received
+    // @MX:SPEC: SPEC-QUIZ-002
+    const storedQuestionOrder = attempt.questionOrder as number[] | null;
+    const questionsForGrading = storedQuestionOrder
+      ? attempt.quiz.questions.filter((q) => storedQuestionOrder.includes(q.id))
+      : attempt.quiz.questions;
+
     const { gradeQuizAttempt } = await import("./quizUtils");
-    const gradingResult = gradeQuizAttempt(attempt.quiz.questions, responses, attempt.quiz.passScore);
+    const gradingResult = gradeQuizAttempt(questionsForGrading, responses, attempt.quiz.passScore);
 
     await prisma.$transaction(async (tx) => {
       for (const resp of responses) {

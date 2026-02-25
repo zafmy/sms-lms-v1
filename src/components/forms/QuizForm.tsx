@@ -180,6 +180,18 @@ const QuizForm = ({
             {t("common.randomizeOptions")}
           </label>
         </div>
+        <InputField
+          label={t("quizzes.poolSize")}
+          name="poolSize"
+          type="number"
+          defaultValue={data?.poolSize || ""}
+          register={register}
+          error={errors?.poolSize}
+          inputProps={{ min: 0 }}
+        />
+        <p className="text-xs text-gray-400 w-full md:w-1/4">
+          {t("quizzes.poolSizeHelper")}
+        </p>
       </div>
       {state.error && (
         <span className="text-red-500">{t("common.somethingWentWrong")}</span>

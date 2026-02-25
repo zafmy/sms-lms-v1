@@ -8,7 +8,7 @@ type QuizQuestionProps = {
     text: string;
     type: string;
     points: number;
-    options: Array<{ id: number; text: string; order: number }>;
+    options: Array<{ id: number; text: string }>;
   };
   questionNumber: number;
   totalQuestions: number;
@@ -40,9 +40,7 @@ const QuizQuestion = ({
 
       {(question.type === "MULTIPLE_CHOICE" || question.type === "TRUE_FALSE") && (
         <div className="flex flex-col gap-2">
-          {question.options
-            .sort((a, b) => a.order - b.order)
-            .map((option) => (
+          {question.options.map((option) => (
               <label
                 key={option.id}
                 className={`flex items-center gap-3 p-3 rounded-md border cursor-pointer transition-colors ${

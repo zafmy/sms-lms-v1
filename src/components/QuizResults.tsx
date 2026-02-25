@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { getIntlLocale } from "@/lib/formatUtils";
 
@@ -12,6 +13,7 @@ type QuizResultsProps = {
     percentage: number | null;
     passed: boolean | null;
     submittedAt: string | null;
+    questionOrder: number[] | null;
     responses: Array<{
       id: number;
       isCorrect: boolean | null;
@@ -38,6 +40,31 @@ type QuizResultsProps = {
 const QuizResults = ({ attempt }: QuizResultsProps) => {
   const t = useTranslations("lms.quizzes");
   const locale = useLocale();
+
+  // Sort responses to match the order the student saw during the attempt
+  const orderedResponses = useMemo(() => {
+    if (!attempt.questionOrder || attempt.questionOrder.length === 0) {
+      // Legacy attempt without stored order -- use database order
+      return attempt.responses;
+    }
+
+    const responseMap = new Map(
+      attempt.responses.map((r) => [r.question.id, r])
+    );
+    const ordered: typeof attempt.responses = [];
+    for (const qId of attempt.questionOrder) {
+      const resp = responseMap.get(qId);
+      if (resp) {
+        ordered.push(resp);
+        responseMap.delete(qId);
+      }
+    }
+    // Append any responses not in the stored order (safety fallback)
+    for (const resp of responseMap.values()) {
+      ordered.push(resp);
+    }
+    return ordered;
+  }, [attempt.questionOrder, attempt.responses]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -75,7 +102,7 @@ const QuizResults = ({ attempt }: QuizResultsProps) => {
 
       {/* PER-QUESTION BREAKDOWN */}
       <div className="flex flex-col gap-4">
-        {attempt.responses.map((response, index) => {
+        {orderedResponses.map((response, index) => {
           const correctOption = response.question.options.find(
             (o) => o.isCorrect
           );

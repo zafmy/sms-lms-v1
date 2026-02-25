@@ -16,7 +16,7 @@ type QuizTakingClientProps = {
     text: string;
     type: string;
     points: number;
-    options: Array<{ id: number; text: string; order: number }>;
+    options: Array<{ id: number; text: string }>;
   }>;
 };
 

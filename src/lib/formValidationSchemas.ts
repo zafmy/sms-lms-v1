@@ -256,6 +256,13 @@ export const quizSchema = z.object({
   scoringPolicy: z.enum(["BEST", "LATEST", "AVERAGE"]),
   randomizeQuestions: z.coerce.boolean().default(false),
   randomizeOptions: z.coerce.boolean().default(false),
+  poolSize: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .nullable()
+    .transform((val) => (val === 0 ? null : val)),
   lessonId: z.coerce.number().min(1, { message: "lessonRequired" }),
 });
 export type QuizSchema = z.infer<typeof quizSchema>;

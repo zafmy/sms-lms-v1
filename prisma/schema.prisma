@@ -352,6 +352,7 @@ model Quiz {
   scoringPolicy      ScoringPolicy @default(BEST)
   randomizeQuestions Boolean       @default(false)
   randomizeOptions   Boolean       @default(false)
+  poolSize           Int?
   createdAt          DateTime      @default(now())
   lessonId           Int
   lesson             LmsLesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -405,6 +406,8 @@ model QuizAttempt {
   maxScore      Int?
   percentage    Float?
   passed        Boolean?
+  questionOrder Json?
+  optionOrder   Json?
   studentId     String
   student       Student            @relation(fields: [studentId], references: [id])
   quizId        Int

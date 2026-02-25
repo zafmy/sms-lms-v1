@@ -112,6 +112,7 @@ const QuizResultsPage = async ({
             attempt={{
               ...latestAttempt,
               submittedAt: latestAttempt.submittedAt?.toISOString() ?? null,
+              questionOrder: (latestAttempt.questionOrder as number[] | null) ?? null,
               responses: latestAttempt.responses.map((r) => ({
                 ...r,
                 question: {

@@ -496,7 +496,10 @@
       "updateTitle": "Kemaskini kuiz",
       "bestScore": "Markah Terbaik",
       "latestScore": "Markah Terkini",
-      "averageScore": "Markah Purata"
+      "averageScore": "Markah Purata",
+      "poolSize": "Soalan setiap percubaan",
+      "poolSizeHelper": "Biarkan kosong untuk guna semua soalan",
+      "poolSizeDisplay": "{count} daripada {total} soalan setiap percubaan"
     },
     "questions": {
       "createTitle": "Cipta soalan baharu",
@@ -721,6 +724,7 @@
       "attemptCount": "{count} percubaan",
       "bestScore": "Terbaik: {score}/{max} ({percentage}%)",
       "noSubmittedAttempts": "Tiada percubaan dihantar ditemui.",
+      "poolSizeDisplay": "{count} daripada {total} soalan setiap percubaan",
       "allAttempts": "Semua Percubaan"
     },
     "enrollment": {},
