@@ -107,6 +107,8 @@ An in-platform quiz builder with a reusable question bank. Teachers author quizz
 - Atomic quiz submission via Prisma `$transaction` — all `QuestionResponse` records and the `QuizAttempt` record are written in a single transaction to prevent partial submissions
 - `QuizTimer` component providing a countdown with automatic form submission on expiry
 - Per-attempt result review at `/list/courses/[id]/quiz/[quizId]/results`
+- Question and option randomization using Fisher-Yates shuffle with per-attempt order persistence (SPEC-QUIZ-002); refreshing a quiz in progress restores the original order
+- Pool selection: teachers can configure "pick N from M questions" per quiz to reduce cheating and increase question reuse value; `maxScore` is calculated from the selected subset only
 
 **Routes added:**
 - `/list/courses/[id]/quiz/[quizId]` — Quiz-taking interface
