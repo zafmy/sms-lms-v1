@@ -122,6 +122,18 @@
 **Setup**: `ToastContainer` added to root layout `src/app/layout.tsx`.
 **Usage**: Called in form components after Server Action responses to display success or error messages.
 
+### OpenAI Node.js SDK
+**Version**: `^4.x` (openai)
+**Role**: Official OpenAI Node.js client for GPT model chat completions (gpt-4o-mini, gpt-4o).
+**Usage**: Used exclusively in `src/lib/ai/adapters/openai.ts` as the provider-specific adapter implementing the `AIProvider` interface. All AI API calls are server-side only via Server Actions.
+**Configuration**: `OPENAI_API_KEY` environment variable.
+
+### Anthropic SDK
+**Version**: `^0.x` (@anthropic-ai/sdk)
+**Role**: Official Anthropic client for Claude model message API (claude-3-haiku, claude-3-sonnet).
+**Usage**: Used exclusively in `src/lib/ai/adapters/anthropic.ts` as the provider-specific adapter implementing the `AIProvider` interface. All AI API calls are server-side only via Server Actions.
+**Configuration**: `ANTHROPIC_API_KEY` environment variable.
+
 ### Next Cloudinary
 **Version**: `^6.13.0` (next-cloudinary)
 **Role**: Image upload and delivery via Cloudinary CDN.

@@ -158,6 +158,19 @@
 │   │   └── GamificationAdoptionMetrics.tsx  # Gamification: admin adoption metrics widget
 │   └── lib/                          # Utilities and business logic
 │       ├── actions.ts                # 62+ Server Actions for all CRUD operations; includes selfEnrollStudent and unenrollSelf added for SPEC-LMS-002
+│       ├── aiActions.ts              # AI-specific Server Actions (1216 lines): question generation, summary generation, approval/rejection, interval optimization, quota management
+│       ├── ai/                       # AI adapter layer: provider adapters, prompt templates, validation, quota management, interval optimizer
+│       │   ├── types.ts              # Shared AI types and interfaces (AIProvider, AIResponse, GenerationConfig)
+│       │   ├── aiService.ts          # Provider-agnostic AI facade: orchestrates provider selection and config merging
+│       │   ├── prompts.ts            # Prompt templates for question and summary generation with content truncation
+│       │   ├── validation.ts         # Zod-based validation of AI-generated question and summary responses
+│       │   ├── quotaUtils.ts         # Pure quota utilities: availability check, threshold warnings, month boundary calculations
+│       │   ├── intervalOptimizer.ts  # FSRS-like interval optimizer: exponential decay, retention probability, multiplier clamping
+│       │   ├── adapters/             # Provider-specific adapters (OpenAI, Anthropic) implementing AIProvider interface
+│       │   │   ├── openai.ts         # OpenAI adapter (gpt-4o-mini, gpt-4o) via openai SDK
+│       │   │   ├── anthropic.ts      # Anthropic adapter (claude-3-haiku, claude-3-sonnet) via @anthropic-ai/sdk
+│       │   │   └── index.ts          # Adapter factory: reads AI_PROVIDER env var and returns the appropriate adapter
+│       │   └── __tests__/            # Unit tests for AI business logic (125 tests in 191ms)
 │       ├── csvUtils.ts               # CSV generation utilities
 │       ├── data.ts                   # Static data: menu items, calendar events
 │       ├── formValidationSchemas.ts  # Zod schemas for all entity forms

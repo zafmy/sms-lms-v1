@@ -326,6 +326,31 @@ Searchable knowledge base with categorized guides and interactive driver.js tour
 - `/list/guides` -- Knowledge base listing with search, category filter, pagination
 - `/list/guides/[id]` -- Individual guide detail page with Markdown rendering
 
+### 22. AI-Powered Learning Engine
+
+AI-assisted content generation and intelligent spaced repetition for enhanced learning outcomes. Implemented in SPEC-AI-001.
+
+**Target users:**
+- **Teachers**: Generate quiz questions and lesson summaries from lesson content using AI, review and approve/reject AI-generated content before student visibility.
+- **Admins**: Configure AI provider (OpenAI/Anthropic), set per-teacher monthly quotas, monitor usage and costs across all teachers.
+- **Students**: Access teacher-approved AI-generated summaries on lesson pages; benefit from AI-optimized spaced repetition intervals.
+
+**Key capabilities:**
+- Provider-agnostic AI adapter supporting OpenAI GPT models and Anthropic Claude models via unified interface
+- Auto-question generation: extract lesson text, generate MCQ/True-False questions, create in DRAFT status for teacher review
+- Auto-summary generation: produce lesson summaries (brief/standard/detailed) with key points extraction
+- Draft/Approval workflow: all AI content requires teacher approval (DRAFT → APPROVED/REJECTED) before student visibility
+- Smart spaced repetition: FSRS-like exponential decay model analyzing student ReviewLog history to personalize review intervals (0.65x-1.25x multiplier range with graceful fallback)
+- Monthly quota system: per-teacher request limits with 80% warning threshold and admin-configurable quotas
+- Admin dashboard: AI settings management, per-teacher usage table with token counts and cost estimates, 6-month trend data
+- Teacher dashboard widgets: quota usage progress bar, pending review count, unified DRAFT content review queue with quick approve/reject
+- Content safeguards: minimum 50-character content requirement, 8000-character truncation for AI processing, Zod schema validation of all AI responses
+- Notification integration: 4 notification types (questions ready, summary ready, summary approved by teacher, quota warning)
+- 125 unit tests covering all pure business logic (quota, validation, interval optimization, prompts, service orchestration)
+
+**Routes added:**
+- `/list/ai-settings` — Admin AI configuration and usage dashboard
+
 ## Planned Features
 
 No features are currently in the planned backlog. All previously planned features (Discussion Forums, Spaced Repetition) have been implemented.
