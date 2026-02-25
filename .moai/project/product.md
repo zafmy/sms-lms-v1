@@ -199,15 +199,136 @@ A per-course analytics page enabling teachers and administrators to monitor stud
 **Routes added:**
 - `/list/courses/[id]/analytics` — Per-course analytics dashboard (admin, teacher)
 
-## Planned Features (Post-Phase 1)
+### 17. Discussion Forums
 
-The following features remain planned for future sprints:
+Course-level discussion forums enabling students and teachers to collaborate on problems with full moderation capabilities. Implemented in SPEC-LMS-003.
 
-### Discussion Forums
-Peer and teacher-moderated forums attached to subjects and classes. Students can continue academic discussions during the 12-day gap between sessions.
+**Target users:**
+- **Students**: Create threads, post replies, upvote helpful answers. Must be actively enrolled in the course.
+- **Teachers**: Moderate discussions -- pin important threads, lock threads, delete inappropriate content, mark accepted solutions.
+- **Admins**: Full access to all forums.
 
-### Spaced Repetition for Knowledge Retention
-A spaced repetition system presenting students with review material at algorithmically determined intervals designed to counteract the 12-day retention drop between sessions.
+**Key capabilities:**
+- Threaded reply system with one-level nesting (replies to threads, no nested replies)
+- Upvoting system with optimistic UI updates (`UpvoteButton` component)
+- Teacher/admin moderation: pin, lock, delete, mark accepted replies
+- Anonymous posting support for both threads and replies
+- Enrollment-gated authorization (students must be actively enrolled in the course)
+- Search and pagination for thread discovery
+- Last activity timestamp tracking for thread ordering
+- 10 server actions in `forumActions.ts`: createThread, updateThread, deleteThread, pinThread, lockThread, createReply, updateReply, deleteReply, markReplyAccepted, voteOnReply
+
+**Routes added:**
+- `/list/courses/[id]/forum` -- Forum thread listing page
+- `/list/courses/[id]/forum/[threadId]` -- Thread detail page with replies
+
+### 18. Spaced Repetition System
+
+SM-2 Leitner-box algorithm implementation for adaptive knowledge retention, with review cards automatically generated from lessons and quizzes. Designed to counteract the 12-day retention drop between bi-weekly sessions. Implemented in SPEC-LMS-007.
+
+**Target users:**
+- **Students**: Review cards at algorithmically determined intervals, track subject mastery across boxes, complete review sessions.
+- **Teachers**: Create custom review cards, view pre-class engagement reports, manage card pools per course.
+- **Parents**: View per-child review widget showing due cards and mastery progress.
+- **Admins**: View system-wide adoption metrics.
+
+**Key capabilities:**
+- 5-box Leitner system (Box 1-5) with interval scheduling tuned to bi-weekly weekend sessions (Box 1 = 1st weekend, Box 2 = 2nd, Box 3 = 4th, Box 4 = 8th, Box 5 = 24th)
+- SM-2 easiness factor starting at 2.5, adjusted by response difficulty
+- Automatic promotion rules: 2 consecutive correct = advance box; 1 hard = return to Box 1
+- Card types: FLASHCARD, VOCABULARY
+- Automatic card generation from lesson content and quiz attempts
+- Review sessions with 15-card queue batch processing
+- Card distribution tracking across boxes with `SubjectMasteryMeter` visualization
+- Response time tracking per review
+- Gamification integration: XP rewards for correct answers, session completion bonus, mastery milestone badges
+- Teacher review card creation form with course-level management UI
+- Parent review widget showing due card count and mastery progress
+
+**Routes added:**
+- `/list/reviews` -- Student review dashboard with queue, mastery, and session history
+- `/list/reviews/session` -- Active review session (card flip interface)
+- `/list/reviews/session/summary` -- Session completion summary
+- `/list/courses/[id]/reviews` -- Teacher review card management per course
+- `/list/courses/[id]/reviews/create` -- Create custom review card
+
+### 19. Lexical Rich Text Editor
+
+Full-featured rich text editor using the Lexical framework, integrated across all content creation surfaces with sanitization and i18n support. Implemented in SPEC-EDITOR-001.
+
+**Target users:**
+- **Teachers**: Create and edit rich lesson content, announcements, assignments, and forum posts with formatting, images, code blocks, and embeds.
+- **Admins**: Same content creation capabilities as teachers.
+
+**Key capabilities:**
+- Full formatting: headings (H1-H6), bold, italic, underline, strikethrough
+- Lists: ordered, unordered, with nesting
+- Links with URL validation
+- Code blocks with syntax highlighting (multi-language)
+- Tables with insert/delete rows and columns
+- Image support via URL or Cloudinary upload (next-cloudinary integration)
+- YouTube embed support
+- Serialized JSON output (Lexical AST) stored in existing content fields
+- Server-side rendering via `RichTextRenderer` component
+- DOMPurify sanitization preventing XSS attacks
+- Two editor variants: "full" (complete toolbar) and "compact" (minimal toolbar)
+- Content truncation utilities for previews
+- Lazy-loaded via `RichTextEditorDynamic` for optimal bundle size
+
+**Integration points:**
+- LMS lesson creation/editing (`LmsLessonForm`)
+- Forum thread and reply composition (`ThreadForm`, `ForumReplyForm`)
+- Announcement creation (`AnnouncementForm`)
+- Assignment descriptions (`AssignmentForm`)
+
+### 20. Multi-Language Support (i18n)
+
+Complete internationalization system supporting English and Bahasa Malaysia across UI components, validation messages, and content. Implemented in SPEC-I18N-001.
+
+**Target users:**
+- All roles benefit from localized UI in their preferred language.
+
+**Key capabilities:**
+- Dual-locale support: English (`en`) and Bahasa Malaysia (`ms`) via next-intl v4.8.3
+- 60+ Zod validation message keys with translations (e.g., "stringEmail", "stringMin")
+- 24 form components updated with localized validation error display
+- Component-level i18n via namespaces (`useTranslations("forms.validation")`, `useTranslations("lms.forums")`, etc.)
+- Date/time formatting with locale awareness (`getIntlLocale` utility)
+- Dashboard analytics labels in both languages
+- Forum moderation UI fully localized
+- Automatic locale detection from browser preference
+- Fallback to English for unsupported locales
+- Message interpolation for dynamic values (e.g., "{count} cards due")
+
+### 21. Help & Knowledge Base System
+
+Searchable knowledge base with categorized guides and interactive driver.js tours for onboarding new users. Implemented in SPEC-GUIDE-001.
+
+**Target users:**
+- **Students**: Browse and search help guides, complete interactive feature tours.
+- **Teachers**: Create and edit guides, manage guide categories.
+- **Admins**: Full guide and category management.
+
+**Key capabilities:**
+- 8 seed guides across 3 categories (Getting Started, Features, Troubleshooting)
+- Dual-locale content via `GuideTranslation` model (English and Bahasa Malaysia)
+- Full-text search across guide titles and content
+- Category filtering dropdown
+- Pagination: 12 guides per page
+- Role-based access control (`roleAccess` array filtering by admin/teacher/student/parent)
+- Markdown rendering with GitHub-flavored markdown (react-markdown + remark-gfm)
+- Interactive tours using driver.js: step-by-step feature walkthroughs with completion tracking via localStorage
+- Published/draft status for guides
+- Ordering capability for category and guide ranking
+- Full CRUD for guides and categories via FormModal
+
+**Routes added:**
+- `/list/guides` -- Knowledge base listing with search, category filter, pagination
+- `/list/guides/[id]` -- Individual guide detail page with Markdown rendering
+
+## Planned Features
+
+No features are currently in the planned backlog. All previously planned features (Discussion Forums, Spaced Repetition) have been implemented.
 
 ## Primary Use Cases
 
