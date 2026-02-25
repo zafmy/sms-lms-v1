@@ -133,6 +133,12 @@ const menuItems = [
         href: "/list/guides",
         visible: ["admin", "teacher", "student", "parent"],
       },
+      {
+        icon: "/setting.png",
+        key: "aiSettings",
+        href: "/list/ai-settings",
+        visible: ["admin"],
+      },
     ],
   },
   {

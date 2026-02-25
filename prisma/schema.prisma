@@ -45,23 +45,26 @@ model Student {
 }
 
 model Teacher {
-  id            String         @id
-  username      String         @unique
-  name          String
-  surname       String
-  email         String?        @unique
-  phone         String?        @unique
-  address       String
-  img           String?
-  bloodType     String
-  sex           UserSex
-  createdAt     DateTime       @default(now())
-  subjects      Subject[]
-  lessons       Lesson[]
-  classes       Class[]
-  birthday      DateTime
-  courses       Course[]
-  questionBanks QuestionBank[]
+  id                 String            @id
+  username           String            @unique
+  name               String
+  surname            String
+  email              String?           @unique
+  phone              String?           @unique
+  address            String
+  img                String?
+  bloodType          String
+  sex                UserSex
+  createdAt          DateTime          @default(now())
+  subjects           Subject[]
+  lessons            Lesson[]
+  classes            Class[]
+  birthday           DateTime
+  courses            Course[]
+  questionBanks      QuestionBank[]
+  aiGenerationLogs   AIGenerationLog[]
+  generatedSummaries LessonSummary[]   @relation("GeneratedSummaries")
+  approvedSummaries  LessonSummary[]   @relation("ApprovedSummaries")
 }
 
 model Parent {
@@ -214,6 +217,7 @@ enum NotificationType {
   GAMIFICATION
   REVIEW
   FORUM_REPLY
+  AI_CONTENT
 }
 
 enum UserSex {
@@ -268,6 +272,24 @@ enum ScoringPolicy {
   AVERAGE
 }
 
+enum AIGenerationType {
+  QUESTIONS
+  SUMMARY
+  INTERVAL_ADJUSTMENT
+}
+
+enum AIGenerationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum AIContentStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+}
+
 model Course {
   id          Int          @id @default(autoincrement())
   title       String
@@ -299,21 +321,23 @@ model Module {
 }
 
 model LmsLesson {
-  id               Int             @id @default(autoincrement())
+  id               Int               @id @default(autoincrement())
   title            String
-  content          String          @db.Text
-  contentType      ContentType     @default(TEXT)
+  content          String            @db.Text
+  contentType      ContentType       @default(TEXT)
   externalUrl      String?
   order            Int
   estimatedMinutes Int?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  flagForReview    Boolean         @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  flagForReview    Boolean           @default(false)
   moduleId         Int
-  module           Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module           Module            @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   quizzes          Quiz[]
   progress         LessonProgress[]
   reviewCards      ReviewCard[]
+  aiGenerationLogs AIGenerationLog[]
+  summaries        LessonSummary[]
 }
 
 model LessonProgress {
@@ -361,19 +385,23 @@ model Quiz {
 }
 
 model Question {
-  id             Int               @id @default(autoincrement())
-  text           String
-  type           QuestionType
-  explanation    String?
-  points         Int               @default(1)
-  order          Int
-  quizId         Int?
-  quiz           Quiz?             @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  questionBankId Int?
-  questionBank   QuestionBank?     @relation(fields: [questionBankId], references: [id])
-  options        AnswerOption[]
-  responses      QuestionResponse[]
-  reviewCards    ReviewCard[]
+  id                Int               @id @default(autoincrement())
+  text              String
+  type              QuestionType
+  explanation       String?
+  points            Int               @default(1)
+  order             Int
+  quizId            Int?
+  quiz              Quiz?             @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionBankId    Int?
+  questionBank      QuestionBank?     @relation(fields: [questionBankId], references: [id])
+  isAIGenerated     Boolean           @default(false)
+  aiStatus          AIContentStatus?
+  aiGenerationLogId Int?
+  aiGenerationLog   AIGenerationLog?  @relation(fields: [aiGenerationLogId], references: [id])
+  options           AnswerOption[]
+  responses         QuestionResponse[]
+  reviewCards       ReviewCard[]
 }
 
 model QuestionBank {
@@ -519,6 +547,8 @@ model ReviewCard {
   stability          Float?
   difficulty         Float?
   retrievability     Float?
+  aiAdjustedInterval Boolean        @default(false)
+  aiConfidence       Float?
   isActive           Boolean        @default(true)
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
@@ -557,6 +587,61 @@ model ReviewSession {
   xpEarned     Int       @default(0)
 
   @@index([studentId, startedAt])
+}
+
+// AI Models (SPEC-AI-001)
+
+model AIGenerationLog {
+  id              Int                 @id @default(autoincrement())
+  teacherId       String
+  teacher         Teacher             @relation(fields: [teacherId], references: [id])
+  lessonId        Int?
+  lesson          LmsLesson?          @relation(fields: [lessonId], references: [id])
+  generationType  AIGenerationType
+  status          AIGenerationStatus  @default(PENDING)
+  provider        String?
+  model           String?
+  inputTokens     Int?
+  outputTokens    Int?
+  estimatedCost   Float?
+  metadata        Json?
+  errorMessage    String?
+  createdAt       DateTime            @default(now())
+
+  questions       Question[]
+  summaries       LessonSummary[]
+
+  @@index([teacherId, createdAt])
+  @@index([teacherId, generationType, createdAt])
+}
+
+model LessonSummary {
+  id                   Int              @id @default(autoincrement())
+  lessonId             Int
+  lesson               LmsLesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  content              String           @db.Text
+  status               AIContentStatus  @default(DRAFT)
+  generatedByTeacherId String
+  generatedByTeacher   Teacher          @relation("GeneratedSummaries", fields: [generatedByTeacherId], references: [id])
+  approvedByTeacherId  String?
+  approvedByTeacher    Teacher?         @relation("ApprovedSummaries", fields: [approvedByTeacherId], references: [id])
+  aiGenerationLogId    Int?
+  aiGenerationLog      AIGenerationLog? @relation(fields: [aiGenerationLogId], references: [id])
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  @@index([lessonId, status])
+}
+
+model AISettings {
+  id                     Int      @id @default(1)
+  provider               String   @default("openai")
+  modelId                String   @default("gpt-4o-mini")
+  monthlyQuotaPerTeacher Int      @default(100)
+  maxTokensPerRequest    Int      @default(4000)
+  enabled                Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 // Forum Models (SPEC-LMS-003)

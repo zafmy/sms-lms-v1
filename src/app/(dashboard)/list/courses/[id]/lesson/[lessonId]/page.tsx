@@ -1,4 +1,9 @@
+import AIQuestionGenerator from "@/components/AIQuestionGenerator";
+import AIQuestionReviewContainer from "@/components/AIQuestionReviewContainer";
+import AISummaryGenerator from "@/components/AISummaryGenerator";
+import AISummaryReviewContainer from "@/components/AISummaryReviewContainer";
 import LessonCompleteButton from "@/components/LessonCompleteButton";
+import LessonSummaryDisplayContainer from "@/components/LessonSummaryDisplayContainer";
 import QuizCard from "@/components/QuizCard";
 import { RichTextRenderer } from "@/components/editor";
 import prisma from "@/lib/prisma";
@@ -92,6 +97,13 @@ const LessonViewerPage = async ({
     });
     isCompleted = progress?.status === "COMPLETED";
   }
+
+  // Check for existing approved summary (used by AISummaryGenerator to show warning)
+  const approvedSummary = await prisma.lessonSummary.findFirst({
+    where: { lessonId: lesson.id, status: "APPROVED" },
+    select: { id: true },
+  });
+  const hasApprovedSummary = Boolean(approvedSummary);
 
   const isYouTubeUrl = (url: string) => {
     return (
@@ -208,6 +220,37 @@ const LessonViewerPage = async ({
           </div>
         </div>
       )}
+
+      {/* AI QUESTION GENERATION (admin/teacher only) */}
+      {(role === "admin" || role === "teacher") && (
+        <div className="mt-8 flex flex-col gap-4">
+          <AIQuestionGenerator
+            lessonId={lesson.id}
+            lessonTitle={lesson.title}
+            hasContent={Boolean(lesson.content?.trim())}
+            quizId={lesson.quizzes[0]?.id}
+          />
+          <AIQuestionReviewContainer lessonId={lesson.id} />
+        </div>
+      )}
+
+      {/* AI SUMMARY GENERATION (admin/teacher only) */}
+      {(role === "admin" || role === "teacher") && (
+        <div className="mt-8 flex flex-col gap-4">
+          <AISummaryGenerator
+            lessonId={lesson.id}
+            lessonTitle={lesson.title}
+            hasContent={Boolean(lesson.content?.trim())}
+            hasApprovedSummary={hasApprovedSummary}
+          />
+          <AISummaryReviewContainer lessonId={lesson.id} />
+        </div>
+      )}
+
+      {/* APPROVED SUMMARY (visible to all roles) */}
+      <div className="mt-8">
+        <LessonSummaryDisplayContainer lessonId={lesson.id} />
+      </div>
     </div>
   );
 };

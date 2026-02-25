@@ -90,7 +90,62 @@ export const submitCardReview = async (
       card.easinessFactor
     );
 
-    const nextReviewDate = computeNextReviewDate(newBox, new Date());
+    // @MX:NOTE: [AUTO] Compute base Leitner interval, then attempt AI-enhanced adjustment (SPEC-AI-001 Phase 5)
+    const baseLeitnerDate = computeNextReviewDate(newBox, new Date());
+    const baseDays = Math.max(
+      1,
+      Math.ceil(
+        (baseLeitnerDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      )
+    );
+
+    // AI-enhanced interval optimization (graceful degradation on failure)
+    let nextReviewDate = baseLeitnerDate;
+    let aiAdjusted = false;
+    let aiConf: number | null = null;
+
+    try {
+      const recentLogs = await prisma.reviewLog.findMany({
+        where: {
+          studentId: userId,
+          reviewCard: { subjectId: card.subjectId },
+        },
+        orderBy: { reviewedAt: "desc" },
+        take: 50,
+        select: {
+          rating: true,
+          previousBox: true,
+          newBox: true,
+          responseTimeMs: true,
+          reviewedAt: true,
+        },
+      });
+
+      if (recentLogs.length >= 5) {
+        const { computeAIEnhancedReviewDate } = await import(
+          "./ai/intervalOptimizer"
+        );
+        const { adjustedDate, confidence, wasAdjusted } =
+          computeAIEnhancedReviewDate(
+            new Date(),
+            recentLogs.map((l) => ({
+              rating: l.rating as "HARD" | "OK" | "EASY",
+              previousBox: l.previousBox,
+              newBox: l.newBox,
+              responseTimeMs: l.responseTimeMs,
+              reviewedAt: l.reviewedAt,
+            })),
+            baseDays
+          );
+        if (wasAdjusted) {
+          nextReviewDate = adjustedDate;
+          aiAdjusted = true;
+          aiConf = confidence;
+        }
+      }
+    } catch {
+      // Graceful degradation: use base Leitner interval on any failure
+    }
 
     await prisma.$transaction(async (tx) => {
       // 1. Update the ReviewCard
@@ -103,6 +158,8 @@ export const submitCardReview = async (
           nextReviewDate,
           lastReviewedAt: new Date(),
           reviewCount: { increment: 1 },
+          aiAdjustedInterval: aiAdjusted,
+          aiConfidence: aiConf,
         },
       });
 

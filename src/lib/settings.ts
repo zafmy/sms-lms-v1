@@ -32,4 +32,5 @@ export const routeAccessMap: RouteAccessMap = {
   "/list/reviews": ["student"],
   "/list/reviews/session": ["student"],
   "/list/reviews/session/summary": ["student"],
+  "/list/ai-settings": ["admin"],
 };

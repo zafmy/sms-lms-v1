@@ -365,3 +365,56 @@ export const guideCategorySchema = z.object({
 });
 
 export type GuideCategorySchema = z.infer<typeof guideCategorySchema>;
+
+// AI Question Generation Parameters (SPEC-AI-001)
+export const aiQuestionGenerationSchema = z.object({
+  lessonId: z.coerce.number().int().positive(),
+  questionCount: z.coerce.number().int().min(1).max(20),
+  questionTypes: z
+    .array(z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE"]))
+    .min(1, { message: "atLeastOneQuestionType" }),
+  targetQuizId: z.coerce.number().int().positive().optional(),
+  targetQuestionBankId: z.coerce.number().int().positive().optional(),
+});
+
+export type AIQuestionGenerationSchema = z.infer<
+  typeof aiQuestionGenerationSchema
+>;
+
+// AI Summary Generation Parameters (SPEC-AI-001)
+export const aiSummaryGenerationSchema = z.object({
+  lessonId: z.coerce.number().int().positive(),
+  summaryLength: z
+    .enum(["brief", "standard", "detailed"])
+    .default("standard"),
+});
+
+export type AISummaryGenerationSchema = z.infer<
+  typeof aiSummaryGenerationSchema
+>;
+
+// AI Settings Form (SPEC-AI-001)
+export const aiSettingsSchema = z.object({
+  provider: z.enum(["openai", "anthropic"]),
+  modelId: z.string().min(1).max(100),
+  monthlyQuotaPerTeacher: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(10000),
+  maxTokensPerRequest: z.coerce
+    .number()
+    .int()
+    .min(100)
+    .max(32000),
+  enabled: z.boolean(),
+});
+
+export type AISettingsSchema = z.infer<typeof aiSettingsSchema>;
+
+// Lesson Summary Form (SPEC-AI-001)
+export const lessonSummarySchema = z.object({
+  content: z.string().min(10).max(10000),
+});
+
+export type LessonSummarySchema = z.infer<typeof lessonSummarySchema>;
