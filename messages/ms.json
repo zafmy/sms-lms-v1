@@ -922,5 +922,38 @@
     "minutesAgo": "{minutes}m lepas",
     "hoursAgo": "{hours}j lepas",
     "daysAgo": "{days}h lepas"
+  },
+  "editor": {
+    "placeholder": "Mula menulis...",
+    "toolbar": {
+      "bold": "Tebal",
+      "italic": "Italik",
+      "underline": "Garis Bawah",
+      "strikethrough": "Garis Potong",
+      "heading1": "Tajuk 1",
+      "heading2": "Tajuk 2",
+      "heading3": "Tajuk 3",
+      "heading4": "Tajuk 4",
+      "orderedList": "Senarai Bernombor",
+      "unorderedList": "Senarai Tidak Bernombor",
+      "link": "Pautan",
+      "inlineCode": "Kod Sebaris",
+      "blockQuote": "Petikan Blok",
+      "codeBlock": "Blok Kod",
+      "insertTable": "Sisipkan Jadual",
+      "insertImage": "Sisipkan Imej",
+      "embedYouTube": "Benam Video YouTube"
+    },
+    "prompts": {
+      "enterUrl": "Masukkan URL:",
+      "enterImageUrl": "Masukkan URL imej:",
+      "enterImageAlt": "Masukkan teks alt (pilihan):",
+      "enterYouTubeUrl": "Masukkan URL video YouTube:",
+      "invalidYouTubeUrl": "URL YouTube tidak sah. Sila masukkan URL video YouTube yang sah."
+    },
+    "aria": {
+      "textFormatting": "Pemformatan teks",
+      "richTextEditor": "Penyunting teks kaya"
+    }
   }
 }

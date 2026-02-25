@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
+import { RichTextEditorDynamic } from "@/components/editor";
 import { lmsLessonSchema, LmsLessonSchema } from "@/lib/formValidationSchemas";
 import { createLmsLesson, updateLmsLesson } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
@@ -27,6 +28,7 @@ const LmsLessonForm = ({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LmsLessonSchema>({
     resolver: zodResolver(lmsLessonSchema),
@@ -154,19 +156,21 @@ const LmsLessonForm = ({
             {t("common.flagForReview")}
           </label>
         </div>
+        <input type="hidden" {...register("content")} />
         <div className="flex flex-col gap-2 w-full">
-          <label className="text-xs text-gray-500">{t("labels.content")}</label>
-          <textarea
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("content")}
-            defaultValue={data?.content}
-            rows={6}
+          <RichTextEditorDynamic
+            label={t("labels.content")}
+            variant="full"
+            initialContent={data?.content}
+            onChange={(json) =>
+              setValue("content", json, { shouldValidate: true })
+            }
+            error={
+              errors.content?.message
+                ? tv(errors.content.message.toString())
+                : undefined
+            }
           />
-          {errors.content?.message && (
-            <p className="text-xs text-red-400">
-              {tv(errors.content.message.toString())}
-            </p>
-          )}
         </div>
       </div>
       {state.error && (

@@ -2,12 +2,13 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { RichTextEditorDynamic } from "@/components/editor";
 import {
   threadSchema,
   type ThreadFormData,
 } from "@/lib/forumValidationSchemas";
 import { createThread } from "@/lib/forumActions";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -21,11 +22,13 @@ const ThreadForm = ({ courseId, role, onSuccess }: ThreadFormProps) => {
   const t = useTranslations("forms");
   const tv = useTranslations("forms.validation");
   const router = useRouter();
+  const [editorKey, setEditorKey] = useState(0);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ThreadFormData>({
     resolver: zodResolver(threadSchema),
@@ -49,6 +52,7 @@ const ThreadForm = ({ courseId, role, onSuccess }: ThreadFormProps) => {
   useEffect(() => {
     if (state.success) {
       reset();
+      setEditorKey((prev) => prev + 1);
       router.refresh();
       onSuccess?.();
     }
@@ -73,18 +77,21 @@ const ThreadForm = ({ courseId, role, onSuccess }: ThreadFormProps) => {
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-xs text-gray-500">Content</label>
-        <textarea
-          {...register("content")}
-          rows={5}
-          className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full resize-y"
-          placeholder="Write your discussion content..."
-        />
-        {errors.content?.message && (
-          <p className="text-xs text-red-400">{tv(errors.content.message.toString())}</p>
-        )}
-      </div>
+      <input type="hidden" {...register("content")} />
+      <RichTextEditorDynamic
+        key={editorKey}
+        label="Content"
+        variant="compact"
+        placeholder="Write your discussion content..."
+        onChange={(json) =>
+          setValue("content", json, { shouldValidate: true })
+        }
+        error={
+          errors.content?.message
+            ? tv(errors.content.message.toString())
+            : undefined
+        }
+      />
 
       {role === "student" && (
         <div className="flex items-center gap-2">

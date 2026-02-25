@@ -1,9 +1,10 @@
 "use client";
 
 import { markReplyAccepted, deleteReply } from "@/lib/forumActions";
+import { renderContent } from "@/lib/lexicalRenderer";
 import UpvoteButton from "./UpvoteButton";
 import ForumReplyForm from "./ForumReplyForm";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -35,6 +36,26 @@ const timeAgo = (
   if (hours < 24) return t("hoursAgo", { hours });
   const days = Math.floor(hours / 24);
   return t("daysAgo", { days });
+};
+
+// Renders reply content as rich text (Lexical JSON) or plain text
+const ReplyContent = ({ content }: { content: string }) => {
+  const rendered = useMemo(() => renderContent(content), [content]);
+
+  if (rendered.isRichText) {
+    return (
+      <div
+        className="text-sm text-gray-700 mb-3 rich-text-content"
+        dangerouslySetInnerHTML={{ __html: rendered.html }}
+      />
+    );
+  }
+
+  return (
+    <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">
+      {content}
+    </p>
+  );
 };
 
 const ForumReplyItem = ({
@@ -146,9 +167,7 @@ const ForumReplyItem = ({
         </div>
 
         {/* Content */}
-        <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">
-          {reply.content}
-        </p>
+        <ReplyContent content={reply.content} />
 
         {/* Actions */}
         <div className="flex items-center gap-3">

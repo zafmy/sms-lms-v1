@@ -91,6 +91,7 @@ export type ExamSchema = z.infer<typeof examSchema>;
 export const assignmentSchema = z.object({
   id: z.coerce.number().optional(),
   title: z.string().min(1, { message: "titleRequired" }),
+  description: z.string().max(100000).optional().or(z.literal("")),
   startDate: z.coerce.date({ message: "startDateRequired" }),
   dueDate: z.coerce.date({ message: "dueDateRequired" }),
   lessonId: z.coerce.number({ message: "lessonRequired" }),
@@ -112,7 +113,7 @@ export type EventSchema = z.infer<typeof eventSchema>;
 export const announcementSchema = z.object({
   id: z.coerce.number().optional(),
   title: z.string().min(1, { message: "titleRequired" }),
-  description: z.string().min(1, { message: "descriptionRequired" }),
+  description: z.string().min(1, { message: "descriptionRequired" }).max(100000),
   date: z.coerce.date({ message: "dateRequired" }),
   classId: z.coerce.number().optional(),
 });

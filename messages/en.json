@@ -922,5 +922,38 @@
     "minutesAgo": "{minutes}m ago",
     "hoursAgo": "{hours}h ago",
     "daysAgo": "{days}d ago"
+  },
+  "editor": {
+    "placeholder": "Start writing...",
+    "toolbar": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "strikethrough": "Strikethrough",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "heading4": "Heading 4",
+      "orderedList": "Ordered List",
+      "unorderedList": "Unordered List",
+      "link": "Link",
+      "inlineCode": "Inline Code",
+      "blockQuote": "Block Quote",
+      "codeBlock": "Code Block",
+      "insertTable": "Insert Table",
+      "insertImage": "Insert Image",
+      "embedYouTube": "Embed YouTube Video"
+    },
+    "prompts": {
+      "enterUrl": "Enter URL:",
+      "enterImageUrl": "Enter image URL:",
+      "enterImageAlt": "Enter alt text (optional):",
+      "enterYouTubeUrl": "Enter YouTube video URL:",
+      "invalidYouTubeUrl": "Invalid YouTube URL. Please enter a valid YouTube video URL."
+    },
+    "aria": {
+      "textFormatting": "Text formatting",
+      "richTextEditor": "Rich text editor"
+    }
   }
 }

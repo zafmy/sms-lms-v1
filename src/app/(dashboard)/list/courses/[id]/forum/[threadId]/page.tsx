@@ -1,6 +1,7 @@
 import ForumReplyList from "@/components/ForumReplyList";
 import ForumReplyForm from "@/components/ForumReplyForm";
 import ForumModeration from "@/components/ForumModeration";
+import { RichTextRenderer } from "@/components/editor";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
@@ -219,9 +220,10 @@ const ThreadDetailPage = async ({
 
         {/* Thread Content */}
         <div className="mt-4">
-          <p className="text-sm text-gray-700 whitespace-pre-wrap">
-            {thread.content}
-          </p>
+          <RichTextRenderer
+            content={thread.content}
+            className="text-sm text-gray-700"
+          />
         </div>
 
         {/* Moderation Controls */}

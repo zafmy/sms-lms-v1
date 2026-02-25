@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
+import { RichTextEditorDynamic } from "@/components/editor";
 import {
   announcementSchema,
   AnnouncementSchema,
@@ -30,6 +31,7 @@ const AnnouncementForm = ({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<AnnouncementSchema>({
     resolver: zodResolver(announcementSchema),
@@ -77,13 +79,22 @@ const AnnouncementForm = ({
           register={register}
           error={errors?.title}
         />
-        <InputField
-          label={t("labels.description")}
-          name="description"
-          defaultValue={data?.description}
-          register={register}
-          error={errors?.description}
-        />
+        <input type="hidden" {...register("description")} />
+        <div className="w-full">
+          <RichTextEditorDynamic
+            label={t("labels.description")}
+            variant="full"
+            initialContent={data?.description}
+            onChange={(json) =>
+              setValue("description", json, { shouldValidate: true })
+            }
+            error={
+              errors.description?.message
+                ? tv(errors.description.message.toString())
+                : undefined
+            }
+          />
+        </div>
         <InputField
           label={t("labels.date")}
           name="date"

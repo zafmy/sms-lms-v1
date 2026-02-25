@@ -139,10 +139,11 @@ model Exam {
 }
 
 model Assignment {
-  id        Int      @id @default(autoincrement())
-  title     String
-  startDate DateTime
-  dueDate   DateTime
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?  @db.Text
+  startDate   DateTime
+  dueDate     DateTime
 
   lessonId Int
   lesson   Lesson   @relation(fields: [lessonId], references: [id])
@@ -186,7 +187,7 @@ model Event {
 model Announcement {
   id          Int      @id @default(autoincrement())
   title       String
-  description String
+  description String  @db.Text
   date        DateTime
 
   classId Int?
@@ -300,7 +301,7 @@ model Module {
 model LmsLesson {
   id               Int             @id @default(autoincrement())
   title            String
-  content          String
+  content          String          @db.Text
   contentType      ContentType     @default(TEXT)
   externalUrl      String?
   order            Int
@@ -560,7 +561,7 @@ model ReviewSession {
 model ForumThread {
   id             Int       @id @default(autoincrement())
   title          String
-  content        String
+  content        String    @db.Text
   isPinned       Boolean   @default(false)
   isLocked       Boolean   @default(false)
   isAnonymous    Boolean   @default(false)
@@ -581,7 +582,7 @@ model ForumThread {
 
 model ForumReply {
   id          Int       @id @default(autoincrement())
-  content     String
+  content     String    @db.Text
   isAccepted  Boolean   @default(false)
   isAnonymous Boolean   @default(false)
   createdAt   DateTime  @default(now())

@@ -1,5 +1,6 @@
 import LessonCompleteButton from "@/components/LessonCompleteButton";
 import QuizCard from "@/components/QuizCard";
+import { RichTextRenderer } from "@/components/editor";
 import prisma from "@/lib/prisma";
 import { startLessonProgress } from "@/lib/actions";
 import { auth } from "@clerk/nextjs/server";
@@ -185,9 +186,10 @@ const LessonViewerPage = async ({
 
       {/* LESSON CONTENT */}
       <div className="prose max-w-none">
-        <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-          {lesson.content}
-        </div>
+        <RichTextRenderer
+          content={lesson.content}
+          className="text-gray-700 leading-relaxed"
+        />
       </div>
 
       {/* QUIZZES */}

@@ -717,6 +717,7 @@ export const createAssignment = async (
     await prisma.assignment.create({
       data: {
         title: data.title,
+        description: data.description || null,
         startDate: data.startDate,
         dueDate: data.dueDate,
         lessonId: data.lessonId,
@@ -760,6 +761,7 @@ export const updateAssignment = async (
       },
       data: {
         title: data.title,
+        description: data.description || null,
         startDate: data.startDate,
         dueDate: data.dueDate,
         lessonId: data.lessonId,

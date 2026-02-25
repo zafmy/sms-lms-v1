@@ -2,9 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { RichTextEditorDynamic } from "@/components/editor";
 import { replySchema, type ReplyFormData } from "@/lib/forumValidationSchemas";
 import { createReply } from "@/lib/forumActions";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -23,11 +24,13 @@ const ForumReplyForm = ({
 }) => {
   const router = useRouter();
   const t = useTranslations("lms.forums");
+  const [editorKey, setEditorKey] = useState(0);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ReplyFormData>({
     resolver: zodResolver(replySchema),
@@ -51,6 +54,7 @@ const ForumReplyForm = ({
   useEffect(() => {
     if (state.success) {
       reset();
+      setEditorKey((prev) => prev + 1);
       router.refresh();
       onSuccess?.();
     }
@@ -71,17 +75,16 @@ const ForumReplyForm = ({
         <input type="hidden" {...register("parentId")} value={parentId} />
       )}
 
-      <div className="flex flex-col gap-2">
-        <textarea
-          {...register("content")}
-          rows={3}
-          className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full resize-y"
-          placeholder={parentId ? t("writeReply") : t("writeYourReply")}
-        />
-        {errors.content && (
-          <p className="text-xs text-red-400">{errors.content.message}</p>
-        )}
-      </div>
+      <input type="hidden" {...register("content")} />
+      <RichTextEditorDynamic
+        key={editorKey}
+        variant="compact"
+        placeholder={parentId ? t("writeReply") : t("writeYourReply")}
+        onChange={(json) =>
+          setValue("content", json, { shouldValidate: true })
+        }
+        error={errors.content?.message}
+      />
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

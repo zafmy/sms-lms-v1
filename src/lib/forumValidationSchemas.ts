@@ -8,7 +8,7 @@ export const threadSchema = z.object({
   content: z
     .string()
     .min(1, "Content is required")
-    .max(10000, "Content must be under 10,000 characters"),
+    .max(50000, "Content must be under 50,000 characters"),
   courseId: z.coerce.number().int().positive(),
   isAnonymous: z.boolean().default(false),
 });
@@ -22,14 +22,14 @@ export const threadUpdateSchema = z.object({
   content: z
     .string()
     .min(1, "Content is required")
-    .max(10000, "Content must be under 10,000 characters"),
+    .max(50000, "Content must be under 50,000 characters"),
 });
 
 export const replySchema = z.object({
   content: z
     .string()
     .min(1, "Reply cannot be empty")
-    .max(5000, "Reply must be under 5,000 characters"),
+    .max(25000, "Reply must be under 25,000 characters"),
   threadId: z.coerce.number().int().positive(),
   parentId: z.coerce.number().int().positive().optional(),
   isAnonymous: z.boolean().default(false),
@@ -40,7 +40,7 @@ export const replyUpdateSchema = z.object({
   content: z
     .string()
     .min(1, "Reply cannot be empty")
-    .max(5000, "Reply must be under 5,000 characters"),
+    .max(25000, "Reply must be under 25,000 characters"),
 });
 
 export const moderationSchema = z.object({

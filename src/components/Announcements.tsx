@@ -1,3 +1,4 @@
+import { RichTextRenderer } from "@/components/editor";
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -43,7 +44,9 @@ const Announcements = async () => {
                 {new Intl.DateTimeFormat(getIntlLocale(locale)).format(data[0].date)}
               </span>
             </div>
-            <p className="text-sm text-gray-400 mt-1">{data[0].description}</p>
+            <div className="text-sm text-gray-400 mt-1 max-h-20 overflow-hidden">
+              <RichTextRenderer content={data[0].description} />
+            </div>
           </div>
         )}
         {data[1] && (
@@ -54,7 +57,9 @@ const Announcements = async () => {
                 {new Intl.DateTimeFormat(getIntlLocale(locale)).format(data[1].date)}
               </span>
             </div>
-            <p className="text-sm text-gray-400 mt-1">{data[1].description}</p>
+            <div className="text-sm text-gray-400 mt-1 max-h-20 overflow-hidden">
+              <RichTextRenderer content={data[1].description} />
+            </div>
           </div>
         )}
         {data[2] && (
@@ -65,7 +70,9 @@ const Announcements = async () => {
                 {new Intl.DateTimeFormat(getIntlLocale(locale)).format(data[2].date)}
               </span>
             </div>
-            <p className="text-sm text-gray-400 mt-1">{data[2].description}</p>
+            <div className="text-sm text-gray-400 mt-1 max-h-20 overflow-hidden">
+              <RichTextRenderer content={data[2].description} />
+            </div>
           </div>
         )}
       </div>
